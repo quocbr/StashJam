@@ -1,0 +1,53 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class OnStashPick : IGameEvent
+{
+    public List<Item> listItem;
+}
+
+public class Controller : Singleton<Controller>
+{
+    [SerializeField] private LayerMask filterLayer;
+    private Stash m_StashChoose;
+    private Ray ray;
+
+    private void Update()
+    {
+        //Logic button up
+        if (Input.GetMouseButtonUp(0))
+        {
+            OnButtonUp();
+        }
+    }
+
+    private void OnButtonUp()
+    {
+        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, filterLayer);
+
+        if (hit.collider != null)
+        {
+            HandleRaycastItemPick(hit);
+        }
+    }
+
+    private void HandleRaycastItemPick(RaycastHit2D hit)
+    {
+        m_StashChoose = hit.collider.GetComponent<Stash>();
+        if (!m_StashChoose.CanPick)
+        {
+            return;
+        }
+
+        Debug.Log(hit.transform.name);
+        OnStashPick cb = new OnStashPick();
+        cb.listItem = m_StashChoose.ListItem;
+        EventManager.Trigger(cb);
+        m_StashChoose.OnPick();
+        m_StashChoose = null;
+    }
+}
