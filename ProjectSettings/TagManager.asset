@@ -44,3 +44,39 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: 0
+    uniqueID: 304941407
+    locked: 0
+  - name: 1
+    uniqueID: 2324759425
+    locked: 0
+  - name: 2
+    uniqueID: 1393056419
+    locked: 0
+  - name: 3
+    uniqueID: 3062615813
+    locked: 0
+  - name: 4
+    uniqueID: 220903837
+    locked: 0
+  - name: 5
+    uniqueID: 2318943403
+    locked: 0
+  - name: 6
+    uniqueID: 2734949383
+    locked: 0
+  - name: 7
+    uniqueID: 450131675
+    locked: 0
+  - name: 8
+    uniqueID: 3889239025
+    locked: 0
+  - name: 9
+    uniqueID: 2344119751
+    locked: 0
+  - name: 10
+    uniqueID: 2733640819
+    locked: 0
+  - name: Fly
+    uniqueID: 1727895587
+    locked: 0
