@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Stash : MonoBehaviour
 {
+    [SerializeField] private GameObject MainAsset;
     [SerializeField] private SpriteRenderer box1;
     [SerializeField] private SpriteRenderer box2;
     [SerializeField] private SpriteRenderer glass;
@@ -95,6 +96,6 @@ public class Stash : MonoBehaviour
     public void OnPick()
     {
         CanPick = false;
-        transform.DOScale(0, 0.5f).SetDelay(0.4f).SetEase(Ease.InBack).OnComplete(() => { Destroy(gameObject); });
+        MainAsset.transform.DOScale(0, 0.5f).SetDelay(0.4f).SetEase(Ease.InBack).OnComplete(() => { /*Destroy(gameObject);*/ });
     }
 }

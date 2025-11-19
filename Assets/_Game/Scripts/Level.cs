@@ -15,7 +15,8 @@ public class Level : MonoBehaviour
 
     [Header("Prefabs")] public Stash boxPrefab; // prefab box có item
 
-    [Header("Runtime")] [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
+    [Header("Runtime")]
+    [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
     public Transform levelRoot;
 
     [SerializeField] private GameObject[] obj; // 16 prefab viền (index = tileIndex)
@@ -32,7 +33,9 @@ public class Level : MonoBehaviour
 
     private int[,] levelIndexMatrix;
 
-    private Stash[,] stashGrid;
+    public Stash[,] stashGrid;
+    public Transform max;
+    public Transform min;
 
     private void OnEnable()
     {
@@ -68,6 +71,7 @@ public class Level : MonoBehaviour
         {
             stashGrid[onStashPick.Stash.index.x, onStashPick.Stash.index.y + 1].SetCanPick(true);
         }
+        Stash.Remove(onStashPick.Stash);
     }
 
     [Button]

@@ -7,6 +7,7 @@ using UnityEngine;
 public class ConveyorItem : MonoBehaviour
 {
     [SerializeField] private Item item;
+    public GameObject arrow;
     [ShowInInspector] private int m_Index;
     public int Index => m_Index;
 

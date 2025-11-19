@@ -9,14 +9,20 @@ public class ConveyorController : Singleton<ConveyorController>
 {
     private Tween _checkMathTween;
 
-    private Tween _refillTween; // Map: ItemID -> Index đích đến
-
-    // Runtime Variables
+    private Tween _refillTween;
     private bool isRunning = false;
-    private List<Vector3> m_ListPos = new List<Vector3>(); // Danh sách điểm chi tiết (sau khi làm mềm)
+    private List<Vector3> m_ListPos = new List<Vector3>();
     private Dictionary<int, int> targetIndices = new Dictionary<int, int>();
 
+    private Queue<List<Item>> refillQueue = new Queue<List<Item>>();
+
     #region MOVEMENT LOGIC
+
+    [Header("--- Rotation Settings ---")]
+    [SerializeField] private bool rotateItems = true;
+
+    [Tooltip("Nếu ảnh gốc hướng lên trên thì điền -90. Nếu hướng sang phải thì điền 0.")]
+    [SerializeField] private float rotationOffset = 0f;
 
     private void MoveItemContinuous(ConveyorItem item)
     {
@@ -26,7 +32,19 @@ public class ConveyorController : Singleton<ConveyorController>
 
         int targetIndex = targetIndices[id];
         Vector3 targetPos = m_ListPos[targetIndex];
+        if (rotateItems)
+        {
+            Vector3 direction = (targetPos - item.transform.position).normalized;
 
+            if (direction != Vector3.zero)
+            {
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+                Quaternion targetRotation = Quaternion.AngleAxis(angle + rotationOffset, Vector3.forward);
+
+                item.arrow.transform.rotation = Quaternion.Lerp(item.arrow.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
+        }
         float step = moveSpeed * Time.deltaTime;
         item.transform.position = Vector3.MoveTowards(item.transform.position, targetPos, step);
 
@@ -36,11 +54,19 @@ public class ConveyorController : Singleton<ConveyorController>
             item.SetIndex(targetIndex);
 
             int nextTarget = (targetIndex + 1) % m_ListPos.Count;
+
             if (isLinearPath && targetIndex == m_ListPos.Count - 1)
             {
                 item.transform.position = m_ListPos[0];
                 item.SetIndex(0);
                 nextTarget = 1;
+
+                if (rotateItems && m_ListPos.Count > 1)
+                {
+                    Vector3 startDir = (m_ListPos[1] - m_ListPos[0]).normalized;
+                    float startAngle = Mathf.Atan2(startDir.y, startDir.x) * Mathf.Rad2Deg;
+                    item.transform.rotation = Quaternion.AngleAxis(startAngle + rotationOffset, Vector3.forward);
+                }
             }
 
             targetIndices[id] = nextTarget;
@@ -51,34 +77,32 @@ public class ConveyorController : Singleton<ConveyorController>
 
     #region CONFIGURATION
 
-    [Header("--- Movement Settings ---")] [SerializeField]
+    [Header("--- Movement Settings ---")]
+    [SerializeField]
     private float moveSpeed = 2.0f;
 
-    [SerializeField] private float rotationSpeed = 15f; // Tốc độ xoay (càng lớn xoay càng nhanh)
-    [SerializeField] private bool rotateWithMovement = true; // Bật/tắt tính năng xoay
+    [SerializeField] private float rotationSpeed = 15f;
+    [SerializeField] private bool rotateWithMovement = true;
 
-    [SerializeField] private bool isLinearPath = true; // True: Teleport về đầu. False: Chạy vòng tròn.
+    [SerializeField] private bool isLinearPath = true;
 
-    [Header("--- Curve Settings ---")] [SerializeField]
-    private bool smoothCorners = true; // Bật làm mềm góc
+    [Header("--- Curve Settings ---")]
+    [SerializeField]
+    private bool smoothCorners = true;
 
-    [SerializeField] private float cornerRadius = 0.5f; // Độ rộng góc cua
-    [SerializeField] private int cornerResolution = 10; // Độ mượt
-
-    [Header("--- Visuals ---")] [SerializeField]
-    private SpriteRenderer trayPrefab; // Prefab nền khay
-
-    [SerializeField] private Sprite[] traySprites; // Bộ 16 sprite bitmask
+    [SerializeField] private float cornerRadius = 0.5f;
+    [SerializeField] private int cornerResolution = 10;
 
     #endregion
 
     #region REFERENCES
 
-    [Header("--- References ---")] [SerializeField]
-    private List<ConveyorItem> m_ConveyorList; // Các slot trên băng chuyền
+    [Header("--- References ---")]
+    [SerializeField]
+    private List<ConveyorItem> m_ConveyorList;
 
-    [SerializeField] private List<ConveyorItem> m_Queue; // Các slot hàng chờ
-    [SerializeField] private List<Transform> m_Waypoints; // Các điểm neo đường đi
+    [SerializeField] private List<ConveyorItem> m_QueueConveyor;
+    [SerializeField] private List<Transform> m_Waypoints;
 
     #endregion
 
@@ -88,7 +112,6 @@ public class ConveyorController : Singleton<ConveyorController>
     {
         InitPositions();
 
-        //GenerateTrays();
 
         InitItems();
 
@@ -182,15 +205,12 @@ public class ConveyorController : Singleton<ConveyorController>
     {
         if (m_ListPos.Count == 0) return;
         targetIndices.Clear();
-
-        // Rải đều item lên đường đi
         int totalPathPoints = m_ListPos.Count;
         int totalItems = m_ConveyorList.Count;
 
         for (int i = 0; i < totalItems; i++)
         {
             var item = m_ConveyorList[i];
-            // Map index item sang index đường đi
             int pathIndex = Mathf.RoundToInt((float)i / totalItems * totalPathPoints) % totalPathPoints;
 
             item.transform.position = m_ListPos[pathIndex];
@@ -201,32 +221,40 @@ public class ConveyorController : Singleton<ConveyorController>
         }
     }
 
-    private bool HasNeighbor(Vector3 center, Vector3 dir, float dist)
-    {
-        foreach (var wp in m_Waypoints)
-        {
-            if (wp == null) continue;
-            if (Vector3.Distance(center + dir, wp.position) < 0.5f) return true;
-        }
-
-        return false;
-    }
-
     #endregion
 
     #region GAMEPLAY LOGIC (INPUT & MATCHING)
-
+    private bool _isProcessing = false;
+    private Queue<List<Item>> _stashInputQueue = new Queue<List<Item>>();
+    private Queue<Item> _pendingOverflow = new Queue<Item>();
+    // 1. NHẬN INPUT TỪ NGƯỜI DÙNG
     private void OnStashPickCallBack(OnStashPick cb)
     {
-        if (cb.listItem == null) return;
-        ProcessInputItems(cb.listItem);
+        if (cb.listItem == null || cb.listItem.Count == 0) return;
+        foreach (var it in cb.listItem)
+        {
+            it.transform.SetParent(Controller.Ins.transform);
+        }
+        _stashInputQueue.Enqueue(cb.listItem);
+        TryProcessNextBatch();
+    }
+    // 2. ĐIỀU PHỐI VIÊN
+    private void TryProcessNextBatch()
+    {
+        if (_isProcessing || _stashInputQueue.Count == 0) return;
+
+        _isProcessing = true;
+        var itemsToProcess = _stashInputQueue.Dequeue();
+
+        _pendingOverflow.Clear();
+
+        ProcessBatch(itemsToProcess);
     }
 
-    private void ProcessInputItems(List<Item> items)
+    // 3. XỬ LÝ GÓI ITEM
+    private void ProcessBatch(List<Item> items)
     {
         int itemIndex = 0;
-
-        // 1. Điền vào Băng chuyền trước
         var emptyConveyorSlots = m_ConveyorList.Where(c => c.IsEmpty).ToList();
         foreach (var slot in emptyConveyorSlots)
         {
@@ -235,10 +263,9 @@ public class ConveyorController : Singleton<ConveyorController>
             itemIndex++;
         }
 
-        // 2. Điền vào Queue sau
-        if (itemIndex < items.Count && m_Queue != null)
+        if (itemIndex < items.Count && m_QueueConveyor != null)
         {
-            var emptyQueueSlots = m_Queue.Where(q => q.IsEmpty).ToList();
+            var emptyQueueSlots = m_QueueConveyor.Where(q => q.IsEmpty).ToList();
             foreach (var qSlot in emptyQueueSlots)
             {
                 if (itemIndex >= items.Count) break;
@@ -247,25 +274,23 @@ public class ConveyorController : Singleton<ConveyorController>
             }
         }
 
+        while (itemIndex < items.Count)
+        {
+            _pendingOverflow.Enqueue(items[itemIndex]);
+            itemIndex++;
+        }
+
         CheckMath();
     }
 
+    // 4. KIỂM TRA MATCH 3
     private void CheckMath()
     {
-        // 1. DEBOUNCE: Nếu đang có lệnh chờ check, hủy nó đi để dùng lệnh mới nhất
-        if (_checkMathTween != null && _checkMathTween.IsActive())
-        {
-            _checkMathTween.Kill();
-        }
+        if (_checkMathTween != null && _checkMathTween.IsActive()) _checkMathTween.Kill();
 
-        // 2. Gọi lệnh delay mới
-        _checkMathTween = DOVirtual.DelayedCall(0.5f, () =>
+        _checkMathTween = DOVirtual.DelayedCall(0.45f, () =>
         {
-            // --- CHUYỂN TOÀN BỘ LOGIC TÍNH TOÁN VÀO TRONG NÀY ---
-
-            // Gom nhóm item theo ID (Tính toán tại thời điểm thực thi)
             Dictionary<int, List<ConveyorItem>> itemGroups = new Dictionary<int, List<ConveyorItem>>();
-
             void AddToGroup(ConveyorItem item)
             {
                 if (item != null && !item.IsEmpty && item.CurrentItem != null)
@@ -277,10 +302,9 @@ public class ConveyorController : Singleton<ConveyorController>
             }
 
             m_ConveyorList.ForEach(AddToGroup);
-            if (m_Queue != null) m_Queue.ForEach(AddToGroup);
+            if (m_QueueConveyor != null) m_QueueConveyor.ForEach(AddToGroup);
 
             bool isEarn = false;
-
             foreach (var group in itemGroups.Values)
             {
                 int matches = group.Count / 3;
@@ -296,58 +320,102 @@ public class ConveyorController : Singleton<ConveyorController>
                     }
                 }
             }
-
-            // Nếu có ăn điểm -> Gọi Refill
-            if (isEarn)
+            if (isEarn || _pendingOverflow.Count > 0)
             {
                 CallRefillDelayed();
+            }
+            else
+            {
+                OnBatchFinished();
             }
         });
     }
 
     private void CallRefillDelayed()
     {
-        // Hủy lệnh refill cũ nếu có (tránh việc gọi refill 2 lần liên tiếp quá nhanh)
-        if (_refillTween != null && _refillTween.IsActive())
-        {
-            _refillTween.Kill();
-        }
-
-        _refillTween = DOVirtual.DelayedCall(0.5f, RefillFromQueue);
+        if (_refillTween != null && _refillTween.IsActive()) _refillTween.Kill();
+        _refillTween = DOVirtual.DelayedCall(0.3f, RefillFromQueueAndOverflow);
     }
 
-    private void RefillFromQueue()
+    // 5. REFILL THÔNG MINH (Queue -> Conveyor, Overflow -> Queue/Conveyor)
+    private void RefillFromQueueAndOverflow()
     {
-        if (m_Queue == null || m_Queue.Count == 0) return;
+        bool anyActionTaken = false;
 
-        var validSourceItems = m_Queue.Where(q => !q.IsEmpty).ToList();
-        if (validSourceItems.Count == 0) return;
-
-        // OrderBy Index để lấp đầy từ đầu đến cuối
-        var emptyTargets = m_ConveyorList.Where(c => c.IsEmpty).OrderBy(c => c.Index).ToList();
-
-        int sourceIdx = 0;
-        foreach (var target in emptyTargets)
+        // --- GIAI ĐOẠN A: Đẩy từ m_Queue lên Conveyor (Ưu tiên cao nhất) ---
+        if (m_QueueConveyor != null && m_QueueConveyor.Count > 0)
         {
-            if (sourceIdx >= validSourceItems.Count) break;
+            var validSourceItems = m_QueueConveyor.Where(q => !q.IsEmpty).ToList();
+            var emptyTargets = m_ConveyorList.Where(c => c.IsEmpty).OrderBy(c => c.Index).ToList();
 
-            var source = validSourceItems[sourceIdx];
+            int sourceIdx = 0;
+            foreach (var target in emptyTargets)
+            {
+                if (sourceIdx >= validSourceItems.Count) break;
 
-            // Chuyển data
-            target.SetItem(source.CurrentItem);
-            source.SetItem(null);
+                var source = validSourceItems[sourceIdx];
+                target.SetItem(source.CurrentItem);
+                source.SetItem(null);
 
-            // (Nếu bạn muốn thêm lại hiệu ứng bay Visual ở đây thì thêm vào, code hiện tại là chuyển tức thì)
-
-            sourceIdx++;
+                anyActionTaken = true;
+                sourceIdx++;
+            }
         }
 
-        // Nếu có sự thay đổi (có item mới lấp vào), check math lại lần nữa
-        if (sourceIdx > 0)
+        // --- GIAI ĐOẠN B: Đẩy từ PendingOverflow vào bất kỳ chỗ nào trống (Conveyor hoặc Queue) ---
+        if (_pendingOverflow.Count > 0)
+        {
+            var emptyConveyors = m_ConveyorList.Where(c => c.IsEmpty).OrderBy(c => c.Index).ToList();
+            foreach (var slot in emptyConveyors)
+            {
+                if (_pendingOverflow.Count == 0) break;
+
+                var item = _pendingOverflow.Dequeue();
+                slot.SetItem(item);
+                anyActionTaken = true;
+            }
+
+            if (m_QueueConveyor != null && _pendingOverflow.Count > 0)
+            {
+                var emptyQueues = m_QueueConveyor.Where(q => q.IsEmpty).ToList();
+                foreach (var qSlot in emptyQueues)
+                {
+                    if (_pendingOverflow.Count == 0) break;
+
+                    var item = _pendingOverflow.Dequeue();
+                    qSlot.SetItem(item);
+                    anyActionTaken = true;
+                }
+            }
+        }
+
+        if (anyActionTaken)
         {
             CheckMath();
         }
+        else
+        {
+            OnBatchFinished();
+        }
     }
 
+    private void OnBatchFinished()
+    {
+        bool isConveyorFull = m_ConveyorList.All(c => !c.IsEmpty);
+
+        if (isConveyorFull)
+        {
+            Debug.LogError("GAME OVER! Băng chuyền đã đầy kín.");
+            _stashInputQueue.Clear();
+            _pendingOverflow.Clear();
+
+            // DOVirtual.DelayedCall(1f, () => UIManager.Instance.ShowLosePopup());
+
+            return;
+        }
+
+        _isProcessing = false;
+        TryProcessNextBatch();
+    }
     #endregion
 }
