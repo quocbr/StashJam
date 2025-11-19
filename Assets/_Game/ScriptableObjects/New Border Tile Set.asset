@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed6bf1c9a6d042f0a976f56eac6864ec, type: 3}
+  m_Name: New Border Tile Set
+  m_EditorClassIdentifier: 
+  sprites:
+  - {fileID: 21300000, guid: 90a16051cabd805479048d9170eb138c, type: 3}
+  - {fileID: 21300000, guid: 95a7624535375764a9402ce774e78e4c, type: 3}
+  - {fileID: 21300000, guid: ed8e7f785ef229c4e8422fb32f9e253e, type: 3}
+  - {fileID: 21300000, guid: a2a64b16406ba144899b8af085a8b601, type: 3}
+  - {fileID: 21300000, guid: b48830ae71c2e704d84e86a297d61054, type: 3}
+  - {fileID: 21300000, guid: a438b69cd0698184cbb03d9898cc641e, type: 3}
+  - {fileID: 21300000, guid: bf95eff60f911f2468401c18f4b72172, type: 3}
+  - {fileID: 21300000, guid: 16aeb62f50f582a448a7bf27e2089269, type: 3}
+  - {fileID: 21300000, guid: 3eeee67c0d81b004089aa46511286f95, type: 3}
+  - {fileID: 21300000, guid: d2ba1d64f006532408399dfea8d4a856, type: 3}
+  - {fileID: 21300000, guid: e759c030ecd7d2946a66dd3b4c4d9a1f, type: 3}
+  - {fileID: 21300000, guid: fe6cbb7a7d282bb488152621c25f855b, type: 3}
+  - {fileID: 21300000, guid: 60b4d579f3879f64692376000c17f371, type: 3}
+  - {fileID: 21300000, guid: 6d3aa0f0b7ecae7479dfc20a1ff4c833, type: 3}
+  - {fileID: 21300000, guid: e8e6856214b8fc7459c439cc1538a76e, type: 3}
+  - {fileID: 0}

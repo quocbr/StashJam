@@ -16,4 +16,4 @@ MonoBehaviour:
   displayName: BLu
   shortCode: 2
   color: {r: 0, g: 0.37884855, b: 1, a: 1}
-  icon: {fileID: 21300000, guid: ad5ae61279d9bcc45b9cd362fcf183f3, type: 3}
+  icon: {fileID: 21300000, guid: a0360173393a46346967aaad67d1de0d, type: 3}

@@ -6,6 +6,7 @@ using UnityEngine;
 public class OnStashPick : IGameEvent
 {
     public List<Item> listItem;
+    public Stash Stash;
 }
 
 public class Controller : Singleton<Controller>
@@ -43,8 +44,8 @@ public class Controller : Singleton<Controller>
             return;
         }
 
-        Debug.Log(hit.transform.name);
         OnStashPick cb = new OnStashPick();
+        cb.Stash = m_StashChoose;
         cb.listItem = m_StashChoose.ListItem;
         EventManager.Trigger(cb);
         m_StashChoose.OnPick();

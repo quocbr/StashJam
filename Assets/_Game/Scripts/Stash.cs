@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class Stash : MonoBehaviour
 {
+    [SerializeField] private SpriteRenderer box1;
+    [SerializeField] private SpriteRenderer box2;
+    [SerializeField] private SpriteRenderer glass;
     [SerializeField] private List<Item> m_ListItem;
     public Vector2Int index;
     public bool CanPick = true;
@@ -22,9 +25,6 @@ public class Stash : MonoBehaviour
         CanPick = true;
     }
 
-    /// <summary>
-    /// Áp config từ BoxConfig + ItemDatabase lên các slot sprite.
-    /// </summary>
     public void ApplyConfig(BoxConfig config, ItemDatabase db)
     {
         if (config == null)
@@ -32,6 +32,10 @@ public class Stash : MonoBehaviour
             Debug.LogWarning($"{name}: BoxConfig null trong ApplyConfig.");
             return;
         }
+
+        box1.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
+        box2.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
+        glass.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
 
         // duyệt qua từng slot
         for (int i = 0; i < m_ListItem.Count; i++)
@@ -63,9 +67,21 @@ public class Stash : MonoBehaviour
         }
     }
 
+    public void SetIndex(int x, int y)
+    {
+        index.x = x;
+        index.y = y;
+    }
+
     public void AddItem(Item itemGo)
     {
         m_ListItem.Add(itemGo);
+    }
+
+    public void SetCanPick(bool canPick)
+    {
+        CanPick = canPick;
+        glass.gameObject.SetActive(!canPick);
     }
 
     public Item PopTopItem()

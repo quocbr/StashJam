@@ -27,10 +27,10 @@ public class Item : MonoBehaviour
         m_ItemSprite.sortingOrder = 20;
         m_ItemSprite.sortingLayerID = SortingLayer.NameToID("Fly");
 
-        transform.DOScale(1f, 0.3f).OnComplete(() =>
+        transform.DOScale(1.1f, 0.3f).OnComplete(() =>
         {
             transform.SetParent(parent);
-            transform.DOScale(0.8f, 0.3f);
+            transform.DOScale(1f, 0.3f);
             transform.DOLocalMove(Vector3.zero, 0.3f).OnComplete(() => { m_ItemSprite.sortingOrder = 1; });
         });
     }

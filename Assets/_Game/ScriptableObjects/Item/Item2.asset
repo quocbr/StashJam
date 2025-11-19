@@ -16,4 +16,4 @@ MonoBehaviour:
   displayName: Buble
   shortCode: 2
   color: {r: 1, g: 0, b: 0, a: 1}
-  icon: {fileID: 21300000, guid: 731cc2311e93d3a4392fb06abb843900, type: 3}
+  icon: {fileID: 21300000, guid: 8237a2f911d2bf7458de40fb700a8d50, type: 3}

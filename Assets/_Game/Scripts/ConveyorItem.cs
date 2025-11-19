@@ -33,11 +33,14 @@ public class ConveyorItem : MonoBehaviour
     public void Earn()
     {
         Item it = item;
-        DOVirtual.DelayedCall(0.8f,
+        DOVirtual.DelayedCall(0.2f,
             () =>
             {
                 it.transform.SetParent(Controller.Ins.transform);
-                it.transform.DOScale(0, 0.5f).OnComplete(() => { it.gameObject.SetActive(false); });
+                it.transform.DOScale(1.2f, 0.3f).OnComplete(() =>
+                {
+                    it.transform.DOScale(0, 0.3f).OnComplete(() => { it.gameObject.SetActive(false); });
+                });
             });
         SetItem(null);
     }
