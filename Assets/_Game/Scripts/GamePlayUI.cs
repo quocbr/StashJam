@@ -4,88 +4,67 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class GamePlayUI : MonoBehaviour
+public class GamePlayUI : Singleton<GamePlayUI>
 {
-    public RectTransform t1;
-    public RectTransform t2;
-    public RectTransform xmin;
-    public RectTransform xmax;
+    public RectTransform top;
+    public RectTransform down;
+    public RectTransform left;
+    public RectTransform right;
 
     [Button]
     public void SetupCamera()
     {
-        // 1. Calculate bounds of the level (O)
-        Vector3 min = new Vector3(float.MaxValue, float.MaxValue, 0);
-        Vector3 max = new Vector3(float.MinValue, float.MinValue, 0);
+        Level currentLevel = LevelManager.Ins.currentLevel;
 
-
-        // 2. Calculate UI area in world space (P)
-        Vector3 uiTop = Utils_Custom.ConvertUIToWorldPosition(t1);
-        Vector3 uiBottom = Utils_Custom.ConvertUIToWorldPosition(t2);
-        Vector3 uiLeft = Utils_Custom.ConvertUIToWorldPosition(xmin);
-        Vector3 uiRight = Utils_Custom.ConvertUIToWorldPosition(xmax);
-
-        Vector3 uiTopRight = new Vector3(uiRight.x - 0.2f, uiTop.y, 0);
-        Vector3 uiBottomLeft = new Vector3(uiLeft.x + 0.2f, uiBottom.y, 0);
-
-        LevelManager.Ins.currentLevel.transform.position = new Vector3(
-            0,
-            (uiTop.y + uiBottom.y) / 2f,
-            0
-        );
-
-        max = LevelManager.Ins.currentLevel.max.transform.position;
-        min = LevelManager.Ins.currentLevel.min.transform.position;
-
-
-        Vector2 sizeO = new Vector2(max.x - min.x, max.y - min.y);
-
-        float x1 = Math.Abs(Math.Abs(uiTopRight.x) - Math.Abs(max.x));
-        float y1 = Math.Abs(Math.Abs(uiTopRight.y) - Math.Abs(max.y));
-        float x2 = Math.Abs(Math.Abs(uiBottomLeft.x) - Math.Abs(min.x));
-        float y2 = Math.Abs(Math.Abs(uiBottomLeft.y) - Math.Abs(min.y));
-
-        float minDistance = Mathf.Min(x1, y1, x2, y2);
-        float padding = 0.6f;
-        float size = 1;
-        if (x1 == minDistance)
+        if (currentLevel == null || currentLevel.min == null || currentLevel.max == null)
         {
-            size = Math.Abs(uiTopRight.x) / Math.Abs(max.x + padding);
-        }
-        else if (y1 == minDistance)
-        {
-            size = Math.Abs(uiTopRight.y) / Math.Abs(max.y + padding);
-        }
-        else if (x2 == minDistance)
-        {
-            size = Math.Abs(uiBottomLeft.x) / Math.Abs(min.x - padding);
-        }
-        else if (y2 == minDistance)
-        {
-            size = Math.Abs(uiBottomLeft.y) / Math.Abs(min.y - padding);
+            return;
         }
 
+        float paddingTop = 0.7f;
+        float paddingLeft = 0.7f;
+        float paddingRight = 0.7f;
+        float paddingBottom = 0f;
 
-        Vector2 sizeP = new Vector2(
-            Mathf.Abs(uiTopRight.x - uiBottomLeft.x),
-            Mathf.Abs(uiTopRight.y - uiBottomLeft.y)
-        );
+        Vector3 uiTopPos = Utils_Custom.ConvertUIToWorldPosition(top);
+        Vector3 uiBottomPos = Utils_Custom.ConvertUIToWorldPosition(down);
+        Vector3 uiLeftPos = Utils_Custom.ConvertUIToWorldPosition(left);
+        Vector3 uiRightPos = Utils_Custom.ConvertUIToWorldPosition(right);
 
-        // 3. Calculate scale factor (fit O inside P)
-        float scaleX = sizeP.x / sizeO.x;
-        float scaleY = sizeP.y / sizeO.y;
-        float finalScale = Mathf.Min(scaleX, scaleY) * 0.65f; // 0.9f for padding
+        float fullUiWidth = Mathf.Abs(uiRightPos.x - uiLeftPos.x);
+        float availableWidth = fullUiWidth - (paddingLeft + paddingRight);
 
-        // 4. Apply scale to level
-        //LevelSpawner.Ins.CurrentLevel.transform.localScale = Vector3.one * finalScale;
-        LevelManager.Ins.currentLevel.transform.localScale = Vector3.one * size;
+        float fullUiHeight = Mathf.Abs(uiTopPos.y - uiBottomPos.y);
+        float availableHeight = fullUiHeight - (paddingTop + paddingBottom);
 
-        // 5. Center the level vertically between UI top and bottom
-        Vector3 pos1 = LevelManager.Ins.currentLevel.transform.position;
-        LevelManager.Ins.currentLevel.transform.position = new Vector3(
-            pos1.x,
-            (uiTop.y + uiBottom.y) / 2f,
-            pos1.z
-        );
+        if (availableWidth <= 0) availableWidth = 1f;
+        if (availableHeight <= 0) availableHeight = 1f;
+
+        Vector3 lvlMin = currentLevel.min.localPosition;
+        Vector3 lvlMax = currentLevel.max.localPosition;
+
+        float lvlWidth = Mathf.Abs(lvlMax.x - lvlMin.x);
+        float lvlHeight = Mathf.Abs(lvlMax.y - lvlMin.y);
+
+        float scaleX = availableWidth / lvlWidth;
+        float scaleY = availableHeight / lvlHeight;
+
+        float finalScale = Mathf.Min(scaleX, scaleY);
+        finalScale = Mathf.Clamp(finalScale, 0.1f, 1f);
+
+        currentLevel.transform.localScale = Vector3.one * finalScale;
+
+        float availableAreaLeftX = uiLeftPos.x + paddingLeft;
+        float availableAreaRightX = uiRightPos.x - paddingRight;
+        float targetCenterX = (availableAreaLeftX + availableAreaRightX) / 2f;
+
+        float lvlCenterX = (lvlMin.x + lvlMax.x) / 2f;
+
+        float targetX = targetCenterX - lvlCenterX * finalScale;
+
+        float targetBottomY = uiBottomPos.y + paddingBottom;
+
+        float targetY = targetBottomY - lvlMin.y * finalScale;
+        currentLevel.transform.position = new Vector3(targetX, targetY, currentLevel.transform.position.z);
     }
 }

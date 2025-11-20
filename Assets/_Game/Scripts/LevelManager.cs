@@ -7,6 +7,7 @@ using UnityEngine;
 public class LevelManager : Singleton<LevelManager>
 {
     [SerializeField] private List<Level> allLevel;
+    public ConveyorController conveyorController;
 
     public Level currentLevel;
 
@@ -19,9 +20,12 @@ public class LevelManager : Singleton<LevelManager>
             currentLevel = null;
         }
 
+        conveyorController.ResetConveyor();
+
         index = Math.Clamp(index, 0, allLevel.Count - 1);
 
         currentLevel = Instantiate(allLevel[index], transform);
         currentLevel.Init();
+        GamePlayUI.Ins.SetupCamera();
     }
 }

@@ -13,29 +13,24 @@ public class Level : MonoBehaviour
 
     public Vector3 gridOrigin = Vector3.zero;
 
-    [Header("Prefabs")] public Stash boxPrefab; // prefab box có item
+    [Header("Prefabs")] public Stash boxPrefab;
 
-    [Header("Runtime")]
-    [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
+    [Header("Runtime")] [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
     public Transform levelRoot;
 
-    [SerializeField] private GameObject[] obj; // 16 prefab viền (index = tileIndex)
+    [SerializeField] private GameObject[] obj;
 
-    [Header("Prefabs - Diagonal Borders (Outer Corners)")]
-    [InfoBox("Dùng khi KHÔNG CÓ hàng xóm thẳng, nhưng có hàng xóm ở góc chéo.")]
-    public GameObject corner_Connect_TL; // Box ở hướng 1 (Top-Left)
-
-    public GameObject corner_Connect_TR; // Box ở hướng 3 (Top-Right)
-    public GameObject corner_Connect_BR; // Box ở hướng 5 (Bottom-Right)
-    public GameObject corner_Connect_BL; // Box ở hướng 7 (Bottom-Left)
+    [Header("Prefabs - Diagonal Borders (16 Cases)")]
+    [InfoBox("Index tính theo Bitmask: TL=1, TR=2, BL=4, BR=8. Tổng cộng 16 trường hợp.")]
+    public GameObject[] cornerBorders;
 
     public List<Stash> Stash = new List<Stash>();
+    public Transform max;
+    public Transform min;
 
     private int[,] levelIndexMatrix;
 
     public Stash[,] stashGrid;
-    public Transform max;
-    public Transform min;
 
     private void OnEnable()
     {
@@ -71,6 +66,7 @@ public class Level : MonoBehaviour
         {
             stashGrid[onStashPick.Stash.index.x, onStashPick.Stash.index.y + 1].SetCanPick(true);
         }
+
         Stash.Remove(onStashPick.Stash);
     }
 
@@ -160,7 +156,6 @@ public class Level : MonoBehaviour
         int[,] paddedMatrix = new int[newHeight, newWidth];
         InitializeMatrix(paddedMatrix, newHeight, newWidth, -1);
 
-        // dịch tất cả box vào trong (chừa 1 cột trái, 1 cột phải, 1 hàng dưới)
         for (int y = 0; y < levelData.height; y++)
         {
             for (int x = 0; x < levelData.width; x++)
@@ -168,14 +163,13 @@ public class Level : MonoBehaviour
                 int boxIndex = originalMatrix[y, x];
                 if (boxIndex != -1)
                 {
-                    int newY = y; // giữ nguyên (hàng lề ở dưới)
-                    int newX = x + 1; // dịch phải 1 (lề trái)
+                    int newY = y;
+                    int newX = x + 1;
                     paddedMatrix[newY, newX] = boxIndex;
                 }
             }
         }
 
-        // Lưu lại
         levelIndexMatrix = paddedMatrix;
 
         // ================== PHASE 3: spawn box + border ==================
@@ -222,14 +216,13 @@ public class Level : MonoBehaviour
                     stashGrid[row, col] = null;
 
                     // BƯỚC 1: Kiểm tra 4 hướng chính (Thẳng)
-                    // Nếu có hàng xóm thẳng -> Dùng bộ 16 Tile cũ
                     int orthoMask = GetOrthogonalMask(row, col, maxRows, maxCols);
 
                     if (orthoMask > 0)
                     {
+                        // Xử lý viền thẳng (như cũ)
                         if (obj != null && orthoMask < obj.Length && obj[orthoMask] != null)
                         {
-                            if (obj[orthoMask] == null) return;
                             GameObject go = Instantiate(obj[orthoMask], levelRoot);
                             go.transform.localPosition = localPos;
                             go.transform.localRotation = Quaternion.identity;
@@ -238,17 +231,19 @@ public class Level : MonoBehaviour
                     }
                     else
                     {
-                        // BƯỚC 2: Nếu KHÔNG có hàng xóm thẳng (orthoMask == 0)
-                        // Kiểm tra 4 góc chéo -> Dùng bộ Corner mới
-                        GameObject cornerPrefab = GetDiagonalCornerPrefab(row, col, maxRows, maxCols);
+                        // BƯỚC 2: Nếu KHÔNG có hàng xóm thẳng -> Kiểm tra 16 trường hợp chéo
+                        int diagMask = GetDiagonalMask(row, col, maxRows, maxCols);
 
-                        if (cornerPrefab != null)
+                        if (diagMask > 0 && cornerBorders != null && diagMask < cornerBorders.Length)
                         {
-                            if (cornerPrefab == null) return;
-                            GameObject go = Instantiate(cornerPrefab, levelRoot);
-                            go.transform.localPosition = localPos;
-                            go.transform.localRotation = Quaternion.identity;
-                            go.transform.localScale = Vector3.one;
+                            GameObject prefab = cornerBorders[diagMask];
+                            if (prefab != null)
+                            {
+                                GameObject go = Instantiate(prefab, levelRoot);
+                                go.transform.localPosition = localPos;
+                                go.transform.localRotation = Quaternion.identity;
+                                go.transform.localScale = Vector3.one;
+                            }
                         }
                     }
                 }
@@ -256,6 +251,44 @@ public class Level : MonoBehaviour
         }
 
         SetBlock();
+        UpdateMinMaxPositions(centerX, centerY);
+    }
+
+    private void UpdateMinMaxPositions(float centerX, float centerY)
+    {
+        int minRowIndex = 0;
+        int minColIndex = 1;
+        Vector3 minPos = GetLocalPosition(minRowIndex, minColIndex, centerX, centerY);
+        minPos.y -= 0.6f;
+        UpdateMarker(ref min, "Point_Min (BL)", minPos);
+
+        int maxRowIndex = levelData.height - 1;
+        int maxColIndex = levelData.width;
+        Vector3 maxPos = GetLocalPosition(maxRowIndex, maxColIndex, centerX, centerY);
+        UpdateMarker(ref max, "Point_Max (TR)", maxPos);
+    }
+
+    private void UpdateMarker(ref Transform target, string name, Vector3 localPosition)
+    {
+        if (target == null)
+        {
+            GameObject go = new GameObject(name);
+            go.transform.SetParent(transform,
+                false);
+            target = go.transform;
+        }
+
+        target.name = name;
+        target.localPosition = localPosition;
+    }
+
+    private Vector3 GetLocalPosition(int row, int col, float centerX, float centerY)
+    {
+        return gridOrigin + new Vector3(
+            (col - centerX) * cellSize,
+            (row - centerY) * cellSize,
+            0f
+        );
     }
 
     private void SetBlock()
@@ -296,32 +329,6 @@ public class Level : MonoBehaviour
         }
     }
 
-    private GameObject GetBorderPrefab(int row, int col)
-    {
-        if (levelIndexMatrix == null || obj == null || obj.Length < 16)
-            return null;
-
-        int maxRows = levelIndexMatrix.GetLength(0);
-        int maxCols = levelIndexMatrix.GetLength(1);
-
-        bool top = row - 1 >= 0 && levelIndexMatrix[row - 1, col] != -1;
-        bool down = row + 1 < maxRows && levelIndexMatrix[row + 1, col] != -1;
-        bool left = col - 1 >= 0 && levelIndexMatrix[row, col - 1] != -1;
-        bool right = col + 1 < maxCols && levelIndexMatrix[row, col + 1] != -1;
-
-        int tileIndex = 0;
-        if (top) tileIndex += 1; // 0001
-        if (down) tileIndex += 2; // 0010
-        if (left) tileIndex += 4; // 0100
-        if (right) tileIndex += 8; // 1000
-
-        GameObject selected = obj[tileIndex];
-
-        return selected;
-    }
-
-    // ----------------- Helper -----------------
-
     private int GetOrthogonalMask(int row, int col, int maxRows, int maxCols)
     {
         bool top = IsBox(row - 1, col, maxRows, maxCols);
@@ -348,24 +355,20 @@ public class Level : MonoBehaviour
         }
     }
 
-    // Trả về Prefab góc chéo phù hợp
-    private GameObject GetDiagonalCornerPrefab(int row, int col, int maxRows, int maxCols)
+    private int GetDiagonalMask(int row, int col, int maxRows, int maxCols)
     {
-        // Kiểm tra xem có Box ở các góc chéo không
-        bool tl = IsBox(row - 1, col - 1, maxRows, maxCols); // Top-Left (Góc 1)
-        bool tr = IsBox(row - 1, col + 1, maxRows, maxCols); // Top-Right (Góc 3)
-        bool br = IsBox(row + 1, col + 1, maxRows, maxCols); // Bottom-Right (Góc 5)
-        bool bl = IsBox(row + 1, col - 1, maxRows, maxCols); // Bottom-Left (Góc 7)
+        bool tl = IsBox(row - 1, col - 1, maxRows, maxCols);
+        bool tr = IsBox(row - 1, col + 1, maxRows, maxCols);
+        bool bl = IsBox(row + 1, col - 1, maxRows, maxCols);
+        bool br = IsBox(row + 1, col + 1, maxRows, maxCols);
 
-        // Logic map visual:
-        // Nếu Box nằm ở hướng 1 (Top-Left), ta cần hiển thị miếng bo ở hướng ngược lại (Bottom-Right) để ôm lấy nó.
+        int mask = 0;
+        if (tl) mask += 1;
+        if (tr) mask += 2;
+        if (bl) mask += 4;
+        if (br) mask += 8;
 
-        if (tl) return corner_Connect_TL;
-        if (tr) return corner_Connect_TR;
-        if (br) return corner_Connect_BR;
-        if (bl) return corner_Connect_BL;
-
-        return null;
+        return mask;
     }
 
     private bool IsBox(int r, int c, int maxR, int maxC)

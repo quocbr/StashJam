@@ -7,6 +7,7 @@ public class Item : MonoBehaviour
 {
     public int ID;
     [SerializeField] private SpriteRenderer m_ItemSprite;
+    public bool isEat = false;
 
     public void Init(int id, Sprite sprite, int layer = 0)
     {

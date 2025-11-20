@@ -1,0 +1,70 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class DataManager : Singleton<DataManager>
+{
+    private const string SAVE_KEY = "UserData";
+    public UserData userData;
+
+    private void Awake()
+    {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+    }
+
+    private void Start()
+    {
+        LoadData();
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            SaveData();
+        }
+    }
+
+    public void SaveData()
+    {
+        string json = JsonUtility.ToJson(userData);
+        PlayerPrefs.SetString(SAVE_KEY, json);
+        PlayerPrefs.Save();
+        Debug.Log("Data saved");
+    }
+
+    public void LoadData()
+    {
+        if (PlayerPrefs.HasKey(SAVE_KEY))
+        {
+            string json = PlayerPrefs.GetString(SAVE_KEY);
+            userData = JsonUtility.FromJson<UserData>(json);
+        }
+        else
+        {
+            userData = new UserData();
+            SaveData();
+        }
+
+        LevelManager.Ins.SpawnLevel(userData.level);
+    }
+
+    public void ResetData()
+    {
+        userData = new UserData();
+        SaveData();
+    }
+}
+
+[Serializable]
+public class UserData
+{
+    public int level;
+
+    public UserData()
+    {
+        level = 0;
+    }
+}

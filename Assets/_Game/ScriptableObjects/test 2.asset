@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c49149dabad12e4aa25bff25652649f, type: 3}
+  m_Name: test 2
+  m_EditorClassIdentifier: 
+  width: 6
+  height: 5
+  boxes:
+  - gridPos: {x: 0, y: 0}
+    itemIds: 01000000010000000100000001000000
+    isLocked: 0
+  - gridPos: {x: 1, y: 0}
+    itemIds: 00000000000000000100000001000000
+    isLocked: 0
+  - gridPos: {x: 2, y: 0}
+    itemIds: 03000000030000000000000000000000
+    isLocked: 0
+  - gridPos: {x: 1, y: 1}
+    itemIds: 00000000000000000000000000000000
+    isLocked: 0
+  - gridPos: {x: 0, y: 2}
+    itemIds: 02000000030000000300000002000000
+    isLocked: 0
+  - gridPos: {x: 1, y: 2}
+    itemIds: 00000000000000000000000000000000
+    isLocked: 0
+  - gridPos: {x: 2, y: 2}
+    itemIds: 00000000000000000000000000000000
+    isLocked: 0
+  - gridPos: {x: 2, y: 3}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 3, y: 2}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 4, y: 2}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 5, y: 2}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 5, y: 1}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 5, y: 0}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 5, y: 3}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 5, y: 4}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 4, y: 4}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 1, y: 4}
+    itemIds: 
+    isLocked: 0
+  - gridPos: {x: 2, y: 4}
+    itemIds: 00000000
+    isLocked: 0
+  - gridPos: {x: 0, y: 4}
+    itemIds: 00000000
+    isLocked: 0
