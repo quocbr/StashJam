@@ -85,10 +85,12 @@ public class ConveyorController : MonoBehaviour
 
     #region MOVEMENT LOGIC
 
-    [Header("--- Rotation Settings ---")] [SerializeField]
+    [Header("--- Rotation Settings ---")]
+    [SerializeField]
     private bool rotateItems = true;
 
-    [Tooltip("Nếu ảnh gốc hướng lên trên thì điền -90. Nếu hướng sang phải thì điền 0.")] [SerializeField]
+    [Tooltip("Nếu ảnh gốc hướng lên trên thì điền -90. Nếu hướng sang phải thì điền 0.")]
+    [SerializeField]
     private float rotationOffset = 0f;
 
     private void MoveItemContinuous(ConveyorItem item)
@@ -146,7 +148,8 @@ public class ConveyorController : MonoBehaviour
 
     #region CONFIGURATION
 
-    [Header("--- Movement Settings ---")] [SerializeField]
+    [Header("--- Movement Settings ---")]
+    [SerializeField]
     private float moveSpeed = 2.0f;
 
     [SerializeField] private float rotationSpeed = 15f;
@@ -154,7 +157,8 @@ public class ConveyorController : MonoBehaviour
 
     [SerializeField] private bool isLinearPath = true;
 
-    [Header("--- Curve Settings ---")] [SerializeField]
+    [Header("--- Curve Settings ---")]
+    [SerializeField]
     private bool smoothCorners = true;
 
     [SerializeField] private float cornerRadius = 0.5f;
@@ -164,7 +168,8 @@ public class ConveyorController : MonoBehaviour
 
     #region REFERENCES
 
-    [Header("--- References ---")] [SerializeField]
+    [Header("--- References ---")]
+    [SerializeField]
     private List<ConveyorItem> m_ConveyorList;
 
     [SerializeField] private List<ConveyorItem> m_QueueConveyor;
@@ -352,7 +357,7 @@ public class ConveyorController : MonoBehaviour
 
         CheckMath();
     }
-
+    [Button]
     // 4. KIỂM TRA MATCH 3
     private void CheckMath()
     {

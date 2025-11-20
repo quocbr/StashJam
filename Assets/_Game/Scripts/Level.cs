@@ -15,7 +15,8 @@ public class Level : MonoBehaviour
 
     [Header("Prefabs")] public Stash boxPrefab;
 
-    [Header("Runtime")] [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
+    [Header("Runtime")]
+    [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
     public Transform levelRoot;
 
     [SerializeField] private GameObject[] obj;
@@ -44,6 +45,7 @@ public class Level : MonoBehaviour
 
     private void OnStashPickCallBack(OnStashPick onStashPick)
     {
+        if (onStashPick.Stash.IsStackSpawner) return;
         if (onStashPick.Stash.index.x - 1 >= 0 && stashGrid[onStashPick.Stash.index.x - 1, onStashPick.Stash.index.y])
         {
             stashGrid[onStashPick.Stash.index.x - 1, onStashPick.Stash.index.y].SetCanPick(true);
@@ -120,6 +122,41 @@ public class Level : MonoBehaviour
         {
             stashGrid[Stash[i].index.x, Stash[i].index.y] = Stash[i];
         }
+
+        for (int i = 0; i < levelData.boxes.Count; i++)
+        {
+            var boxCfg = levelData.boxes[i];
+
+            if (boxCfg.isStackSpawner)// && boxCfg.direction != BoxDirection.None)
+            {
+                // Tìm vị trí của Spawner trong Grid đã padding (y, x+1)
+                int r = boxCfg.gridPos.y;
+                int c = boxCfg.gridPos.x + 1;
+
+                Stash spawnerStash = stashGrid[r, c];
+
+                if (spawnerStash != null)
+                {
+                    // Tính toán ô đích (Target)
+                    int tRow = r;
+                    int tCol = c;
+                    switch (boxCfg.direction)
+                    {
+                        case BoxDirection.Up: tRow += 1; break;
+                        case BoxDirection.Down: tRow -= 1; break;
+                        case BoxDirection.Left: tCol -= 1; break;
+                        case BoxDirection.Right: tCol += 1; break;
+                    }
+
+                    Vector2Int targetIdx = new Vector2Int(tRow, tCol);
+
+                    // 1. Nạp lại dữ liệu Stack
+                    // Lưu ý: Nếu load game save thì chỗ này nên lấy từ SaveData thay vì Config gốc
+                    // Nhưng nếu là Init level mới thì lấy từ Config.
+                    spawnerStash.SetupSpawner(boxCfg.spawnStack);
+                }
+            }
+        }
     }
 
     public void SpawnLevel()
@@ -142,10 +179,33 @@ public class Level : MonoBehaviour
             var boxCfg = levelData.boxes[i];
             Vector2Int pos = boxCfg.gridPos;
 
+            // 1. Gán vị trí gốc (Vị trí đặt máy Spawner)
             if (pos.y >= 0 && pos.y < levelData.height &&
                 pos.x >= 0 && pos.x < levelData.width)
             {
                 originalMatrix[pos.y, pos.x] = i;
+            }
+
+            // 2. [MỚI] Nếu là Stack Spawner -> Gán luôn index 'i' cho vị trí đích (Target)
+            // Để lát nữa hệ thống tự động spawn ra Visual Box tại ô này
+            if (boxCfg.isStackSpawner)//&& boxCfg.direction != BoxDirection.None)
+            {
+                Vector2Int targetPos = pos;
+                switch (boxCfg.direction)
+                {
+                    case BoxDirection.Up: targetPos.y += 1; break;
+                    case BoxDirection.Down: targetPos.y -= 1; break;
+                    case BoxDirection.Left: targetPos.x -= 1; break;
+                    case BoxDirection.Right: targetPos.x += 1; break;
+                }
+
+                // Kiểm tra nếu ô đích nằm trong bản đồ
+                if (targetPos.y >= 0 && targetPos.y < levelData.height &&
+                    targetPos.x >= 0 && targetPos.x < levelData.width)
+                {
+                    // Gán cùng index i. Điều này có nghĩa là: Ô đích dùng chung dữ liệu Config với ô gốc.
+                    originalMatrix[targetPos.y, targetPos.x] = 100;
+                }
             }
         }
 
@@ -196,19 +256,27 @@ public class Level : MonoBehaviour
 
                 if (boxIndex != -1)
                 {
-                    var boxCfg = levelData.boxes[boxIndex];
+                    if (boxIndex == 100)
+                    {
 
-                    Stash box = Instantiate(boxPrefab, levelRoot);
-                    box.name = $"Box_{boxCfg.gridPos.x}_{boxCfg.gridPos.y}";
-                    box.transform.localPosition = localPos;
-                    box.transform.localRotation = Quaternion.identity;
-                    box.transform.localScale = Vector3.one;
-                    box.SetIndex(row, col);
+                    }
+                    else
+                    {
+                        var boxCfg = levelData.boxes[boxIndex];
 
-                    box.ApplyConfig(boxCfg, itemDatabase);
-                    Stash.Add(box);
+                        Stash box = Instantiate(boxPrefab, levelRoot);
+                        box.name = $"Box_{boxCfg.gridPos.x}_{boxCfg.gridPos.y}";
+                        box.transform.localPosition = localPos;
+                        box.transform.localRotation = Quaternion.identity;
+                        box.transform.localScale = Vector3.one;
+                        box.SetIndex(row, col);
 
-                    stashGrid[row, col] = box;
+                        box.ApplyConfig(boxCfg, itemDatabase);
+                        Stash.Add(box);
+
+                        stashGrid[row, col] = box;
+                    }
+
                 }
                 else
                 {

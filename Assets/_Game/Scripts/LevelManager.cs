@@ -7,6 +7,7 @@ using UnityEngine;
 public class LevelManager : Singleton<LevelManager>
 {
     [SerializeField] private List<Level> allLevel;
+    public ItemDatabase itemDatabase;
     public ConveyorController conveyorController;
 
     public Level currentLevel;

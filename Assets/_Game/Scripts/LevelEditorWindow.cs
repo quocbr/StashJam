@@ -1,136 +1,116 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 public class LevelEditorWindow : EditorWindow
 {
     private LevelData _level;
     private ItemDatabase _itemDatabase;
-
     private Vector2 _gridScroll;
     private Vector2 _inspectorScroll;
-
     private BoxConfig _selectedBox;
 
-    // Ô lưới to hơn chút cho dễ nhìn icon
-    private int _cellSize = 56;
-
-    // dữ liệu cho popup chọn item
+    private int _cellSize = 64;
     private int[] _itemIds;
     private string[] _itemNames;
-    private int _newItemId;
+
+    // Cache danh sách ô bị chiếm dụng (Key: Ô bị chiếm, Value: Ô nguồn)
+    private Dictionary<Vector2Int, Vector2Int> _reservedCells = new Dictionary<Vector2Int, Vector2Int>();
 
     [MenuItem("Tools/Level Editor (Box + Items)")]
-    public static void Open()
-    {
-        GetWindow<LevelEditorWindow>("Level Editor");
-    }
+    public static void Open() { GetWindow<LevelEditorWindow>("Level Editor"); }
 
     private void OnGUI()
     {
         EditorGUILayout.Space();
-
-        // ====== HEADER: chọn LevelData & ItemDatabase ======
         EditorGUILayout.BeginVertical("box");
         _level = (LevelData)EditorGUILayout.ObjectField("Level Data", _level, typeof(LevelData), false);
         _itemDatabase = (ItemDatabase)EditorGUILayout.ObjectField("Item Database", _itemDatabase, typeof(ItemDatabase), false);
         EditorGUILayout.EndVertical();
 
-        if (_level == null)
-        {
-            EditorGUILayout.HelpBox("Chọn một LevelData asset để bắt đầu.", MessageType.Info);
-            return;
-        }
+        if (_level == null) return;
+        if (_itemDatabase != null) BuildItemOptions();
 
-        if (_itemDatabase == null)
-        {
-            EditorGUILayout.HelpBox("Chọn một ItemDatabase để hiển thị & chọn item.", MessageType.Warning);
-        }
-        else
-        {
-            BuildItemOptions();
-        }
+        // Tính toán lại vùng bị chiếm
+        CalculateReservedCells();
 
         EditorGUILayout.Space(4);
         DrawLevelSettings();
         EditorGUILayout.Space(4);
 
-        // ====== BODY: 2 cột - Grid & Inspector ======
         EditorGUILayout.BeginHorizontal();
 
-        // -------- Cột trái: GRID --------
+        // CỘT TRÁI: GRID
         EditorGUILayout.BeginVertical("box", GUILayout.ExpandWidth(true));
-        EditorGUILayout.LabelField("Level Grid", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
-
         _gridScroll = EditorGUILayout.BeginScrollView(_gridScroll);
         DrawGrid();
         EditorGUILayout.EndScrollView();
-
         EditorGUILayout.EndVertical();
 
-        // -------- Cột phải: INSPECTOR --------
-        EditorGUILayout.BeginVertical("box", GUILayout.Width(360));
-        EditorGUILayout.LabelField("Box Inspector", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
-
+        // CỘT PHẢI: INSPECTOR
+        EditorGUILayout.BeginVertical("box", GUILayout.Width(380));
         _inspectorScroll = EditorGUILayout.BeginScrollView(_inspectorScroll);
         DrawSelectedBoxInspector();
         EditorGUILayout.EndScrollView();
-
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.EndHorizontal();
     }
 
-    // ================= LEVEL SETTINGS =================
+    private void CalculateReservedCells()
+    {
+        _reservedCells.Clear();
+        if (_level.boxes == null) return;
+
+        foreach (var box in _level.boxes)
+        {
+            if (box.isStackSpawner)//&& box.direction != BoxDirection.None)
+            {
+                Vector2Int targetPos = box.gridPos;
+                switch (box.direction)
+                {
+                    case BoxDirection.Up: targetPos.y += 1; break;
+                    case BoxDirection.Down: targetPos.y -= 1; break;
+                    case BoxDirection.Left: targetPos.x -= 1; break;
+                    case BoxDirection.Right: targetPos.x += 1; break;
+                }
+                if (!_reservedCells.ContainsKey(targetPos))
+                    _reservedCells.Add(targetPos, box.gridPos);
+            }
+        }
+    }
 
     private void DrawLevelSettings()
     {
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Level Settings", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
-
         EditorGUI.BeginChangeCheck();
-
         int newWidth = EditorGUILayout.IntField("Width", _level.width);
         int newHeight = EditorGUILayout.IntField("Height", _level.height);
-
-        _cellSize = EditorGUILayout.IntSlider("Cell Size", _cellSize, 40, 96);
+        _cellSize = EditorGUILayout.IntSlider("Cell Size", _cellSize, 40, 120);
 
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(_level, "Change level size");
+            Undo.RecordObject(_level, "Change Level Settings");
             _level.width = Mathf.Max(1, newWidth);
             _level.height = Mathf.Max(1, newHeight);
             EditorUtility.SetDirty(_level);
         }
 
-        EditorGUILayout.Space(2);
-        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Clear All Boxes", GUILayout.Height(22)))
+        if (GUILayout.Button("Clear All Boxes"))
         {
-            if (EditorUtility.DisplayDialog("Clear?", "Xoá toàn bộ box trong level?", "Yes", "No"))
+            if (EditorUtility.DisplayDialog("Confirm", "Clear all boxes?", "Yes", "No"))
             {
-                Undo.RecordObject(_level, "Clear level boxes");
+                Undo.RecordObject(_level, "Clear Boxes");
                 _level.boxes.Clear();
                 _selectedBox = null;
                 EditorUtility.SetDirty(_level);
             }
         }
-
-        if (GUILayout.Button("Deselect Box", GUILayout.Height(22)))
-        {
-            _selectedBox = null;
-        }
-        EditorGUILayout.EndHorizontal();
-
         EditorGUILayout.EndVertical();
     }
-
-    // ================= GRID DRAW =================
 
     private void DrawGrid()
     {
@@ -151,699 +131,383 @@ public class LevelEditorWindow : EditorWindow
 
     private void DrawCell(Rect rect, int x, int y, BoxConfig box)
     {
-        // nền grid
         Color bgColor = new Color(0.17f, 0.17f, 0.17f);
         EditorGUI.DrawRect(rect, bgColor);
+
+        Vector2Int currentPos = new Vector2Int(x, y);
+        bool isReserved = _reservedCells.ContainsKey(currentPos);
 
         if (box != null)
         {
             bool isSelected = (_selectedBox == box);
-
-            // border box
             Color borderColor = isSelected ? new Color(1f, 0.8f, 0.3f) : new Color(0.4f, 0.4f, 0.4f);
-            EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2), borderColor);
+            if (box.isStackSpawner) borderColor = new Color(0.6f, 0.4f, 1f);
+            if (isReserved) borderColor = Color.red;
 
-            // nền bên trong box
-            EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6), Color.black);
+            FrameRect(rect, borderColor, 2);
+            EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6), new Color(0.1f, 0.1f, 0.1f));
 
-            // vẽ stack item (icon hoặc thanh màu + text)
-            int maxShow = Mathf.Min(4, box.itemIds.Count);
-            if (maxShow > 0 && _itemDatabase != null)
+            // Mũi tên hướng
+            if (box.isStackSpawner)//&& box.direction != BoxDirection.None)
             {
-                float stackAreaHeight = rect.height - 18f;
-                float rowHeight = stackAreaHeight / Mathf.Max(3, maxShow + 1);
-
-                var itemTextStyle = new GUIStyle(EditorStyles.miniLabel)
+                string arrow = GetArrowString(box.direction);
+                GUI.Label(rect, arrow, new GUIStyle(EditorStyles.largeLabel)
                 {
                     alignment = TextAnchor.MiddleCenter,
-                    normal = { textColor = Color.white },
-                    fontSize = Mathf.Clamp(_cellSize / 6, 8, 12),
-                    clipping = TextClipping.Clip
-                };
+                    normal = { textColor = new Color(1f, 1f, 1f, 0.3f) },
+                    fontSize = 24,
+                    fontStyle = FontStyle.Bold
+                });
+            }
 
-                for (int i = 0; i < maxShow; i++)
+            DrawItemPreviewCompact(rect, box);
+
+            if (isReserved)
+            {
+                GUI.Label(rect, "ERR!", new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.MiddleCenter, normal = { textColor = Color.red } });
+            }
+        }
+        else if (isReserved)
+        {
+            // Ô ĐÍCH (GHOST BOX)
+            // Vẽ box mờ + item sắp sinh ra
+            Vector2Int sourcePos = _reservedCells[currentPos];
+            BoxConfig sourceBox = _level.GetBoxAt(sourcePos.x, sourcePos.y);
+            bool isSourceSelected = (_selectedBox == sourceBox);
+
+            // Nếu đang chọn box nguồn -> Highlight ô đích này lên
+            Color ghostBg = isSourceSelected ? new Color(0.6f, 0.4f, 1f, 0.2f) : new Color(1f, 1f, 1f, 0.05f);
+            EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2), ghostBg);
+
+            Color ghostBorder = new Color(0.6f, 0.4f, 1f, 0.4f);
+            FrameRect(rect, ghostBorder, 2);
+
+            // Vẽ Preview Item tiếp theo trong stack
+            if (sourceBox != null && sourceBox.spawnStack.Count > 0 && _itemDatabase != null)
+            {
+                var nextBoxData = sourceBox.spawnStack[0];
+                if (nextBoxData.itemIds.Count > 0)
                 {
-                    int id = box.itemIds[i];
-                    var def = _itemDatabase.GetById(id);
-
-                    float rowY = rect.yMax - 4 - rowHeight * (i + 1);
-                    Rect rowRect = new Rect(rect.x + 5, rowY, rect.width - 10, rowHeight - 2);
-
-                    if (def != null && def.icon != null && def.icon.texture != null)
+                    int previewId = nextBoxData.itemIds[0];
+                    var def = _itemDatabase.GetById(previewId);
+                    if (def != null && def.icon != null)
                     {
-                        Texture2D tex = def.icon.texture;
-                        float size = Mathf.Min(rowRect.width, rowRect.height);
-                        Rect iconRect = new Rect(
-                            rowRect.x + (rowRect.width - size) * 0.5f,
-                            rowRect.y + (rowRect.height - size) * 0.5f,
-                            size,
-                            size
-                        );
-                        GUI.DrawTexture(iconRect, tex, ScaleMode.ScaleToFit, true);
-                    }
-                    else
-                    {
-                        Color c = def != null ? def.color : new Color(0.5f, 0.5f, 0.5f);
-                        EditorGUI.DrawRect(rowRect, c);
-
-                        string code = def != null
-                            ? (!string.IsNullOrEmpty(def.shortCode) ? def.shortCode : def.displayName)
-                            : id.ToString();
-
-                        GUI.Label(rowRect, code, itemTextStyle);
+                        var c = GUI.color;
+                        GUI.color = new Color(1, 1, 1, 0.4f); // Mờ
+                        float padding = 10f;
+                        float size = Mathf.Min(rect.width, rect.height) - padding * 2;
+                        Rect iconRect = new Rect(rect.x + (rect.width - size) / 2f, rect.y + (rect.height - size) / 2f, size, size);
+                        GUI.DrawTexture(iconRect, def.icon.texture, ScaleMode.ScaleToFit);
+                        GUI.color = c;
                     }
                 }
             }
 
-            // text nhỏ: toạ độ & số item
-            string topText = $"({x},{y})";
-            string bottomText = box.itemIds.Count > 0 ? $"{box.itemIds.Count} items" : "Empty";
-
-            var topStyle = new GUIStyle(EditorStyles.miniLabel)
+            GUI.Label(rect, "Target", new GUIStyle(EditorStyles.miniLabel)
             {
-                alignment = TextAnchor.UpperLeft,
-                normal = { textColor = Color.white },
-                fontSize = Mathf.Clamp(_cellSize / 5, 9, 13)
-            };
-            var bottomStyle = new GUIStyle(EditorStyles.miniLabel)
-            {
-                alignment = TextAnchor.LowerRight,
-                normal = { textColor = Color.gray },
-                fontSize = Mathf.Clamp(_cellSize / 6, 8, 12)
-            };
-
-            Rect topRect = new Rect(rect.x + 4, rect.y + 2, rect.width - 8, 14);
-            Rect bottomRect = new Rect(rect.x + 4, rect.yMax - 15, rect.width - 8, 13);
-
-            GUI.Label(topRect, topText, topStyle);
-            GUI.Label(bottomRect, bottomText, bottomStyle);
+                alignment = TextAnchor.LowerCenter,
+                normal = { textColor = new Color(0.7f, 0.7f, 1f, 0.6f) }
+            });
         }
         else
         {
-            // ô trống
-            EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2),
-                new Color(0.25f, 0.25f, 0.25f));
+            EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2), new Color(0.25f, 0.25f, 0.25f));
         }
 
-        // Tooltip chi tiết
-        string tooltip = box == null
-            ? $"({x},{y})\nNo box"
-            : BuildBoxTooltip(box, x, y);
+        HandleInput(rect, x, y, box, isReserved);
+    }
 
-        GUI.Label(rect, new GUIContent("", tooltip));
-
-        // ====== XỬ LÝ CLICK / DOUBLE-CLICK ======
+    private void HandleInput(Rect rect, int x, int y, BoxConfig box, bool isReserved)
+    {
         Event e = Event.current;
         if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition))
         {
-            if (e.button == 1 && e.clickCount == 1)
+            if (e.button == 0) // Trái
             {
-                // Right-click: xoá box nếu có
-                HandleRightClickCell(x, y, box);
+                // [NEW] Nếu click vào ô Target -> Tự động chọn Box Spawner gốc
+                if (box == null && isReserved)
+                {
+                    Vector2Int sourcePos = _reservedCells[new Vector2Int(x, y)];
+                    _selectedBox = _level.GetBoxAt(sourcePos.x, sourcePos.y);
+                    GUI.changed = true;
+                    e.Use();
+                    return;
+                }
+
+                if (box == null)
+                {
+                    Undo.RecordObject(_level, "Create Box");
+                    box = new BoxConfig { gridPos = new Vector2Int(x, y) };
+                    EnsureBoxItems(box.itemIds);
+                    _level.boxes.Add(box);
+                    EditorUtility.SetDirty(_level);
+                }
+                _selectedBox = box;
+                GUI.changed = true;
                 e.Use();
             }
-            else if (e.button == 0)
+            else if (e.button == 1) // Phải
             {
-                if (e.clickCount == 2)
+                if (box != null)
                 {
-                    // Double-click mở BoxDetailWindow
-                    HandleDoubleClickCell(x, y, box);
-                }
-                else
-                {
-                    // Single-click: chọn / tạo box
-                    HandleLeftClickCell(x, y, box);
+                    Undo.RecordObject(_level, "Remove Box");
+                    _level.boxes.Remove(box);
+                    if (_selectedBox == box) _selectedBox = null;
+                    EditorUtility.SetDirty(_level);
                 }
                 e.Use();
             }
         }
     }
 
-    private string BuildBoxTooltip(BoxConfig box, int x, int y)
+    private void DrawItemPreviewCompact(Rect rect, BoxConfig box)
     {
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        sb.AppendLine($"Box at ({x},{y})");
-        sb.AppendLine($"Locked: {box.isLocked}");
-        sb.AppendLine("Items (bottom → top):");
+        if (_itemDatabase == null || box.itemIds.Count == 0) return;
 
-        if (box.itemIds.Count == 0)
+        // Vẽ 1 item đại diện to ở giữa
+        int id = box.itemIds[0];
+        var def = _itemDatabase.GetById(id);
+        if (def == null) return;
+
+        float padding = 6f;
+        float size = Mathf.Min(rect.width, rect.height) - padding * 2;
+        Rect iconRect = new Rect(rect.x + (rect.width - size) / 2f, rect.y + (rect.height - size) / 2f, size, size);
+
+        if (def.icon != null)
         {
-            sb.AppendLine("- (empty)");
-        }
-        else if (_itemDatabase == null)
-        {
-            for (int i = 0; i < box.itemIds.Count; i++)
-                sb.AppendLine($"[{i}] ID = {box.itemIds[i]}");
+            GUI.DrawTexture(iconRect, def.icon.texture, ScaleMode.ScaleToFit);
+            // Hiển thị số lượng stack (nếu > 0)
+            if (box.isStackSpawner && box.spawnStack.Count > 0)
+            {
+                GUI.Label(new Rect(rect.xMax - 25, rect.y, 25, 20),
+                    $"+{box.spawnStack.Count}",
+                    new GUIStyle(EditorStyles.boldLabel) { alignment = TextAnchor.UpperRight, normal = { textColor = Color.green } });
+            }
         }
         else
         {
-            for (int i = 0; i < box.itemIds.Count; i++)
-            {
-                int id = box.itemIds[i];
-                var def = _itemDatabase.GetById(id);
-                string name = def != null ? def.displayName : "(Unknown)";
-                sb.AppendLine($"[{i}] {id} - {name}");
-            }
+            EditorGUI.DrawRect(iconRect, def.color);
         }
-
-        return sb.ToString();
     }
 
-    private void HandleLeftClickCell(int x, int y, BoxConfig box)
+    private void FrameRect(Rect rect, Color color, int thickness)
     {
-        Undo.RecordObject(_level, "Select / Create box");
-
-        if (box == null)
-        {
-            box = new BoxConfig
-            {
-                gridPos = new Vector2Int(x, y)
-            };
-            _level.boxes.Add(box);
-        }
-
-        _selectedBox = box;
-        EditorUtility.SetDirty(_level);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, thickness), color);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - thickness, rect.width, thickness), color);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.y, thickness, rect.height), color);
+        EditorGUI.DrawRect(new Rect(rect.xMax - thickness, rect.y, thickness, rect.height), color);
     }
 
-    private void HandleRightClickCell(int x, int y, BoxConfig box)
-    {
-        if (box != null)
-        {
-            Undo.RecordObject(_level, "Remove box");
-            _level.boxes.Remove(box);
-            if (_selectedBox == box) _selectedBox = null;
-            EditorUtility.SetDirty(_level);
-        }
-    }
-
-    private void HandleDoubleClickCell(int x, int y, BoxConfig box)
-    {
-        // Nếu chưa có box, tạo mới
-        if (box == null)
-        {
-            Undo.RecordObject(_level, "Create box");
-            box = new BoxConfig
-            {
-                gridPos = new Vector2Int(x, y)
-            };
-            _level.boxes.Add(box);
-            EditorUtility.SetDirty(_level);
-        }
-
-        _selectedBox = box;
-
-        // Mở cửa sổ chi tiết box
-        if (_itemDatabase != null)
-        {
-            BoxDetailWindow.Open(_level, box, _itemDatabase);
-        }
-        else
-        {
-            Debug.LogWarning("Double-click: cần ItemDatabase để edit chi tiết item.");
-        }
-    }
-
-    // ================= BOX INSPECTOR (CỘT PHẢI) =================
+    // ================= INSPECTOR (ĐÃ SỬA LỖI SAVE) =================
 
     private void DrawSelectedBoxInspector()
     {
         if (_selectedBox == null)
         {
-            EditorGUILayout.HelpBox(
-                "Click 1 lần vào ô bên trái để chọn box.\nDouble-click để mở cửa sổ Box Detail.\nRight-click để xoá box.",
-                MessageType.Info);
+            EditorGUILayout.HelpBox("Chọn một box để chỉnh sửa.", MessageType.Info);
             return;
         }
 
-        // ----- Block: General info -----
+        // --- 1. General ---
         EditorGUILayout.BeginVertical("box");
-        EditorGUILayout.LabelField("Thông tin box", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
+        EditorGUILayout.LabelField("General Config", EditorStyles.boldLabel);
 
         EditorGUI.BeginChangeCheck();
+        bool locked = EditorGUILayout.Toggle("Is Locked", _selectedBox.isLocked);
+        // Grid Pos
         Vector2Int newPos = _selectedBox.gridPos;
         newPos.x = EditorGUILayout.IntSlider("Grid X", newPos.x, 0, Mathf.Max(0, _level.width - 1));
         newPos.y = EditorGUILayout.IntSlider("Grid Y", newPos.y, 0, Mathf.Max(0, _level.height - 1));
+
         if (EditorGUI.EndChangeCheck())
         {
-            var other = _level.GetBoxAt(newPos.x, newPos.y);
-            if (other == null || other == _selectedBox)
+            Undo.RecordObject(_level, "Modify Box General");
+            _selectedBox.isLocked = locked;
+            if (newPos != _selectedBox.gridPos)
             {
-                Undo.RecordObject(_level, "Move box");
-                _selectedBox.gridPos = newPos;
-                EditorUtility.SetDirty(_level);
+                bool isBlocked = _reservedCells.ContainsKey(newPos) || _level.GetBoxAt(newPos.x, newPos.y) != null;
+                if (!isBlocked) _selectedBox.gridPos = newPos;
             }
-            else
-            {
-                EditorGUILayout.HelpBox("Ô này đã có box khác, không thể di chuyển tới.", MessageType.Warning);
-            }
+            EditorUtility.SetDirty(_level);
         }
-
-        _selectedBox.isLocked = EditorGUILayout.Toggle("Is Locked", _selectedBox.isLocked);
-
-        EditorGUILayout.Space(2);
-        if (GUILayout.Button("Open Box Detail Window", GUILayout.Height(22)))
-        {
-            if (_itemDatabase != null)
-            {
-                BoxDetailWindow.Open(_level, _selectedBox, _itemDatabase);
-            }
-        }
-
         EditorGUILayout.EndVertical();
 
-        EditorGUILayout.Space(4);
+        EditorGUILayout.Space(5);
 
-        // ----- Block: Items -----
+        // --- 2. Spawner ---
         EditorGUILayout.BeginVertical("box");
-        EditorGUILayout.LabelField("Items (bottom → top)", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
+        EditorGUILayout.LabelField("Spawner Config", EditorStyles.boldLabel);
 
-        if (_itemIds == null || _itemIds.Length == 0)
+        EditorGUI.BeginChangeCheck();
+        bool isStack = EditorGUILayout.Toggle("Is Stack Spawner", _selectedBox.isStackSpawner);
+        if (EditorGUI.EndChangeCheck())
         {
-            EditorGUILayout.HelpBox("ItemDatabase chưa có item nào.", MessageType.Warning);
-            EditorGUILayout.EndVertical();
-            return;
-        }
-
-        int removeIndex = -1;
-        int moveUpIndex = -1;
-        int moveDownIndex = -1;
-
-        for (int i = 0; i < _selectedBox.itemIds.Count; i++)
-        {
-            EditorGUILayout.BeginHorizontal();
-
-            int currentId = _selectedBox.itemIds[i];
-            int newId = EditorGUILayout.IntPopup(
-                $"[{i}]",
-                currentId,
-                _itemNames,
-                _itemIds
-            );
-            _selectedBox.itemIds[i] = newId;
-
-            if (GUILayout.Button("▲", GUILayout.Width(24)))
-                moveUpIndex = i;
-            if (GUILayout.Button("▼", GUILayout.Width(24)))
-                moveDownIndex = i;
-            if (GUILayout.Button("X", GUILayout.Width(24)))
-                removeIndex = i;
-
-            EditorGUILayout.EndHorizontal();
-        }
-
-        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-        if (moveUpIndex >= 0 && moveUpIndex < _selectedBox.itemIds.Count - 1)
-        {
-            Undo.RecordObject(_level, "Move item up");
-            var temp = _selectedBox.itemIds[moveUpIndex];
-            _selectedBox.itemIds[moveUpIndex] = _selectedBox.itemIds[moveUpIndex + 1];
-            _selectedBox.itemIds[moveUpIndex + 1] = temp;
+            Undo.RecordObject(_level, "Toggle Spawner");
+            _selectedBox.isStackSpawner = isStack;
             EditorUtility.SetDirty(_level);
         }
 
-        if (moveDownIndex > 0 && moveDownIndex < _selectedBox.itemIds.Count)
+        if (_selectedBox.isStackSpawner)
         {
-            Undo.RecordObject(_level, "Move item down");
-            var temp = _selectedBox.itemIds[moveDownIndex];
-            _selectedBox.itemIds[moveDownIndex] = _selectedBox.itemIds[moveDownIndex - 1];
-            _selectedBox.itemIds[moveDownIndex - 1] = temp;
-            EditorUtility.SetDirty(_level);
+            EditorGUILayout.Space(2);
+            EditorGUILayout.LabelField("Spawn Direction:");
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("▲", GUILayout.Width(30))) ChangeDirection(BoxDirection.Up);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("◄", GUILayout.Width(30))) ChangeDirection(BoxDirection.Left);
+            //if (GUILayout.Button("●", GUILayout.Width(30))) ChangeDirection(BoxDirection.None);
+            if (GUILayout.Button("►", GUILayout.Width(30))) ChangeDirection(BoxDirection.Right);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("▼", GUILayout.Width(30))) ChangeDirection(BoxDirection.Down);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.LabelField($"Current: {_selectedBox.direction}", EditorStyles.centeredGreyMiniLabel);
         }
-
-        if (removeIndex >= 0)
-        {
-            Undo.RecordObject(_level, "Remove item");
-            _selectedBox.itemIds.RemoveAt(removeIndex);
-            EditorUtility.SetDirty(_level);
-        }
-
-        EditorGUILayout.Space(2);
-        EditorGUILayout.LabelField("Thêm item mới", EditorStyles.boldLabel);
-
-        _newItemId = EditorGUILayout.IntPopup(
-            "New item type",
-            _newItemId,
-            _itemNames,
-            _itemIds
-        );
-
-        if (GUILayout.Button("+ Add Item", GUILayout.Height(22)))
-        {
-            Undo.RecordObject(_level, "Add item");
-            _selectedBox.itemIds.Add(_newItemId);
-            EditorUtility.SetDirty(_level);
-        }
-
-        EditorGUILayout.EndVertical();
-    }
-
-    // ================= ITEM OPTIONS =================
-
-    private void BuildItemOptions()
-    {
-        if (_itemDatabase == null || _itemDatabase.items == null)
-        {
-            _itemIds = null;
-            _itemNames = null;
-            return;
-        }
-
-        _itemDatabase.BuildLookup();
-
-        int count = _itemDatabase.items.Count;
-        _itemIds = new int[count];
-        _itemNames = new string[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            var def = _itemDatabase.items[i];
-            if (def == null) continue;
-
-            _itemIds[i] = def.id;
-
-            string name = !string.IsNullOrEmpty(def.displayName)
-                ? def.displayName
-                : def.name;
-
-            if (!string.IsNullOrEmpty(def.shortCode))
-                name = $"{def.shortCode} - {name}";
-
-            _itemNames[i] = name;
-        }
-
-        if (_itemIds.Length > 0)
-        {
-            bool found = false;
-            for (int i = 0; i < _itemIds.Length; i++)
-            {
-                if (_itemIds[i] == _newItemId)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-                _newItemId = _itemIds[0];
-        }
-    }
-}
-
-
-/// <summary>
-/// Cửa sổ chi tiết cho một box, mở bằng double-click.
-/// Có icon to, chia block rõ ràng.
-/// </summary>
-public class BoxDetailWindow : EditorWindow
-{
-    private LevelData _level;
-    private BoxConfig _box;
-    private ItemDatabase _itemDatabase;
-
-    private Vector2 _scroll;
-
-    private int[] _itemIds;
-    private string[] _itemNames;
-    private int _newItemId;
-
-    // kích thước icon
-    private const float PreviewIconSize = 56f;
-    private const float RowIconSize = 40f;
-
-    public static void Open(LevelData level, BoxConfig box, ItemDatabase db)
-    {
-        var win = CreateInstance<BoxDetailWindow>();
-        win._level = level;
-        win._box = box;
-        win._itemDatabase = db;
-        win.BuildItemOptions();
-
-        if (win._itemIds != null && win._itemIds.Length > 0)
-            win._newItemId = win._itemIds[0];
-
-        win.titleContent = new GUIContent($"Box ({box.gridPos.x},{box.gridPos.y})");
-        win.minSize = new Vector2(380, 360);
-        win.ShowUtility();
-    }
-
-    private void OnGUI()
-    {
-        if (_level == null || _box == null)
-        {
-            EditorGUILayout.HelpBox("Box/Level bị null. Hãy mở lại từ LevelEditor.", MessageType.Error);
-            if (GUILayout.Button("Close")) Close();
-            return;
-        }
-
-        if (_itemDatabase == null)
-        {
-            EditorGUILayout.HelpBox("Cần ItemDatabase để edit item.", MessageType.Error);
-            if (GUILayout.Button("Close")) Close();
-            return;
-        }
-
-        EditorGUILayout.LabelField($"Box Detail – ({_box.gridPos.x}, {_box.gridPos.y})", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-        _scroll = EditorGUILayout.BeginScrollView(_scroll);
-
-        // ========== BLOCK 1: Thông tin cơ bản ==========
-        EditorGUILayout.BeginVertical("box");
-        EditorGUILayout.LabelField("Thông tin chung", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
-
-        EditorGUILayout.LabelField("Grid Position:", $"{_box.gridPos.x}, {_box.gridPos.y}");
-        _box.isLocked = EditorGUILayout.Toggle("Is Locked", _box.isLocked);
-
         EditorGUILayout.EndVertical();
 
-        EditorGUILayout.Space(4);
+        EditorGUILayout.Space(5);
 
-        // ========== BLOCK 2: Preview icon các item ==========
+        // --- 3. Items ---
         EditorGUILayout.BeginVertical("box");
-        EditorGUILayout.LabelField("Preview items (bottom → top)", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
+        string title = _selectedBox.isStackSpawner ? "Initial Box (On Board)" : "Box Items";
+        EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
 
-        EditorGUILayout.BeginHorizontal();
-        if (_box.itemIds.Count == 0)
+        EditorGUI.BeginChangeCheck();
+        Draw4ItemSlots(_selectedBox.itemIds);
+        if (EditorGUI.EndChangeCheck())
         {
-            GUILayout.Label("(Empty)");
+            Undo.RecordObject(_level, "Modify Base Items");
+            EditorUtility.SetDirty(_level);
         }
-        else
-        {
-            for (int i = 0; i < _box.itemIds.Count; i++)
-            {
-                int id = _box.itemIds[i];
-                var def = _itemDatabase.GetById(id);
-                Texture2D tex = (def != null && def.icon != null) ? def.icon.texture : null;
-
-                GUILayout.BeginVertical(GUILayout.Width(PreviewIconSize + 8));
-
-                Rect r = GUILayoutUtility.GetRect(PreviewIconSize, PreviewIconSize, GUILayout.ExpandWidth(false));
-                if (tex != null)
-                {
-                    GUI.DrawTexture(r, tex, ScaleMode.ScaleToFit, true);
-                }
-                else
-                {
-                    // fallback: ô màu + chữ
-                    Color c = def != null ? def.color : new Color(0.5f, 0.5f, 0.5f);
-                    EditorGUI.DrawRect(r, c);
-                    string label = def != null
-                        ? (!string.IsNullOrEmpty(def.shortCode) ? def.shortCode : def.displayName)
-                        : id.ToString();
-                    var style = new GUIStyle(EditorStyles.miniLabel)
-                    {
-                        alignment = TextAnchor.MiddleCenter,
-                        normal = { textColor = Color.white },
-                        clipping = TextClipping.Clip
-                    };
-                    GUI.Label(r, label, style);
-                }
-
-                GUILayout.Label($"[{i}]", EditorStyles.centeredGreyMiniLabel);
-
-                GUILayout.EndVertical();
-            }
-        }
-        EditorGUILayout.EndHorizontal();
-
         EditorGUILayout.EndVertical();
 
-        EditorGUILayout.Space(4);
-
-        // ========== BLOCK 3: Danh sách item chi tiết ==========
-        EditorGUILayout.BeginVertical("box");
-        EditorGUILayout.LabelField("Danh sách item (bottom → top)", EditorStyles.boldLabel);
-        EditorGUILayout.Space(2);
-
-        if (_itemIds == null || _itemIds.Length == 0)
+        // --- 4. Stack Queue ---
+        if (_selectedBox.isStackSpawner)
         {
-            EditorGUILayout.HelpBox("ItemDatabase chưa có item nào.", MessageType.Warning);
-        }
-        else
-        {
-            int removeIndex = -1;
-            int moveUpIndex = -1;
-            int moveDownIndex = -1;
+            EditorGUILayout.Space(5);
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.LabelField($"Spawn Queue ({_selectedBox.spawnStack.Count})", EditorStyles.boldLabel);
 
-            for (int i = 0; i < _box.itemIds.Count; i++)
+            // Nút ADD - Quan trọng: Phải SetDirty
+            if (GUILayout.Button("+ Add Box to Stack", GUILayout.Height(24)))
             {
-                EditorGUILayout.BeginHorizontal();
-
-                int currentId = _box.itemIds[i];
-                var def = _itemDatabase.GetById(currentId);
-                Texture2D tex = (def != null && def.icon != null) ? def.icon.texture : null;
-
-                // icon bên trái (to hơn)
-                Rect iconRect = GUILayoutUtility.GetRect(RowIconSize, RowIconSize, GUILayout.Width(RowIconSize), GUILayout.Height(RowIconSize));
-                if (tex != null)
-                {
-                    GUI.DrawTexture(iconRect, tex, ScaleMode.ScaleToFit, true);
-                }
-                else
-                {
-                    Color c = def != null ? def.color : new Color(0.5f, 0.5f, 0.5f);
-                    EditorGUI.DrawRect(iconRect, c);
-                    var miniStyle = new GUIStyle(EditorStyles.miniLabel)
-                    {
-                        alignment = TextAnchor.MiddleCenter,
-                        normal = { textColor = Color.white },
-                        clipping = TextClipping.Clip
-                    };
-                    string sc = def != null
-                        ? (!string.IsNullOrEmpty(def.shortCode) ? def.shortCode : def.displayName)
-                        : currentId.ToString();
-                    GUI.Label(iconRect, sc, miniStyle);
-                }
-
-                // popup chọn loại item
-                int newId = EditorGUILayout.IntPopup(
-                    $"[{i}]",
-                    currentId,
-                    _itemNames,
-                    _itemIds
-                );
-                _box.itemIds[i] = newId;
-
-                if (GUILayout.Button("▲", GUILayout.Width(24)))
-                    moveUpIndex = i;
-                if (GUILayout.Button("▼", GUILayout.Width(24)))
-                    moveDownIndex = i;
-                if (GUILayout.Button("X", GUILayout.Width(24)))
-                    removeIndex = i;
-
-                EditorGUILayout.EndHorizontal();
-            }
-
-            // ngăn cách phần list và phần add
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-            if (moveUpIndex >= 0 && moveUpIndex < _box.itemIds.Count - 1)
-            {
-                Undo.RecordObject(_level, "Move item up");
-                var temp = _box.itemIds[moveUpIndex];
-                _box.itemIds[moveUpIndex] = _box.itemIds[moveUpIndex + 1];
-                _box.itemIds[moveUpIndex + 1] = temp;
-                EditorUtility.SetDirty(_level);
-            }
-
-            if (moveDownIndex > 0 && moveDownIndex < _box.itemIds.Count)
-            {
-                Undo.RecordObject(_level, "Move item down");
-                var temp = _box.itemIds[moveDownIndex];
-                _box.itemIds[moveDownIndex] = _box.itemIds[moveDownIndex - 1];
-                _box.itemIds[moveDownIndex - 1] = temp;
-                EditorUtility.SetDirty(_level);
-            }
-
-            if (removeIndex >= 0)
-            {
-                Undo.RecordObject(_level, "Remove item");
-                _box.itemIds.RemoveAt(removeIndex);
+                Undo.RecordObject(_level, "Add Stack Box");
+                var newStack = new BoxStackData();
+                EnsureBoxItems(newStack.itemIds);
+                _selectedBox.spawnStack.Add(newStack);
                 EditorUtility.SetDirty(_level);
             }
 
             EditorGUILayout.Space(2);
 
-            EditorGUILayout.LabelField("Thêm item mới", EditorStyles.boldLabel);
-            _newItemId = EditorGUILayout.IntPopup(
-                "New item type",
-                _newItemId,
-                _itemNames,
-                _itemIds
-            );
-
-            if (GUILayout.Button("+ Add Item", GUILayout.Height(24)))
+            for (int i = 0; i < _selectedBox.spawnStack.Count; i++)
             {
-                Undo.RecordObject(_level, "Add item");
-                _box.itemIds.Add(_newItemId);
-                EditorUtility.SetDirty(_level);
+                var stackData = _selectedBox.spawnStack[i];
+                EditorGUILayout.BeginVertical("helpBox");
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"Spawn #{i + 1}", EditorStyles.boldLabel);
+
+                // Nút REMOVE - Quan trọng: Phải SetDirty
+                if (GUILayout.Button("X", GUILayout.Width(25)))
+                {
+                    Undo.RecordObject(_level, "Remove Stack Box");
+                    _selectedBox.spawnStack.RemoveAt(i);
+                    EditorUtility.SetDirty(_level);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndVertical();
+                    break; // Break loop
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUI.BeginChangeCheck();
+                Draw4ItemSlots(stackData.itemIds);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(_level, "Modify Stack Items");
+                    EditorUtility.SetDirty(_level);
+                }
+
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(2);
             }
+            EditorGUILayout.EndVertical();
         }
+    }
 
-        EditorGUILayout.EndVertical();
-
-        EditorGUILayout.EndScrollView();
-
-        EditorGUILayout.Space(4);
-
-        if (GUILayout.Button("Close", GUILayout.Height(24)))
+    private void ChangeDirection(BoxDirection newDir)
+    {
+        if (_selectedBox.direction != newDir)
         {
-            Close();
+            Undo.RecordObject(_level, "Change Direction");
+            _selectedBox.direction = newDir;
+            EditorUtility.SetDirty(_level);
         }
+    }
+
+    private void Draw4ItemSlots(List<int> items)
+    {
+        EnsureBoxItems(items);
+        if (_itemIds == null) return;
+
+        for (int i = 0; i < 4; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"Slot {i}", GUILayout.Width(45));
+            int cur = items[i];
+            int next = EditorGUILayout.IntPopup(cur, _itemNames, _itemIds);
+            items[i] = next; // Update list trực tiếp (sẽ được check bởi EditorGUI.BeginChangeCheck ở ngoài)
+
+            var def = _itemDatabase.GetById(next);
+            if (def != null && def.icon != null)
+                GUI.DrawTexture(GUILayoutUtility.GetRect(18, 18, GUILayout.Width(18)), def.icon.texture);
+
+            EditorGUILayout.EndHorizontal();
+        }
+    }
+
+    private void EnsureBoxItems(List<int> items)
+    {
+        int defId = (_itemIds != null && _itemIds.Length > 0) ? _itemIds[0] : 0;
+        while (items.Count < 4) items.Add(defId);
+        while (items.Count > 4) items.RemoveAt(items.Count - 1);
     }
 
     private void BuildItemOptions()
     {
-        if (_itemDatabase == null || _itemDatabase.items == null)
-        {
-            _itemIds = null;
-            _itemNames = null;
-            return;
-        }
-
+        if (_itemDatabase == null) return;
         _itemDatabase.BuildLookup();
-
-        int count = _itemDatabase.items.Count;
-        _itemIds = new int[count];
-        _itemNames = new string[count];
-
-        for (int i = 0; i < count; i++)
+        int c = _itemDatabase.items.Count;
+        _itemIds = new int[c];
+        _itemNames = new string[c];
+        for (int i = 0; i < c; i++)
         {
-            var def = _itemDatabase.items[i];
-            if (def == null) continue;
-
-            _itemIds[i] = def.id;
-
-            string name = !string.IsNullOrEmpty(def.displayName)
-                ? def.displayName
-                : def.name;
-
-            if (!string.IsNullOrEmpty(def.shortCode))
-                name = $"{def.shortCode} - {name}";
-
-            _itemNames[i] = name;
+            var d = _itemDatabase.items[i];
+            _itemIds[i] = d.id;
+            _itemNames[i] = d.displayName;
         }
+    }
 
-        if (_itemIds.Length > 0)
+    private string GetArrowString(BoxDirection dir)
+    {
+        switch (dir)
         {
-            bool found = false;
-            for (int i = 0; i < _itemIds.Length; i++)
-            {
-                if (_itemIds[i] == _newItemId)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-                _newItemId = _itemIds[0];
+            case BoxDirection.Up: return "▲";
+            case BoxDirection.Down: return "▼";
+            case BoxDirection.Left: return "◄";
+            case BoxDirection.Right: return "►";
+            default: return "";
         }
     }
 }
