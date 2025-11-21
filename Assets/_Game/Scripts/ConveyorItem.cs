@@ -38,6 +38,7 @@ public class ConveyorItem : MonoBehaviour
             () =>
             {
                 it.transform.SetParent(Controller.Ins.transform);
+                it.SetLayer("Fly", 10);
                 it.transform.DOScale(1.2f, 0.3f).OnComplete(() =>
                 {
                     //it.transform.DOScale(0, 0.3f).OnComplete(() => { it.gameObject.SetActive(false); });

@@ -13,56 +13,46 @@ MonoBehaviour:
   m_Name: test
   m_EditorClassIdentifier: 
   width: 3
-  height: 3
+  height: 2
   boxes:
   - gridPos: {x: 0, y: 0}
-    itemIds: 00000000000000000000000000000000
+    isHidden: 0
+    itemIds: 00000000020000000200000005000000
     isLocked: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
-  - gridPos: {x: 1, y: 1}
-    itemIds: 00000000000000000000000000000000
-    isLocked: 0
-    isStackSpawner: 1
-    direction: 2
-    spawnStack:
-    - itemIds: 00000000000000000000000000000000
-    - itemIds: 00000000000000000000000000000000
-    - itemIds: 00000000000000000000000000000000
-    - itemIds: 00000000000000000000000000000000
   - gridPos: {x: 1, y: 0}
-    itemIds: 00000000000000000000000000000000
+    isHidden: 0
+    itemIds: 02000000000000000100000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 0, y: 1}
+    isHidden: 0
+    itemIds: 01000000030000000400000001000000
     isLocked: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
   - gridPos: {x: 2, y: 0}
-    itemIds: 00000000000000000000000000000000
+    isHidden: 0
+    itemIds: 05000000050000000000000000000000
     isLocked: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
-  - gridPos: {x: 1, y: 2}
-    itemIds: 00000000000000000000000000000000
+  - gridPos: {x: 1, y: 1}
+    isHidden: 0
+    itemIds: 00000000000000000400000004000000
     isLocked: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
   - gridPos: {x: 2, y: 1}
-    itemIds: 00000000000000000000000000000000
-    isLocked: 0
-    isStackSpawner: 0
-    direction: 0
-    spawnStack: []
-  - gridPos: {x: 2, y: 2}
-    itemIds: 00000000000000000000000000000000
-    isLocked: 0
-    isStackSpawner: 0
-    direction: 0
-    spawnStack: []
-  - gridPos: {x: 0, y: 2}
-    itemIds: 00000000000000000000000000000000
+    isHidden: 0
+    itemIds: 03000000030000000000000000000000
     isLocked: 0
     isStackSpawner: 0
     direction: 0

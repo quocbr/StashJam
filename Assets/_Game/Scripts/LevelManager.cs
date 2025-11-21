@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class LevelManager : Singleton<LevelManager>
 {
@@ -22,6 +23,11 @@ public class LevelManager : Singleton<LevelManager>
         }
 
         conveyorController.ResetConveyor();
+
+        if (index >= allLevel.Count)
+        {
+            index = Random.Range(0, allLevel.Count);
+        }
 
         index = Math.Clamp(index, 0, allLevel.Count - 1);
 

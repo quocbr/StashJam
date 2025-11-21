@@ -6,20 +6,24 @@ using UnityEngine;
 
 public class Stash : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private GameObject MainAsset;
+    [Header("References")] [SerializeField]
+    protected GameObject MainAsset;
+
     [SerializeField] private SpriteRenderer box1;
     [SerializeField] private SpriteRenderer box2;
     [SerializeField] private SpriteRenderer glass;
     [SerializeField] private List<Item> m_ListItem;
     [SerializeField] private List<Transform> m_PosItem;
     [SerializeField] private Item preFabItem;
+    [SerializeField] private Stash stackVisual;
 
-    [Header("Runtime Info")]
-    public Vector2Int index; // Tọa độ trên Grid
+    [Header("Runtime Info")] public Vector2Int index; // Tọa độ trên Grid
+
     public bool CanPick = true;
+
     // Hàng đợi chứa các BoxStackData (Box con) chờ được sinh ra
     [ShowInInspector] public Queue<BoxStackData> pendingStack = new Queue<BoxStackData>();
+
     private int sortLayer;
     // --------------------------
 
@@ -27,7 +31,7 @@ public class Stash : MonoBehaviour
     public int ItemCount => m_ListItem.Count;
     public bool IsStackSpawner => pendingStack.Count > 0;
 
-    public void Init()
+    public virtual void Init()
     {
         CanPick = true;
     }
@@ -37,7 +41,13 @@ public class Stash : MonoBehaviour
     /// </summary>
     public void SetupSpawner(List<BoxStackData> stackData)
     {
-        this.pendingStack = new Queue<BoxStackData>(stackData);
+        pendingStack = new Queue<BoxStackData>(stackData);
+    }
+
+    public void SetVisualStack(Stash stack)
+    {
+        stackVisual = stack;
+        stackVisual.UpdateStack(pendingStack.Count);
     }
 
     /// <summary>
@@ -68,12 +78,13 @@ public class Stash : MonoBehaviour
 
                 if (def != null && def.icon != null)
                 {
-                    // Slot item nằm trên box nên order phải cao hơn box
-                    slot.Init(def.id, def.icon, sortLayer);
+                    slot.Init(def.id, def.icon, sortLayer, config.isHidden, i);
                 }
             }
+
             m_ListItem.Add(slot);
         }
+
         SetupSpawner(config.spawnStack);
     }
 
@@ -90,51 +101,53 @@ public class Stash : MonoBehaviour
 
     public void OnPick()
     {
-        CanPick = false; // Khóa click ngay lập tức
+        CanPick = false;
 
-        // Hiệu ứng thu nhỏ (Biến mất)
         MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack)
             .OnComplete(() =>
             {
-                // --- LOGIC MỚI: KIỂM TRA STACK ---
                 if (pendingStack.Count > 0)
                 {
-                    // 1. Lấy dữ liệu box tiếp theo
                     BoxStackData nextData = pendingStack.Dequeue();
-
-                    // 2. Cập nhật hình ảnh item mới
-                    UpdateVisuals(nextData.itemIds);
-
-                    // 3. Hiệu ứng hiện ra lại (Scale Up)
+                    UpdateVisuals(nextData);
                     MainAsset.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack)
-                        .OnComplete(() =>
-                        {
-                            CanPick = true; // Cho phép ăn tiếp
-                        });
+                        .OnComplete(() => { CanPick = true; });
+                }
+                else
+                {
+                    MainAsset.SetActive(false);
+                    OnStashDestroy cb = new OnStashDestroy();
+                    cb.Stash = this;
+                    EventManager.Trigger(cb);
                 }
             });
     }
-    // Hàm cập nhật hiển thị item (được tách ra để dùng lại)
-    private void UpdateVisuals(List<int> itemIds)
+
+    private void UpdateVisuals(BoxStackData data)
     {
+        stackVisual.UpdateStack(pendingStack.Count);
         m_ListItem.Clear();
-        for (int i = 0; i < itemIds.Count; i++)
+        for (int i = 0; i < data.itemIds.Count; i++)
         {
             Item slot = Instantiate(preFabItem, m_PosItem[i]);
             slot.transform.localPosition = Vector3.zero;
 
-            if (i < itemIds.Count)
+            if (i < data.itemIds.Count)
             {
-                int itemId = itemIds[i];
+                int itemId = data.itemIds[i];
                 var def = LevelManager.Ins.itemDatabase.GetById(itemId);
 
                 if (def != null && def.icon != null)
                 {
-                    slot.Init(def.id, def.icon, 7 - index.y + 1);
+                    slot.Init(def.id, def.icon, 7 - index.y + 1, data.isHidden, i);
                 }
-
             }
+
             m_ListItem.Add(slot);
         }
+    }
+
+    protected virtual void UpdateStack(int stack)
+    {
     }
 }

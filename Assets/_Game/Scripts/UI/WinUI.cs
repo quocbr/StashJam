@@ -17,6 +17,7 @@ public class WinUI : UICanvas
     {
         base.Open();
         DataManager.Ins.userData.level++;
+        DataManager.Ins.SaveData();
     }
 
     private void OnNextButtonClickHandle()

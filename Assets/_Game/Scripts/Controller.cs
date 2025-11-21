@@ -9,6 +9,11 @@ public class OnStashPick : IGameEvent
     public Stash Stash;
 }
 
+public class OnStashDestroy : IGameEvent
+{
+    public Stash Stash;
+}
+
 public class Controller : Singleton<Controller>
 {
     [SerializeField] private LayerMask filterLayer;
@@ -47,8 +52,17 @@ public class Controller : Singleton<Controller>
         OnStashPick cb = new OnStashPick();
         cb.Stash = m_StashChoose;
         cb.listItem = m_StashChoose.ListItem;
-        EventManager.Trigger(cb);
         m_StashChoose.OnPick();
+        EventManager.Trigger(cb);
         m_StashChoose = null;
+    }
+
+    public void DestroyAllChildren()
+    {
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = transform.GetChild(i);
+            Destroy(child.gameObject);
+        }
     }
 }

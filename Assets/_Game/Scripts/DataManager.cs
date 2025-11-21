@@ -10,8 +10,8 @@ public class DataManager : Singleton<DataManager>
 
     private void Awake()
     {
-        QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
     }
 
     private void Start()
@@ -25,6 +25,11 @@ public class DataManager : Singleton<DataManager>
         {
             SaveData();
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveData();
     }
 
     public void SaveData()

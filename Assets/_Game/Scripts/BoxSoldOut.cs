@@ -7,6 +7,7 @@ using UnityEngine;
 public class BoxSoldOut : MonoBehaviour
 {
     public GameObject Cap;
+    public GameObject Visual;
     [SerializeField] private Transform[] pos;
 
     public void FlyToBox(List<Item> items)
@@ -14,21 +15,23 @@ public class BoxSoldOut : MonoBehaviour
         for (int i = 0; i < items.Count; i++)
         {
             items[i].transform.SetParent(transform);
-            MoveToPos(items[i].transform, pos[i]);
+            items[i].SetLayer("Fly", 10);
+            MoveToPos(items[i], pos[i]);
         }
 
-        DOVirtual.DelayedCall(0.5f, () =>
+        Visual.transform.DOLocalMove(Vector3.zero, 0.15f).From(Vector3.down).OnComplete(() =>
         {
-            Cap.gameObject.SetActive(true);
-            Cap.transform.DOLocalMove(Vector3.zero, 0.3f).OnComplete(() =>
+            Cap.transform.DOLocalMove(Vector3.zero, 0.3f).SetDelay(0.1f).OnComplete(() =>
             {
-                transform.DOMoveX(transform.position.x - 5f, 1f).OnComplete(() => { Destroy(gameObject); });
-            });
+                transform.DOMoveX(transform.position.x - 5f, 0.3f).OnComplete(() => { Destroy(gameObject); });
+            }).OnStart(() => Cap.gameObject.SetActive(true));
         });
+
+        DOVirtual.DelayedCall(0.2f, () => { });
     }
 
-    private void MoveToPos(Transform source, Transform target)
+    private void MoveToPos(Item source, Transform target)
     {
-        source.DOMove(target.position, 0.4f).OnComplete(() => { });
+        source.transform.DOMove(target.position, 0.3f).OnComplete(() => { source.SetLayer("Default", 1); });
     }
 }

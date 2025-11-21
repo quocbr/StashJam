@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 
 public class GamePlayUI : Singleton<GamePlayUI>
 {
+    public TextMeshProUGUI levelText;
     public RectTransform top;
     public RectTransform down;
     public RectTransform left;
@@ -15,7 +17,7 @@ public class GamePlayUI : Singleton<GamePlayUI>
     public void SetupCamera()
     {
         Level currentLevel = LevelManager.Ins.currentLevel;
-
+        levelText.text = $"Level {DataManager.Ins.userData.level + 1}";
         if (currentLevel == null || currentLevel.min == null || currentLevel.max == null)
         {
             return;

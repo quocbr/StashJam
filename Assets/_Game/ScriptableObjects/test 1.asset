@@ -15,57 +15,150 @@ MonoBehaviour:
   width: 4
   height: 6
   boxes:
-  - gridPos: {x: 0, y: 2}
-    itemIds: 01000000040000000000000001000000
-    isLocked: 0
-  - gridPos: {x: 0, y: 1}
-    itemIds: 00000000010000000000000000000000
-    isLocked: 0
-  - gridPos: {x: 0, y: 0}
-    itemIds: 00000000010000000400000000000000
-    isLocked: 0
-  - gridPos: {x: 1, y: 0}
-    itemIds: 04000000040000000500000005000000
-    isLocked: 0
-  - gridPos: {x: 2, y: 2}
-    itemIds: 00000000040000000200000001000000
-    isLocked: 0
-  - gridPos: {x: 2, y: 1}
-    itemIds: 00000000000000000400000000000000
-    isLocked: 0
-  - gridPos: {x: 2, y: 0}
-    itemIds: 02000000020000000300000003000000
-    isLocked: 0
   - gridPos: {x: 3, y: 0}
+    isHidden: 0
+    itemIds: 05000000000000000000000001000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 2, y: 0}
+    isHidden: 0
+    itemIds: 00000000000000000500000005000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 1, y: 0}
+    isHidden: 0
+    itemIds: 00000000050000000000000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 0, y: 0}
+    isHidden: 0
+    itemIds: 00000000010000000200000001000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 0, y: 1}
+    isHidden: 0
+    itemIds: 04000000020000000400000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 1, y: 1}
+    isHidden: 0
+    itemIds: 04000000010000000100000002000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 2, y: 1}
+    isHidden: 0
+    itemIds: 05000000040000000400000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 3, y: 1}
+    isHidden: 0
+    itemIds: 01000000000000000000000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 2, y: 2}
+    isHidden: 0
+    itemIds: 03000000030000000300000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 1, y: 2}
+    isHidden: 0
+    itemIds: 05000000050000000000000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 1, y: 3}
+    isHidden: 0
+    itemIds: 00000000000000000000000004000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 0, y: 3}
+    isHidden: 0
+    itemIds: 02000000020000000200000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 2, y: 3}
+    isHidden: 0
+    itemIds: 01000000010000000300000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 3, y: 3}
+    isHidden: 0
+    itemIds: 01000000000000000300000003000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 2, y: 4}
+    isHidden: 0
+    itemIds: 03000000010000000000000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 1, y: 4}
+    isHidden: 0
+    itemIds: 00000000030000000300000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 1, y: 5}
+    isHidden: 0
+    itemIds: 00000000020000000400000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 2, y: 5}
+    isHidden: 0
+    itemIds: 02000000040000000000000004000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 3, y: 5}
+    isHidden: 0
+    itemIds: 05000000050000000000000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 0, y: 5}
+    isHidden: 0
+    itemIds: 00000000020000000000000000000000
+    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - gridPos: {x: 3, y: 4}
+    isHidden: 0
     itemIds: 00000000000000000100000001000000
     isLocked: 0
-  - gridPos: {x: 0, y: 3}
-    itemIds: 03000000020000000000000000000000
-    isLocked: 0
-  - gridPos: {x: 1, y: 3}
-    itemIds: 00000000010000000000000000000000
-    isLocked: 0
-  - gridPos: {x: 2, y: 3}
-    itemIds: 00000000040000000400000000000000
-    isLocked: 0
-  - gridPos: {x: 3, y: 3}
-    itemIds: 00000000000000000200000000000000
-    isLocked: 0
-  - gridPos: {x: 0, y: 4}
-    itemIds: 00000000010000000100000000000000
-    isLocked: 0
-  - gridPos: {x: 1, y: 4}
-    itemIds: 00000000000000000300000000000000
-    isLocked: 0
-  - gridPos: {x: 2, y: 4}
-    itemIds: 00000000010000000000000002000000
-    isLocked: 0
-  - gridPos: {x: 3, y: 4}
-    itemIds: 04000000040000000300000000000000
-    isLocked: 0
-  - gridPos: {x: 1, y: 5}
-    itemIds: 02000000020000000000000000000000
-    isLocked: 0
-  - gridPos: {x: 2, y: 5}
-    itemIds: 00000000040000000000000000000000
-    isLocked: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []

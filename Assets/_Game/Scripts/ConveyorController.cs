@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using Sirenix.OdinInspector;
+using TMPro;
 using UnityEngine;
 
 public class ConveyorController : MonoBehaviour
 {
+    [SerializeField] private TextMeshPro text;
     [SerializeField] private BoxSoldOut prefabBox;
     [SerializeField] private Transform transBox;
     private Tween _checkMathTween;
@@ -23,19 +25,54 @@ public class ConveyorController : MonoBehaviour
     [Button("RESET LEVEL")]
     public void ResetConveyor()
     {
-        // 1. Dừng mọi hoạt động logic đang chạy ngầm
+        Controller.Ins.DestroyAllChildren();
         if (_checkMathTween != null) _checkMathTween.Kill();
         if (_refillTween != null) _refillTween.Kill();
-        StopAllCoroutines(); // Đề phòng nếu bạn dùng Coroutine ở chỗ nào khác
-
-        // 2. Reset biến trạng thái
+        StopAllCoroutines();
         _isProcessing = false;
-        isRunning = false; // Tạm dừng di chuyển để reset vị trí (nếu cần)
+        isRunning = false;
 
-        // 3. Xóa sạch dữ liệu hàng đợi
+        // Destroy items in _stashInputQueue
+        while (_stashInputQueue.Count > 0)
+        {
+            var batch = _stashInputQueue.Dequeue();
+            foreach (var item in batch)
+            {
+                if (item != null)
+                    Destroy(item.gameObject);
+            }
+        }
+
+        while (_pendingOverflow.Count > 0)
+        {
+            var item = _pendingOverflow.Dequeue();
+            if (item != null)
+                Destroy(item.gameObject);
+        }
+
+        while (refillQueue.Count > 0)
+        {
+            var batch = refillQueue.Dequeue();
+            foreach (var item in batch)
+            {
+                if (item != null)
+                    Destroy(item.gameObject);
+            }
+        }
+
+        while (q.Count > 0)
+        {
+            var batch = q.Dequeue();
+            foreach (var item in batch)
+            {
+                if (item != null)
+                    Destroy(item.gameObject);
+            }
+        }
+
         _stashInputQueue.Clear();
         _pendingOverflow.Clear();
-        refillQueue.Clear(); // Nếu bạn có dùng biến này
+        refillQueue.Clear();
 
         // 4. Xóa Item trên băng chuyền chính (m_ConveyorList)
         if (m_ConveyorList != null)
@@ -73,24 +110,19 @@ public class ConveyorController : MonoBehaviour
             }
         }
 
-        // 6. (Tùy chọn) Reset vị trí các khay về vị trí ban đầu
-        // Nếu bạn muốn khi Reset, các khay chạy về đúng vị trí lúc Start game
         InitItems();
-
-        // 7. Chạy lại
         isRunning = true;
+        UpdateItemCountUI();
     }
 
     #endregion
 
     #region MOVEMENT LOGIC
 
-    [Header("--- Rotation Settings ---")]
-    [SerializeField]
+    [Header("--- Rotation Settings ---")] [SerializeField]
     private bool rotateItems = true;
 
-    [Tooltip("Nếu ảnh gốc hướng lên trên thì điền -90. Nếu hướng sang phải thì điền 0.")]
-    [SerializeField]
+    [Tooltip("Nếu ảnh gốc hướng lên trên thì điền -90. Nếu hướng sang phải thì điền 0.")] [SerializeField]
     private float rotationOffset = 0f;
 
     private void MoveItemContinuous(ConveyorItem item)
@@ -148,8 +180,7 @@ public class ConveyorController : MonoBehaviour
 
     #region CONFIGURATION
 
-    [Header("--- Movement Settings ---")]
-    [SerializeField]
+    [Header("--- Movement Settings ---")] [SerializeField]
     private float moveSpeed = 2.0f;
 
     [SerializeField] private float rotationSpeed = 15f;
@@ -157,8 +188,7 @@ public class ConveyorController : MonoBehaviour
 
     [SerializeField] private bool isLinearPath = true;
 
-    [Header("--- Curve Settings ---")]
-    [SerializeField]
+    [Header("--- Curve Settings ---")] [SerializeField]
     private bool smoothCorners = true;
 
     [SerializeField] private float cornerRadius = 0.5f;
@@ -168,8 +198,7 @@ public class ConveyorController : MonoBehaviour
 
     #region REFERENCES
 
-    [Header("--- References ---")]
-    [SerializeField]
+    [Header("--- References ---")] [SerializeField]
     private List<ConveyorItem> m_ConveyorList;
 
     [SerializeField] private List<ConveyorItem> m_QueueConveyor;
@@ -209,17 +238,17 @@ public class ConveyorController : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        if (Application.isPlaying && m_ListPos.Count > 0)
-        {
-            Gizmos.color = Color.green;
-            for (int i = 0; i < m_ListPos.Count - 1; i++)
-                Gizmos.DrawLine(m_ListPos[i], m_ListPos[i + 1]);
-
-            if (!isLinearPath) Gizmos.DrawLine(m_ListPos[m_ListPos.Count - 1], m_ListPos[0]);
-        }
-    }
+    // private void OnDrawGizmos()
+    // {
+    //     if (Application.isPlaying && m_ListPos.Count > 0)
+    //     {
+    //         Gizmos.color = Color.green;
+    //         for (int i = 0; i < m_ListPos.Count - 1; i++)
+    //             Gizmos.DrawLine(m_ListPos[i], m_ListPos[i + 1]);
+    //
+    //         if (!isLinearPath) Gizmos.DrawLine(m_ListPos[m_ListPos.Count - 1], m_ListPos[0]);
+    //     }
+    // }
 
     #endregion
 
@@ -300,6 +329,20 @@ public class ConveyorController : MonoBehaviour
 
     private Queue<Item> _pendingOverflow = new Queue<Item>();
 
+    private void UpdateItemCountUI()
+    {
+        if (text == null) return;
+
+        int currentCount = 0;
+
+        if (m_ConveyorList != null)
+        {
+            currentCount += m_ConveyorList.Count(x => !x.IsEmpty);
+        }
+
+        text.text = $"{currentCount}/10";
+    }
+
     // 1. NHẬN INPUT TỪ NGƯỜI DÙNG
     private void OnStashPickCallBack(OnStashPick cb)
     {
@@ -355,8 +398,11 @@ public class ConveyorController : MonoBehaviour
             itemIndex++;
         }
 
+        UpdateItemCountUI();
+
         CheckMath();
     }
+
     [Button]
     // 4. KIỂM TRA MATCH 3
     private void CheckMath()
@@ -416,12 +462,18 @@ public class ConveyorController : MonoBehaviour
                         {
                             DOVirtual.DelayedCall(0.5f, () =>
                             {
-                                BoxSoldOut x = Instantiate(prefabBox, transBox);
-                                x.FlyToBox(batch3Items);
+                                // BoxSoldOut x = Instantiate(prefabBox, transBox);
+                                // x.FlyToBox(batch3Items);
+                                SoldOut(batch3Items);
                             });
                         }
                     }
                 }
+            }
+
+            if (isEarn)
+            {
+                UpdateItemCountUI();
             }
 
             if (isEarn || _pendingOverflow.Count > 0)
@@ -432,6 +484,37 @@ public class ConveyorController : MonoBehaviour
             {
                 OnBatchFinished();
             }
+        });
+    }
+
+    private Queue<List<Item>> q = new Queue<List<Item>>();
+    private bool isProcessingSoldOut = false;
+
+    private void SoldOut(List<Item> items)
+    {
+        q.Enqueue(items);
+        ProcessNextSoldOut();
+    }
+
+    private void ProcessNextSoldOut()
+    {
+        if (isProcessingSoldOut || q.Count == 0) return;
+
+        isProcessingSoldOut = true;
+        List<Item> currentBatch = q.Dequeue();
+
+        AnimSoldOut(currentBatch);
+    }
+
+    private void AnimSoldOut(List<Item> items)
+    {
+        BoxSoldOut x = Instantiate(prefabBox, transBox);
+        x.FlyToBox(items);
+
+        DOVirtual.DelayedCall(0.5f, () =>
+        {
+            isProcessingSoldOut = false;
+            ProcessNextSoldOut();
         });
     }
 
@@ -495,6 +578,7 @@ public class ConveyorController : MonoBehaviour
 
         if (anyActionTaken)
         {
+            UpdateItemCountUI();
             CheckMath();
         }
         else
@@ -512,7 +596,7 @@ public class ConveyorController : MonoBehaviour
             _stashInputQueue.Clear();
             _pendingOverflow.Clear();
 
-            DOVirtual.DelayedCall(1.5f, () => UIManager.Ins.OpenUI<LoseUI>());
+            DOVirtual.DelayedCall(1f, () => UIManager.Ins.OpenUI<LoseUI>());
 
             return;
         }
