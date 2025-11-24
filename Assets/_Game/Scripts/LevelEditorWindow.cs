@@ -6,48 +6,66 @@ using System.Linq;
 
 public class LevelEditorWindow : EditorWindow
 {
+    // --- CẤU HÌNH UI ---
     private int _cellSize = 64;
     private Vector2 _gridScroll;
     private Vector2 _inspectorScroll;
     private ItemDatabase _itemDatabase;
     private int[] _itemIds;
     private string[] _itemNames;
+
+    // --- DỮ LIỆU ---
     private LevelData _level;
 
-    // Cache danh sách ô bị chiếm dụng (Key: Ô bị chiếm, Value: Ô nguồn)
+    // --- LOGIC ---
     private Dictionary<Vector2Int, Vector2Int> _reservedCells = new Dictionary<Vector2Int, Vector2Int>();
     private BoxConfig _selectedBox;
 
     private void OnGUI()
     {
         EditorGUILayout.Space();
+
+        // 1. Header: Chọn Data
         EditorGUILayout.BeginVertical("box");
         _level = (LevelData)EditorGUILayout.ObjectField("Level Data", _level, typeof(LevelData), false);
         _itemDatabase =
             (ItemDatabase)EditorGUILayout.ObjectField("Item Database", _itemDatabase, typeof(ItemDatabase), false);
         EditorGUILayout.EndVertical();
 
-        if (_level == null) return;
+        if (_level == null)
+        {
+            EditorGUILayout.HelpBox("Vui lòng chọn LevelData!", MessageType.Info);
+            return;
+        }
+
         if (_itemDatabase != null) BuildItemOptions();
 
-        // Tính toán lại vùng bị chiếm
+        // 2. Tính toán Logic
         CalculateReservedCells();
 
+        // 3. Settings & Validation
         EditorGUILayout.Space(4);
         DrawLevelSettings();
+
+        EditorGUILayout.Space(4);
+        DrawValidationStats(); // Kiểm tra chia hết cho 3
+
         EditorGUILayout.Space(4);
 
+        // 4. Main Body: Grid & Inspector
         EditorGUILayout.BeginHorizontal();
 
-        // CỘT TRÁI: GRID
+        // --- CỘT TRÁI: GRID ---
         EditorGUILayout.BeginVertical("box", GUILayout.ExpandWidth(true));
+        EditorGUILayout.LabelField("Level Grid", EditorStyles.boldLabel);
         _gridScroll = EditorGUILayout.BeginScrollView(_gridScroll);
         DrawGrid();
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();
 
-        // CỘT PHẢI: INSPECTOR
+        // --- CỘT PHẢI: INSPECTOR ---
         EditorGUILayout.BeginVertical("box", GUILayout.Width(380));
+        EditorGUILayout.LabelField("Inspector", EditorStyles.boldLabel);
         _inspectorScroll = EditorGUILayout.BeginScrollView(_inspectorScroll);
         DrawSelectedBoxInspector();
         EditorGUILayout.EndScrollView();
@@ -62,65 +80,13 @@ public class LevelEditorWindow : EditorWindow
         GetWindow<LevelEditorWindow>("Level Editor");
     }
 
-    private void CalculateReservedCells()
-    {
-        _reservedCells.Clear();
-        if (_level.boxes == null) return;
-
-        foreach (var box in _level.boxes)
-        {
-            if (box.isStackSpawner)
-            {
-                Vector2Int targetPos = box.gridPos;
-                switch (box.direction)
-                {
-                    case BoxDirection.Up: targetPos.y += 1; break;
-                    case BoxDirection.Down: targetPos.y -= 1; break;
-                    case BoxDirection.Left: targetPos.x -= 1; break;
-                    case BoxDirection.Right: targetPos.x += 1; break;
-                }
-
-                if (!_reservedCells.ContainsKey(targetPos))
-                    _reservedCells.Add(targetPos, box.gridPos);
-            }
-        }
-    }
-
-    private void DrawLevelSettings()
-    {
-        EditorGUILayout.BeginVertical("box");
-        EditorGUILayout.LabelField("Level Settings", EditorStyles.boldLabel);
-        EditorGUI.BeginChangeCheck();
-        int newWidth = EditorGUILayout.IntField("Width", _level.width);
-        int newHeight = EditorGUILayout.IntField("Height", _level.height);
-        _cellSize = EditorGUILayout.IntSlider("Cell Size", _cellSize, 40, 120);
-
-        if (EditorGUI.EndChangeCheck())
-        {
-            Undo.RecordObject(_level, "Change Level Settings");
-            _level.width = Mathf.Max(1, newWidth);
-            _level.height = Mathf.Max(1, newHeight);
-            EditorUtility.SetDirty(_level);
-        }
-
-        if (GUILayout.Button("Clear All Boxes"))
-        {
-            if (EditorUtility.DisplayDialog("Confirm", "Clear all boxes?", "Yes", "No"))
-            {
-                Undo.RecordObject(_level, "Clear Boxes");
-                _level.boxes.Clear();
-                _selectedBox = null;
-                EditorUtility.SetDirty(_level);
-            }
-        }
-
-        EditorGUILayout.EndVertical();
-    }
+    // ================== LOGIC VẼ GRID ==================
 
     private void DrawGrid()
     {
         if (_level.width <= 0 || _level.height <= 0) return;
 
+        // Vẽ từ trên xuống dưới (để toạ độ y=0 ở dưới cùng)
         for (int y = _level.height - 1; y >= 0; y--)
         {
             EditorGUILayout.BeginHorizontal();
@@ -137,6 +103,7 @@ public class LevelEditorWindow : EditorWindow
 
     private void DrawCell(Rect rect, int x, int y, BoxConfig box)
     {
+        // Nền ô lưới
         Color bgColor = new Color(0.17f, 0.17f, 0.17f);
         EditorGUI.DrawRect(rect, bgColor);
 
@@ -145,45 +112,45 @@ public class LevelEditorWindow : EditorWindow
 
         if (box != null)
         {
+            // --- VẼ BOX THỰC ---
             bool isSelected = _selectedBox == box;
+
+            // Màu viền
             Color borderColor = isSelected ? new Color(1f, 0.8f, 0.3f) : new Color(0.4f, 0.4f, 0.4f);
-            if (box.isStackSpawner) borderColor = new Color(0.6f, 0.4f, 1f);
-            if (isReserved) borderColor = Color.red;
+            if (box.isStackSpawner) borderColor = new Color(0.6f, 0.4f, 1f); // Tím cho Spawner
+            if (isReserved) borderColor = Color.red; // Lỗi trùng lặp
 
             FrameRect(rect, borderColor, 2);
             EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6),
                 new Color(0.1f, 0.1f, 0.1f));
 
-            // --- VISUALIZATION CHO BOX ---
-
-            // 1. Mũi tên hướng (nếu là Spawner)
+            // 1. Mũi tên hướng (Spawner)
             if (box.isStackSpawner)
             {
                 string arrow = GetArrowString(box.direction);
                 GUI.Label(rect, arrow, new GUIStyle(EditorStyles.largeLabel)
                 {
                     alignment = TextAnchor.MiddleCenter,
-                    normal = { textColor = new Color(1f, 1f, 1f, 0.3f) },
+                    normal = { textColor = new Color(1f, 1f, 1f, 0.15f) },
                     fontSize = 24,
                     fontStyle = FontStyle.Bold
                 });
             }
 
-            // 2. Hiển thị Item
-            DrawItemPreviewCompact(rect, box);
+            // 2. Vẽ Item dạng lưới 2x2
+            DrawItemPreview2x2(rect, box);
 
-            // 3. [NEW] Hiển thị trạng thái HIDDEN trên Grid
+            // 3. Trạng thái Hidden (H)
             if (box.isHidden)
             {
                 GUI.Label(new Rect(rect.x + 2, rect.y + 2, 30, 15), "(H)",
                     new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.cyan }, fontSize = 10 });
-
-                // Làm mờ item đi một chút nếu hidden để dễ nhìn
+                // Phủ lớp đen mờ
                 EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6),
                     new Color(0, 0, 0, 0.3f));
             }
 
-            // 4. Báo lỗi nếu ô bị trùng reserved
+            // 4. Báo lỗi Reserved
             if (isReserved)
             {
                 GUI.Label(rect, "ERR!",
@@ -193,7 +160,7 @@ public class LevelEditorWindow : EditorWindow
         }
         else if (isReserved)
         {
-            // Ô ĐÍCH (GHOST BOX)
+            // --- VẼ GHOST BOX (Ô ĐÍCH) ---
             Vector2Int sourcePos = _reservedCells[currentPos];
             BoxConfig sourceBox = _level.GetBoxAt(sourcePos.x, sourcePos.y);
             bool isSourceSelected = _selectedBox == sourceBox;
@@ -203,41 +170,96 @@ public class LevelEditorWindow : EditorWindow
             Color ghostBorder = new Color(0.6f, 0.4f, 1f, 0.4f);
             FrameRect(rect, ghostBorder, 2);
 
-            // Preview Item tiếp theo trong stack
-            if (sourceBox != null && sourceBox.spawnStack.Count > 0 && _itemDatabase != null)
-            {
-                var nextBoxData = sourceBox.spawnStack[0];
-                if (nextBoxData.itemIds.Count > 0)
-                {
-                    int previewId = nextBoxData.itemIds[0];
-                    var def = _itemDatabase.GetById(previewId);
-                    if (def != null && def.icon != null)
-                    {
-                        var c = GUI.color;
-                        GUI.color = new Color(1, 1, 1, 0.4f);
-                        float padding = 10f;
-                        float size = Mathf.Min(rect.width, rect.height) - padding * 2;
-                        Rect iconRect = new Rect(rect.x + (rect.width - size) / 2f, rect.y + (rect.height - size) / 2f,
-                            size, size);
-                        GUI.DrawTexture(iconRect, def.icon.texture, ScaleMode.ScaleToFit);
-                        GUI.color = c;
-                    }
-                }
-            }
-
+            // Vẽ label "Target"
             GUI.Label(rect, "Target", new GUIStyle(EditorStyles.miniLabel)
             {
-                alignment = TextAnchor.LowerCenter,
+                alignment = TextAnchor.MiddleCenter,
                 normal = { textColor = new Color(0.7f, 0.7f, 1f, 0.6f) }
             });
         }
         else
         {
+            // Ô TRỐNG
             EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + 1, rect.width - 2, rect.height - 2),
                 new Color(0.25f, 0.25f, 0.25f));
         }
 
+        // Xử lý click chuột
         HandleInput(rect, x, y, box, isReserved);
+    }
+
+    private void DrawItemPreview2x2(Rect rect, BoxConfig box)
+    {
+        if (_itemDatabase == null || box.itemIds.Count == 0) return;
+
+        float halfW = (rect.width - 6) / 2f;
+        float halfH = (rect.height - 6) / 2f;
+        float startX = rect.x + 3;
+        float startY = rect.y + 3;
+
+        int count = Mathf.Min(4, box.itemIds.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            int id = box.itemIds[i];
+            var def = _itemDatabase.GetById(id);
+            if (def == null) continue;
+
+            // Tính toạ độ 2x2: (0,0), (1,0), (0,1), (1,1)
+            float x = startX + i % 2 * halfW;
+            float y = startY + i / 2 * halfH;
+
+            Rect subRect = new Rect(x, y, halfW, halfH);
+            Rect iconRect = new Rect(subRect.x + 1, subRect.y + 1, subRect.width - 2, subRect.height - 2);
+
+            if (def.icon != null)
+            {
+                DrawSprite(iconRect, def.icon);
+            }
+            else
+            {
+                EditorGUI.DrawRect(iconRect, def.color);
+            }
+        }
+
+        // Vẽ Text số lượng Stack (VD: +5)
+        if (box.isStackSpawner)
+        {
+            int stackCount = box.spawnStack.Count;
+            if (stackCount > 0)
+            {
+                string labelText = $"+{stackCount}";
+                var style = new GUIStyle(EditorStyles.boldLabel)
+                {
+                    alignment = TextAnchor.LowerRight,
+                    fontSize = 11,
+                    normal = { textColor = Color.green }
+                };
+
+                Rect textRect = new Rect(rect.x, rect.yMax - 18, rect.width - 4, 16);
+
+                // Shadow
+                GUI.color = Color.black;
+                GUI.Label(new Rect(textRect.x + 1, textRect.y + 1, textRect.width, textRect.height), labelText, style);
+
+                GUI.color = Color.white;
+                GUI.Label(textRect, labelText, style);
+            }
+        }
+    }
+
+    private void DrawSprite(Rect rect, Sprite sprite)
+    {
+        if (sprite == null || sprite.texture == null) return;
+        Rect spriteRect = sprite.rect;
+        Texture2D tex = sprite.texture;
+        Rect uv = new Rect(
+            spriteRect.x / tex.width,
+            spriteRect.y / tex.height,
+            spriteRect.width / tex.width,
+            spriteRect.height / tex.height
+        );
+        GUI.DrawTextureWithTexCoords(rect, tex, uv);
     }
 
     private void HandleInput(Rect rect, int x, int y, BoxConfig box, bool isReserved)
@@ -245,8 +267,9 @@ public class LevelEditorWindow : EditorWindow
         Event e = Event.current;
         if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition))
         {
-            if (e.button == 0) // Trái
+            if (e.button == 0) // Click Trái
             {
+                // Nếu click vào ô Target -> Chọn Box nguồn
                 if (box == null && isReserved)
                 {
                     Vector2Int sourcePos = _reservedCells[new Vector2Int(x, y)];
@@ -256,6 +279,7 @@ public class LevelEditorWindow : EditorWindow
                     return;
                 }
 
+                // Nếu click vào ô trống -> Tạo Box mới
                 if (box == null)
                 {
                     Undo.RecordObject(_level, "Create Box");
@@ -265,11 +289,12 @@ public class LevelEditorWindow : EditorWindow
                     EditorUtility.SetDirty(_level);
                 }
 
+                // Chọn Box
                 _selectedBox = box;
                 GUI.changed = true;
                 e.Use();
             }
-            else if (e.button == 1) // Phải
+            else if (e.button == 1) // Click Phải -> Xóa Box
             {
                 if (box != null)
                 {
@@ -284,50 +309,13 @@ public class LevelEditorWindow : EditorWindow
         }
     }
 
-    private void DrawItemPreviewCompact(Rect rect, BoxConfig box)
-    {
-        if (_itemDatabase == null || box.itemIds.Count == 0) return;
-
-        int id = box.itemIds[0];
-        var def = _itemDatabase.GetById(id);
-        if (def == null) return;
-
-        float padding = 6f;
-        float size = Mathf.Min(rect.width, rect.height) - padding * 2;
-        Rect iconRect = new Rect(rect.x + (rect.width - size) / 2f, rect.y + (rect.height - size) / 2f, size, size);
-
-        if (def.icon != null)
-        {
-            GUI.DrawTexture(iconRect, def.icon.texture, ScaleMode.ScaleToFit);
-            if (box.isStackSpawner && box.spawnStack.Count > 0)
-            {
-                GUI.Label(new Rect(rect.xMax - 25, rect.y, 25, 20),
-                    $"+{box.spawnStack.Count}",
-                    new GUIStyle(EditorStyles.boldLabel)
-                        { alignment = TextAnchor.UpperRight, normal = { textColor = Color.green } });
-            }
-        }
-        else
-        {
-            EditorGUI.DrawRect(iconRect, def.color);
-        }
-    }
-
-    private void FrameRect(Rect rect, Color color, int thickness)
-    {
-        EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, thickness), color);
-        EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - thickness, rect.width, thickness), color);
-        EditorGUI.DrawRect(new Rect(rect.x, rect.y, thickness, rect.height), color);
-        EditorGUI.DrawRect(new Rect(rect.xMax - thickness, rect.y, thickness, rect.height), color);
-    }
-
-    // ================= INSPECTOR =================
+    // ================== INSPECTOR ==================
 
     private void DrawSelectedBoxInspector()
     {
         if (_selectedBox == null)
         {
-            EditorGUILayout.HelpBox("Chọn một box để chỉnh sửa.", MessageType.Info);
+            EditorGUILayout.HelpBox("Chọn một box trên lưới để chỉnh sửa.", MessageType.Info);
             return;
         }
 
@@ -337,7 +325,6 @@ public class LevelEditorWindow : EditorWindow
 
         EditorGUI.BeginChangeCheck();
 
-        // [NEW] Thêm Toggle Hidden cho Box chính
         bool hidden = EditorGUILayout.Toggle("Is Hidden", _selectedBox.isHidden);
         bool locked = EditorGUILayout.Toggle("Is Locked", _selectedBox.isLocked);
 
@@ -350,6 +337,7 @@ public class LevelEditorWindow : EditorWindow
             Undo.RecordObject(_level, "Modify Box General");
             _selectedBox.isHidden = hidden;
             _selectedBox.isLocked = locked;
+            // Chỉ di chuyển nếu ô mới trống
             if (newPos != _selectedBox.gridPos)
             {
                 bool isBlocked = _reservedCells.ContainsKey(newPos) || _level.GetBoxAt(newPos.x, newPos.y) != null;
@@ -378,6 +366,7 @@ public class LevelEditorWindow : EditorWindow
 
         if (_selectedBox.isStackSpawner)
         {
+            // Hướng Spawner
             EditorGUILayout.Space(2);
             EditorGUILayout.LabelField("Spawn Direction:");
 
@@ -400,14 +389,16 @@ public class LevelEditorWindow : EditorWindow
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            EditorGUILayout.LabelField($"Current: {_selectedBox.direction}", EditorStyles.centeredGreyMiniLabel);
+            // Target Count (chỉ là dữ liệu, hiển thị dạng text field)
+            EditorGUILayout.Space(2);
+            _selectedBox.targetStackCount = EditorGUILayout.IntField("Target Total", _selectedBox.targetStackCount);
         }
 
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.Space(5);
 
-        // --- 3. Items ---
+        // --- 3. Items (Box Chính) ---
         EditorGUILayout.BeginVertical("box");
         string title = _selectedBox.isStackSpawner ? "Initial Box (On Board)" : "Box Items";
         EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
@@ -422,7 +413,7 @@ public class LevelEditorWindow : EditorWindow
 
         EditorGUILayout.EndVertical();
 
-        // --- 4. Stack Queue ---
+        // --- 4. Spawn Stack (Hàng đợi) ---
         if (_selectedBox.isStackSpawner)
         {
             EditorGUILayout.Space(5);
@@ -450,7 +441,7 @@ public class LevelEditorWindow : EditorWindow
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField($"Spawn #{i + 1}", EditorStyles.boldLabel, GUILayout.Width(80));
 
-                // [NEW] Thêm toggle Hidden cho từng Box trong Stack
+                // Toggle Hidden cho Box trong Stack
                 stackData.isHidden = EditorGUILayout.ToggleLeft("Hidden", stackData.isHidden, GUILayout.Width(60));
 
                 GUILayout.FlexibleSpace();
@@ -483,6 +474,32 @@ public class LevelEditorWindow : EditorWindow
         }
     }
 
+    private void Draw4ItemSlots(List<int> items)
+    {
+        EnsureBoxItems(items);
+        if (_itemIds == null) return;
+
+        for (int i = 0; i < 4; i++)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label($"Slot {i}", GUILayout.Width(45));
+
+            int cur = items[i];
+            int next = EditorGUILayout.IntPopup(cur, _itemNames, _itemIds);
+            items[i] = next;
+
+            var def = _itemDatabase.GetById(next);
+            if (def != null && def.icon != null)
+            {
+                // Preview nhỏ trong Inspector
+                Rect r = GUILayoutUtility.GetRect(18, 18, GUILayout.Width(18));
+                DrawSprite(r, def.icon);
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+    }
+
     private void ChangeDirection(BoxDirection newDir)
     {
         if (_selectedBox.direction != newDir)
@@ -493,25 +510,130 @@ public class LevelEditorWindow : EditorWindow
         }
     }
 
-    private void Draw4ItemSlots(List<int> items)
+    // ================== HELPERS ==================
+
+    private void CalculateReservedCells()
     {
-        EnsureBoxItems(items);
-        if (_itemIds == null) return;
+        _reservedCells.Clear();
+        if (_level.boxes == null) return;
 
-        for (int i = 0; i < 4; i++)
+        foreach (var box in _level.boxes)
         {
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Label($"Slot {i}", GUILayout.Width(45));
-            int cur = items[i];
-            int next = EditorGUILayout.IntPopup(cur, _itemNames, _itemIds);
-            items[i] = next;
+            if (box.isStackSpawner)
+            {
+                Vector2Int targetPos = box.gridPos;
+                switch (box.direction)
+                {
+                    case BoxDirection.Up: targetPos.y += 1; break;
+                    case BoxDirection.Down: targetPos.y -= 1; break;
+                    case BoxDirection.Left: targetPos.x -= 1; break;
+                    case BoxDirection.Right: targetPos.x += 1; break;
+                }
 
-            var def = _itemDatabase.GetById(next);
-            if (def != null && def.icon != null)
-                GUI.DrawTexture(GUILayoutUtility.GetRect(18, 18, GUILayout.Width(18)), def.icon.texture);
-
-            EditorGUILayout.EndHorizontal();
+                if (!_reservedCells.ContainsKey(targetPos)) _reservedCells.Add(targetPos, box.gridPos);
+            }
         }
+    }
+
+    // ================== LOGIC KIỂM TRA (VALIDATION) ==================
+
+    private void DrawValidationStats()
+    {
+        if (_level == null || _level.boxes == null) return;
+
+        Dictionary<int, int> itemCounts = new Dictionary<int, int>();
+
+        void AddCount(int id)
+        {
+            if (!itemCounts.ContainsKey(id)) itemCounts[id] = 0;
+            itemCounts[id]++;
+        }
+
+        foreach (var box in _level.boxes)
+        {
+            if (box.itemIds != null)
+            {
+                foreach (var id in box.itemIds) AddCount(id);
+            }
+
+            if (box.isStackSpawner && box.spawnStack != null)
+            {
+                foreach (var stackBox in box.spawnStack)
+                {
+                    if (stackBox.itemIds != null)
+                    {
+                        foreach (var id in stackBox.itemIds) AddCount(id);
+                    }
+                }
+            }
+        }
+
+        List<string> errors = new List<string>();
+        foreach (var kvp in itemCounts)
+        {
+            if (kvp.Value % 3 != 0)
+            {
+                string n = kvp.Key.ToString();
+                if (_itemDatabase != null)
+                {
+                    var d = _itemDatabase.GetById(kvp.Key);
+                    if (d != null) n = d.displayName;
+                }
+
+                int rem = kvp.Value % 3;
+                int missing = 3 - rem;
+                errors.Add($"'{n}': Đang có {kvp.Value} (Dư {rem}, Thiếu {missing})");
+            }
+        }
+
+        EditorGUILayout.BeginVertical("box");
+        EditorGUILayout.LabelField("Validation", EditorStyles.boldLabel);
+
+        if (errors.Count == 0)
+        {
+            GUI.backgroundColor = Color.green;
+            EditorGUILayout.HelpBox("OK! Tất cả item đều chia hết cho 3.", MessageType.Info);
+        }
+        else
+        {
+            GUI.backgroundColor = new Color(1f, 0.6f, 0.6f);
+            EditorGUILayout.HelpBox($"Lỗi: Có {errors.Count} loại item lẻ bộ!", MessageType.Error);
+            foreach (var e in errors) EditorGUILayout.LabelField("• " + e, EditorStyles.miniLabel);
+        }
+
+        GUI.backgroundColor = Color.white;
+        EditorGUILayout.EndVertical();
+    }
+
+    private void DrawLevelSettings()
+    {
+        EditorGUILayout.BeginVertical("box");
+        EditorGUILayout.LabelField("Level Settings", EditorStyles.boldLabel);
+        EditorGUI.BeginChangeCheck();
+        int newWidth = EditorGUILayout.IntField("Width", _level.width);
+        int newHeight = EditorGUILayout.IntField("Height", _level.height);
+        _cellSize = EditorGUILayout.IntSlider("Cell Size", _cellSize, 40, 120);
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(_level, "Change Settings");
+            _level.width = Mathf.Max(1, newWidth);
+            _level.height = Mathf.Max(1, newHeight);
+            EditorUtility.SetDirty(_level);
+        }
+
+        if (GUILayout.Button("Clear All Boxes"))
+        {
+            if (EditorUtility.DisplayDialog("Confirm", "Clear?", "Yes", "No"))
+            {
+                Undo.RecordObject(_level, "Clear");
+                _level.boxes.Clear();
+                _selectedBox = null;
+                EditorUtility.SetDirty(_level);
+            }
+        }
+
+        EditorGUILayout.EndVertical();
     }
 
     private void EnsureBoxItems(List<int> items)
@@ -546,6 +668,14 @@ public class LevelEditorWindow : EditorWindow
             case BoxDirection.Right: return "►";
             default: return "";
         }
+    }
+
+    private void FrameRect(Rect rect, Color color, int thickness)
+    {
+        EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, thickness), color);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - thickness, rect.width, thickness), color);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.y, thickness, rect.height), color);
+        EditorGUI.DrawRect(new Rect(rect.xMax - thickness, rect.y, thickness, rect.height), color);
     }
 }
 #endif

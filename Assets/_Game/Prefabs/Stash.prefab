@@ -31,7 +31,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 4832080982058539069}
+  m_Father: {fileID: 8198665872959814491}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3076313046823463476
 SpriteRenderer:
@@ -101,6 +101,41 @@ MonoBehaviour:
   m_ItemSprite: {fileID: 3076313046823463476}
   m_Hidden: {fileID: 0}
   isEat: 0
+--- !u!1 &1212556901981831635
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8198665872959814491}
+  m_Layer: 8
+  m_Name: Item
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8198665872959814491
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1212556901981831635}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3338096650810968073}
+  - {fileID: 6179360261146190252}
+  - {fileID: 2639681662006258714}
+  - {fileID: 1874244173070939857}
+  m_Father: {fileID: 963941697168377850}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1698158187955540290
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,7 +167,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 4832080982058539069}
+  m_Father: {fileID: 8198665872959814491}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7442278114337197545
 SpriteRenderer:
@@ -402,6 +437,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8198665872959814491}
   - {fileID: 4832080982058539069}
   - {fileID: 1561730744705730478}
   m_Father: {fileID: 0}
@@ -471,6 +507,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MainAsset: {fileID: 7969061051656783117}
+  itemContainer: {fileID: 1212556901981831635}
   box1: {fileID: 3157489696749452619}
   box2: {fileID: 1936758700812060069}
   glass: {fileID: 1721359287769484885}
@@ -644,7 +681,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 4832080982058539069}
+  m_Father: {fileID: 8198665872959814491}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5439745111092714501
 SpriteRenderer:
@@ -944,10 +981,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3338096650810968073}
-  - {fileID: 6179360261146190252}
-  - {fileID: 2639681662006258714}
-  - {fileID: 1874244173070939857}
   - {fileID: 1858676160297521333}
   - {fileID: 2080435681658325327}
   - {fileID: 8095074797595671689}
@@ -984,7 +1017,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 4832080982058539069}
+  m_Father: {fileID: 8198665872959814491}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1536290192614427460
 SpriteRenderer:

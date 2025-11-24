@@ -10,7 +10,8 @@ public class ConveyorController : MonoBehaviour
 {
     [SerializeField] private TextMeshPro text;
     [SerializeField] private BoxSoldOut prefabBox;
-    [SerializeField] private Transform transBox;
+    [SerializeField] private AutoCenterLayout autoCenterLayout;
+    [SerializeField] private SpriteRenderer visual;
     private Tween _checkMathTween;
 
     private Tween _refillTween;
@@ -36,7 +37,7 @@ public class ConveyorController : MonoBehaviour
         while (_stashInputQueue.Count > 0)
         {
             var batch = _stashInputQueue.Dequeue();
-            foreach (var item in batch)
+            foreach (var item in batch.ListItem)
             {
                 if (item != null)
                     Destroy(item.gameObject);
@@ -116,6 +117,13 @@ public class ConveyorController : MonoBehaviour
     }
 
     #endregion
+
+    [Button]
+    public void Tesuu()
+    {
+        Vector3 bottomLeft = visual.bounds.min;
+        Vector3 topRight = visual.bounds.max;
+    }
 
     #region MOVEMENT LOGIC
 
@@ -210,12 +218,7 @@ public class ConveyorController : MonoBehaviour
 
     private void Start()
     {
-        InitPositions();
-
-
-        InitItems();
-
-        isRunning = true;
+        Init();
     }
 
     private void OnEnable()
@@ -253,6 +256,13 @@ public class ConveyorController : MonoBehaviour
     #endregion
 
     #region INITIALIZATION (PATH & VISUALS)
+
+    public void Init()
+    {
+        InitPositions();
+        InitItems();
+        isRunning = true;
+    }
 
     private void InitPositions()
     {
@@ -325,7 +335,7 @@ public class ConveyorController : MonoBehaviour
     #region GAMEPLAY LOGIC (INPUT & MATCHING)
 
     private bool _isProcessing = false;
-    private Queue<List<Item>> _stashInputQueue = new Queue<List<Item>>();
+    private Queue<Stash> _stashInputQueue = new Queue<Stash>();
 
     private Queue<Item> _pendingOverflow = new Queue<Item>();
 
@@ -347,12 +357,7 @@ public class ConveyorController : MonoBehaviour
     private void OnStashPickCallBack(OnStashPick cb)
     {
         if (cb.listItem == null || cb.listItem.Count == 0) return;
-        foreach (var it in cb.listItem)
-        {
-            it.transform.SetParent(Controller.Ins.transform);
-        }
-
-        _stashInputQueue.Enqueue(cb.listItem);
+        _stashInputQueue.Enqueue(cb.Stash);
         TryProcessNextBatch();
     }
 
@@ -362,11 +367,15 @@ public class ConveyorController : MonoBehaviour
         if (_isProcessing || _stashInputQueue.Count == 0) return;
 
         _isProcessing = true;
-        var itemsToProcess = _stashInputQueue.Dequeue();
+        Stash itemsToProcess = _stashInputQueue.Dequeue();
+        OnStashDestroy cb = new OnStashDestroy();
+        cb.Stash = itemsToProcess;
+        EventManager.Trigger(cb);
 
         _pendingOverflow.Clear();
 
-        ProcessBatch(itemsToProcess);
+        ProcessBatch(itemsToProcess.ListItem);
+        itemsToProcess.HandlerItem();
     }
 
     // 3. XỬ LÝ GÓI ITEM
@@ -460,12 +469,10 @@ public class ConveyorController : MonoBehaviour
 
                         if (batch3Items.Count > 0)
                         {
-                            DOVirtual.DelayedCall(0.5f, () =>
-                            {
-                                // BoxSoldOut x = Instantiate(prefabBox, transBox);
-                                // x.FlyToBox(batch3Items);
-                                SoldOut(batch3Items);
-                            });
+                            BoxSoldOut x = Instantiate(prefabBox, autoCenterLayout.transform);
+                            autoCenterLayout.AddBox(x);
+                            DOVirtual.DelayedCall(0.5f,
+                                () => { x.FlyToBox(batch3Items, () => autoCenterLayout.RemoveBox(x)); });
                         }
                     }
                 }
@@ -508,7 +515,7 @@ public class ConveyorController : MonoBehaviour
 
     private void AnimSoldOut(List<Item> items)
     {
-        BoxSoldOut x = Instantiate(prefabBox, transBox);
+        BoxSoldOut x = Instantiate(prefabBox, autoCenterLayout.transform);
         x.FlyToBox(items);
 
         DOVirtual.DelayedCall(0.5f, () =>

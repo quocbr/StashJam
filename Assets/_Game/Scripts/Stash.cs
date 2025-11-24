@@ -9,6 +9,8 @@ public class Stash : MonoBehaviour
     [Header("References")] [SerializeField]
     protected GameObject MainAsset;
 
+    [SerializeField] protected GameObject itemContainer;
+
     [SerializeField] private SpriteRenderer box1;
     [SerializeField] private SpriteRenderer box2;
     [SerializeField] private SpriteRenderer glass;
@@ -56,8 +58,6 @@ public class Stash : MonoBehaviour
     public void ApplyConfig(BoxConfig config, ItemDatabase db)
     {
         if (config == null) return;
-        // 1. Setup Layer hiển thị để không bị chồng chéo sai
-        // Giả sử trục Y càng cao thì Layer càng thấp để tạo độ sâu
         sortLayer = 7 - config.gridPos.y;
 
         box1.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
@@ -65,7 +65,6 @@ public class Stash : MonoBehaviour
         glass.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
 
         m_ListItem.Clear();
-        // 2. Hiển thị Item
         for (int i = 0; i < config.itemIds.Count; i++)
         {
             Item slot = Instantiate(preFabItem, m_PosItem[i]);
@@ -103,24 +102,21 @@ public class Stash : MonoBehaviour
     {
         CanPick = false;
 
-        MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack)
-            .OnComplete(() =>
-            {
-                if (pendingStack.Count > 0)
-                {
-                    BoxStackData nextData = pendingStack.Dequeue();
-                    UpdateVisuals(nextData);
-                    MainAsset.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack)
-                        .OnComplete(() => { CanPick = true; });
-                }
-                else
-                {
-                    MainAsset.SetActive(false);
-                    OnStashDestroy cb = new OnStashDestroy();
-                    cb.Stash = this;
-                    EventManager.Trigger(cb);
-                }
-            });
+        MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
+    }
+
+    [Button]
+    public void HandlerItem()
+    {
+        if (pendingStack.Count > 0)
+        {
+            BoxStackData nextData = pendingStack.Dequeue();
+            UpdateVisuals(nextData);
+            itemContainer.transform.localPosition = Vector3.zero;
+            MainAsset.transform.DOScale(1f, 0.4f).SetDelay(0.5f).SetEase(Ease.OutBack)
+                .OnComplete(() => { CanPick = true; });
+            itemContainer.transform.DOScale(1f, 0.4f).From(0).SetDelay(0.5f).SetEase(Ease.OutBack);
+        }
     }
 
     private void UpdateVisuals(BoxStackData data)
@@ -139,7 +135,7 @@ public class Stash : MonoBehaviour
 
                 if (def != null && def.icon != null)
                 {
-                    slot.Init(def.id, def.icon, 7 - index.y + 1, data.isHidden, i);
+                    slot.Init(def.id, def.icon, 7 - index.x, data.isHidden, i);
                 }
             }
 

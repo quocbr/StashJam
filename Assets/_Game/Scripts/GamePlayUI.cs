@@ -7,11 +7,15 @@ using UnityEngine;
 
 public class GamePlayUI : Singleton<GamePlayUI>
 {
+    public ConveyorController conveyorPrefab;
     public TextMeshProUGUI levelText;
     public RectTransform top;
     public RectTransform down;
     public RectTransform left;
     public RectTransform right;
+
+    public RectTransform posConveyor;
+    private ConveyorController conveyor;
 
     [Button]
     public void SetupCamera()
@@ -27,6 +31,15 @@ public class GamePlayUI : Singleton<GamePlayUI>
         float paddingLeft = 0.7f;
         float paddingRight = 0.7f;
         float paddingBottom = 0f;
+
+        if (conveyor != null)
+        {
+            Destroy(conveyor.gameObject);
+        }
+
+        conveyor = Instantiate(conveyorPrefab, Utils_Custom.ConvertUIToWorldPosition(posConveyor, true),
+            Quaternion.identity);
+        conveyor.transform.SetParent(LevelManager.Ins.transform);
 
         Vector3 uiTopPos = Utils_Custom.ConvertUIToWorldPosition(top);
         Vector3 uiBottomPos = Utils_Custom.ConvertUIToWorldPosition(down);

@@ -22,25 +22,30 @@ public class Item : MonoBehaviour
         ID = id;
         m_ItemSprite.sprite = sprite;
         m_Hidden.gameObject.SetActive(isHidden);
+        m_ItemSprite.enabled = !isHidden;
         m_ItemSprite.sortingLayerID = SortingLayer.NameToID($"{layer}");
         m_Hidden.sortingLayerID = SortingLayer.NameToID($"{layer}");
         if (index == 0)
         {
             m_ItemSprite.sortingOrder = 1;
+            m_Hidden.sortingOrder = 1;
         }
         else if (index == 1 || index == 2)
         {
             m_ItemSprite.sortingOrder = 2;
+            m_Hidden.sortingOrder = 2;
         }
         else
         {
             m_ItemSprite.sortingOrder = 3;
+            m_Hidden.sortingOrder = 3;
         }
     }
 
 
     public void AnimBackToRoot(Transform parent)
     {
+        m_ItemSprite.enabled = true;
         m_Hidden.gameObject.SetActive(false);
         m_ItemSprite.sortingOrder = 20;
         m_ItemSprite.sortingLayerID = SortingLayer.NameToID("Fly");

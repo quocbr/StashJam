@@ -54,7 +54,7 @@ public class Utils_Custom : MonoBehaviour
         return new Vector3(Mathf.Abs(screenBorderWorldPos.x), Mathf.Abs(screenBorderWorldPos.y), 0f);
     }
 
-    public static Vector3 ConvertUIToWorldPosition(RectTransform uiElement)
+    public static Vector3 ConvertUIToWorldPosition(RectTransform uiElement, bool is2D = false)
     {
         // Get the screen position of the UI element
         Vector3 screenPosition = RectTransformUtility.WorldToScreenPoint(Camera.main, uiElement.position);
@@ -62,6 +62,11 @@ public class Utils_Custom : MonoBehaviour
         // Convert the screen position to world position
         Vector3 worldPosition =
             Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, Camera.main.nearClipPlane));
+
+        if (is2D)
+        {
+            worldPosition.z = 0f;
+        }
 
         return worldPosition;
     }

@@ -9,7 +9,6 @@ public class LevelManager : Singleton<LevelManager>
 {
     [SerializeField] private List<Level> allLevel;
     public ItemDatabase itemDatabase;
-    public ConveyorController conveyorController;
 
     public Level currentLevel;
 
@@ -21,8 +20,6 @@ public class LevelManager : Singleton<LevelManager>
             Destroy(currentLevel.gameObject);
             currentLevel = null;
         }
-
-        conveyorController.ResetConveyor();
 
         if (index >= allLevel.Count)
         {

@@ -23,6 +23,7 @@ public class BoxStackData
 [Serializable]
 public class BoxConfig
 {
+    public int targetStackCount;
     public Vector2Int gridPos;
 
     public bool isHidden = false;

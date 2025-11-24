@@ -7,31 +7,37 @@ using UnityEngine;
 public class BoxSoldOut : MonoBehaviour
 {
     public GameObject Cap;
-    public GameObject Visual;
+    public SpriteRenderer Visual;
     [SerializeField] private Transform[] pos;
+    public bool isRemove = false;
 
-    public void FlyToBox(List<Item> items)
+    public void Init(int index)
+    {
+        Visual.sortingOrder = index;
+    }
+
+    public void FlyToBox(List<Item> items, Action onComplete = null)
     {
         for (int i = 0; i < items.Count; i++)
         {
-            items[i].transform.SetParent(transform);
             items[i].SetLayer("Fly", 10);
             MoveToPos(items[i], pos[i]);
         }
 
-        Visual.transform.DOLocalMove(Vector3.zero, 0.15f).From(Vector3.down).OnComplete(() =>
+        Cap.transform.DOLocalMove(Vector3.zero, 0.5f).SetDelay(0.4f).OnComplete(() =>
         {
-            Cap.transform.DOLocalMove(Vector3.zero, 0.3f).SetDelay(0.1f).OnComplete(() =>
-            {
-                transform.DOMoveX(transform.position.x - 5f, 0.3f).OnComplete(() => { Destroy(gameObject); });
-            }).OnStart(() => Cap.gameObject.SetActive(true));
-        });
-
-        DOVirtual.DelayedCall(0.2f, () => { });
+            isRemove = true;
+            onComplete?.Invoke();
+        }).OnStart(() => Cap.gameObject.SetActive(true));
     }
 
     private void MoveToPos(Item source, Transform target)
     {
-        source.transform.DOMove(target.position, 0.3f).OnComplete(() => { source.SetLayer("Default", 1); });
+        source.transform.SetParent(target);
+        source.transform.DOLocalMove(Vector3.zero, 0.4f).OnComplete(() =>
+        {
+            source.transform.localPosition = Vector3.zero;
+            source.SetLayer("Default", 10);
+        });
     }
 }
