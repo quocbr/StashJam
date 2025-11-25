@@ -62,3 +62,8 @@ public interface IEventListener<T> : IEventListener where T : IGameEvent
 public interface IGameEvent
 {
 }
+
+public class UnLockStash : IGameEvent
+{
+    public KeyLockType KeyLockType;
+}

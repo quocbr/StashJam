@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -14,28 +15,50 @@ public class Stash : MonoBehaviour
     [SerializeField] private SpriteRenderer box1;
     [SerializeField] private SpriteRenderer box2;
     [SerializeField] private SpriteRenderer glass;
+    [SerializeField] private SpriteRenderer lockSprite;
+    [SerializeField] private SpriteRenderer keyLockSprite;
     [SerializeField] private List<Item> m_ListItem;
     [SerializeField] private List<Transform> m_PosItem;
     [SerializeField] private Item preFabItem;
     [SerializeField] private Stash stackVisual;
+    [SerializeField] private Sprite[] l_LockSprite;
+    [SerializeField] private Sprite[] l_KeyLockSprite;
 
     [Header("Runtime Info")] public Vector2Int index; // Tọa độ trên Grid
 
     public bool CanPick = true;
-
-    // Hàng đợi chứa các BoxStackData (Box con) chờ được sinh ra
+    public bool isLock = false;
+    private KeyLockType keyLockType;
+    private LockType lockType;
     [ShowInInspector] public Queue<BoxStackData> pendingStack = new Queue<BoxStackData>();
 
     private int sortLayer;
-    // --------------------------
-
     public List<Item> ListItem => m_ListItem;
     public int ItemCount => m_ListItem.Count;
     public bool IsStackSpawner => pendingStack.Count > 0;
 
+    private void OnEnable()
+    {
+        EventManager.AddListener<UnLockStash>(OnUnLockStashCallBack);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.RemoveListener<UnLockStash>(OnUnLockStashCallBack);
+    }
+
+    private void OnUnLockStashCallBack(UnLockStash obj)
+    {
+        if (isLock && (int)lockType == (int)obj.KeyLockType)
+        {
+            SetLock(false, LockType.None);
+        }
+    }
+
     public virtual void Init()
     {
         CanPick = true;
+        isLock = false;
     }
 
     /// <summary>
@@ -63,6 +86,8 @@ public class Stash : MonoBehaviour
         box1.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
         box2.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
         glass.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
+        lockSprite.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
+        keyLockSprite.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
 
         m_ListItem.Clear();
         for (int i = 0; i < config.itemIds.Count; i++)
@@ -84,6 +109,11 @@ public class Stash : MonoBehaviour
             m_ListItem.Add(slot);
         }
 
+        //Lock
+        SetLock(config.hasLock, config.lockType);
+        //KeyLock
+        SetKeyLock(config.hasKeyLock, config.keyLockType);
+
         SetupSpawner(config.spawnStack);
     }
 
@@ -103,6 +133,14 @@ public class Stash : MonoBehaviour
         CanPick = false;
 
         MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
+
+        if (keyLockType != KeyLockType.None)
+        {
+            UnLockStash cb = new UnLockStash();
+            cb.KeyLockType = keyLockType;
+            EventManager.Trigger(cb);
+            SetKeyLock(false, KeyLockType.None);
+        }
     }
 
     [Button]
@@ -140,6 +178,53 @@ public class Stash : MonoBehaviour
             }
 
             m_ListItem.Add(slot);
+        }
+    }
+
+    public void SetLock(bool locked, LockType lockType)
+    {
+        isLock = locked;
+        if (lockType == LockType.None)
+        {
+            lockSprite.gameObject.SetActive(false);
+            return;
+        }
+
+        this.lockType = lockType;
+        if (lockSprite != null)
+        {
+            if (locked)
+            {
+                lockSprite.gameObject.SetActive(true);
+                lockSprite.sprite = l_LockSprite[(int)lockType - 1];
+            }
+            else
+            {
+                lockSprite.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    public void SetKeyLock(bool locked, KeyLockType lockType)
+    {
+        keyLockType = lockType;
+        if (lockType == KeyLockType.None)
+        {
+            keyLockSprite.gameObject.SetActive(false);
+            return;
+        }
+
+        if (keyLockSprite != null)
+        {
+            if (locked)
+            {
+                keyLockSprite.gameObject.SetActive(true);
+                keyLockSprite.sprite = l_LockSprite[(int)lockType - 1];
+            }
+            else
+            {
+                keyLockSprite.gameObject.SetActive(false);
+            }
         }
     }
 

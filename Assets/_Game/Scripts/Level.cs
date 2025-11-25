@@ -127,6 +127,17 @@ public class Level : MonoBehaviour
         {
             var boxCfg = levelData.boxes[i];
 
+
+            if (boxCfg.hasLock)
+            {
+                stashGrid[boxCfg.gridPos.y, boxCfg.gridPos.x + 1].SetLock(boxCfg.hasLock, boxCfg.lockType);
+            }
+
+            if (boxCfg.hasKeyLock)
+            {
+                stashGrid[boxCfg.gridPos.y, boxCfg.gridPos.x + 1].SetKeyLock(boxCfg.hasKeyLock, boxCfg.keyLockType);
+            }
+
             if (boxCfg.isStackSpawner)
             {
                 int r = boxCfg.gridPos.y;

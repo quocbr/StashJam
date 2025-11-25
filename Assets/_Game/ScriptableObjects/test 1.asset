@@ -19,7 +19,10 @@ MonoBehaviour:
     gridPos: {x: 2, y: 0}
     isHidden: 0
     itemIds: 00000000000000000500000005000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -27,7 +30,10 @@ MonoBehaviour:
     gridPos: {x: 1, y: 0}
     isHidden: 0
     itemIds: 00000000050000000000000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 1
+    keyLockType: 2
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -35,7 +41,10 @@ MonoBehaviour:
     gridPos: {x: 0, y: 0}
     isHidden: 0
     itemIds: 00000000010000000200000001000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -43,7 +52,10 @@ MonoBehaviour:
     gridPos: {x: 0, y: 1}
     isHidden: 0
     itemIds: 04000000020000000400000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -51,7 +63,10 @@ MonoBehaviour:
     gridPos: {x: 1, y: 1}
     isHidden: 0
     itemIds: 04000000010000000100000002000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -59,7 +74,10 @@ MonoBehaviour:
     gridPos: {x: 2, y: 1}
     isHidden: 0
     itemIds: 05000000040000000400000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -67,7 +85,10 @@ MonoBehaviour:
     gridPos: {x: 2, y: 2}
     isHidden: 0
     itemIds: 03000000030000000300000000000000
-    isLocked: 0
+    hasLock: 1
+    lockType: 2
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -75,7 +96,10 @@ MonoBehaviour:
     gridPos: {x: 1, y: 2}
     isHidden: 0
     itemIds: 05000000050000000000000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -83,7 +107,10 @@ MonoBehaviour:
     gridPos: {x: 1, y: 3}
     isHidden: 1
     itemIds: 00000000000000000000000004000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -91,7 +118,10 @@ MonoBehaviour:
     gridPos: {x: 0, y: 3}
     isHidden: 0
     itemIds: 02000000020000000200000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -99,7 +129,10 @@ MonoBehaviour:
     gridPos: {x: 2, y: 3}
     isHidden: 1
     itemIds: 01000000010000000000000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -107,7 +140,10 @@ MonoBehaviour:
     gridPos: {x: 2, y: 4}
     isHidden: 1
     itemIds: 03000000010000000000000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -115,7 +151,10 @@ MonoBehaviour:
     gridPos: {x: 1, y: 4}
     isHidden: 1
     itemIds: 00000000030000000300000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -123,7 +162,10 @@ MonoBehaviour:
     gridPos: {x: 1, y: 5}
     isHidden: 0
     itemIds: 00000000020000000400000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -131,7 +173,10 @@ MonoBehaviour:
     gridPos: {x: 2, y: 5}
     isHidden: 0
     itemIds: 02000000040000000000000004000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -139,7 +184,10 @@ MonoBehaviour:
     gridPos: {x: 3, y: 5}
     isHidden: 0
     itemIds: 05000000050000000000000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -147,7 +195,10 @@ MonoBehaviour:
     gridPos: {x: 0, y: 5}
     isHidden: 0
     itemIds: 00000000020000000000000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -155,7 +206,10 @@ MonoBehaviour:
     gridPos: {x: 3, y: 4}
     isHidden: 0
     itemIds: 00000000000000000100000001000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 1
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 0
     direction: 0
     spawnStack: []
@@ -163,23 +217,45 @@ MonoBehaviour:
     gridPos: {x: 3, y: 1}
     isHidden: 0
     itemIds: 03000000010000000300000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
     isStackSpawner: 1
     direction: 1
     spawnStack:
     - itemIds: 03000000000000000000000000000000
       isHidden: 0
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
     - itemIds: 05000000040000000000000000000000
       isHidden: 1
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
     - itemIds: 05000000050000000400000000000000
       isHidden: 1
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
     - itemIds: 05000000040000000000000000000000
       isHidden: 1
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
   - targetStackCount: 0
     gridPos: {x: 3, y: 3}
     isHidden: 0
     itemIds: 01000000010000000000000000000000
-    isLocked: 0
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 2
     isStackSpawner: 0
     direction: 0
     spawnStack: []

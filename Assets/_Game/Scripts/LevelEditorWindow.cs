@@ -1,8 +1,10 @@
+// --- EDITOR WINDOW ---
+
 #if UNITY_EDITOR
-using UnityEditor;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEditor;
 using System.Linq;
+using UnityEngine;
 
 public class LevelEditorWindow : EditorWindow
 {
@@ -46,9 +48,8 @@ public class LevelEditorWindow : EditorWindow
         // 3. Settings & Validation
         EditorGUILayout.Space(4);
         DrawLevelSettings();
-
         EditorGUILayout.Space(4);
-        DrawValidationStats(); // Kiểm tra chia hết cho 3
+        DrawValidationStats();
 
         EditorGUILayout.Space(4);
 
@@ -86,7 +87,6 @@ public class LevelEditorWindow : EditorWindow
     {
         if (_level.width <= 0 || _level.height <= 0) return;
 
-        // Vẽ từ trên xuống dưới (để toạ độ y=0 ở dưới cùng)
         for (int y = _level.height - 1; y >= 0; y--)
         {
             EditorGUILayout.BeginHorizontal();
@@ -137,20 +137,36 @@ public class LevelEditorWindow : EditorWindow
                 });
             }
 
-            // 2. Vẽ Item dạng lưới 2x2
+            // 2. Vẽ Item
             DrawItemPreview2x2(rect, box);
 
-            // 3. Trạng thái Hidden (H)
+            // 3. Trạng thái Hidden
             if (box.isHidden)
             {
-                GUI.Label(new Rect(rect.x + 2, rect.y + 2, 30, 15), "(H)",
-                    new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.cyan }, fontSize = 10 });
-                // Phủ lớp đen mờ
+                GUI.Label(new Rect(rect.x + 2, rect.y + 2, 70, 20), "(Hidden)",
+                    new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.cyan }, fontSize = 14 });
                 EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6),
                     new Color(0, 0, 0, 0.3f));
             }
 
-            // 4. Báo lỗi Reserved
+            // 4. HIỂN THỊ LOCK & KEYLOCK TRÊN GRID
+            if (box.hasLock)
+            {
+                GUI.Label(new Rect(rect.x + 2, rect.y + 17, 70, 20), "(Lock)",
+                    new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.green }, fontSize = 14 });
+                EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6),
+                    new Color(0, 0, 0, 0.3f));
+            }
+
+            if (box.hasKeyLock)
+            {
+                GUI.Label(new Rect(rect.x + 2, rect.y + 27, 70, 20), "(Key)",
+                    new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.magenta }, fontSize = 14 });
+                EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6),
+                    new Color(0, 0, 0, 0.3f));
+            }
+
+            // 5. Báo lỗi Reserved
             if (isReserved)
             {
                 GUI.Label(rect, "ERR!",
@@ -160,7 +176,7 @@ public class LevelEditorWindow : EditorWindow
         }
         else if (isReserved)
         {
-            // --- VẼ GHOST BOX (Ô ĐÍCH) ---
+            // --- VẼ GHOST BOX (Target) ---
             Vector2Int sourcePos = _reservedCells[currentPos];
             BoxConfig sourceBox = _level.GetBoxAt(sourcePos.x, sourcePos.y);
             bool isSourceSelected = _selectedBox == sourceBox;
@@ -170,7 +186,6 @@ public class LevelEditorWindow : EditorWindow
             Color ghostBorder = new Color(0.6f, 0.4f, 1f, 0.4f);
             FrameRect(rect, ghostBorder, 2);
 
-            // Vẽ label "Target"
             GUI.Label(rect, "Target", new GUIStyle(EditorStyles.miniLabel)
             {
                 alignment = TextAnchor.MiddleCenter,
@@ -184,7 +199,6 @@ public class LevelEditorWindow : EditorWindow
                 new Color(0.25f, 0.25f, 0.25f));
         }
 
-        // Xử lý click chuột
         HandleInput(rect, x, y, box, isReserved);
     }
 
@@ -205,24 +219,14 @@ public class LevelEditorWindow : EditorWindow
             var def = _itemDatabase.GetById(id);
             if (def == null) continue;
 
-            // Tính toạ độ 2x2: (0,0), (1,0), (0,1), (1,1)
             float x = startX + i % 2 * halfW;
             float y = startY + i / 2 * halfH;
 
-            Rect subRect = new Rect(x, y, halfW, halfH);
-            Rect iconRect = new Rect(subRect.x + 1, subRect.y + 1, subRect.width - 2, subRect.height - 2);
-
-            if (def.icon != null)
-            {
-                DrawSprite(iconRect, def.icon);
-            }
-            else
-            {
-                EditorGUI.DrawRect(iconRect, def.color);
-            }
+            Rect iconRect = new Rect(x + 1, y + 1, halfW - 2, halfH - 2);
+            if (def.icon != null) DrawSprite(iconRect, def.icon);
+            else EditorGUI.DrawRect(iconRect, def.color);
         }
 
-        // Vẽ Text số lượng Stack (VD: +5)
         if (box.isStackSpawner)
         {
             int stackCount = box.spawnStack.Count;
@@ -235,13 +239,9 @@ public class LevelEditorWindow : EditorWindow
                     fontSize = 11,
                     normal = { textColor = Color.green }
                 };
-
                 Rect textRect = new Rect(rect.x, rect.yMax - 18, rect.width - 4, 16);
-
-                // Shadow
                 GUI.color = Color.black;
                 GUI.Label(new Rect(textRect.x + 1, textRect.y + 1, textRect.width, textRect.height), labelText, style);
-
                 GUI.color = Color.white;
                 GUI.Label(textRect, labelText, style);
             }
@@ -253,12 +253,8 @@ public class LevelEditorWindow : EditorWindow
         if (sprite == null || sprite.texture == null) return;
         Rect spriteRect = sprite.rect;
         Texture2D tex = sprite.texture;
-        Rect uv = new Rect(
-            spriteRect.x / tex.width,
-            spriteRect.y / tex.height,
-            spriteRect.width / tex.width,
-            spriteRect.height / tex.height
-        );
+        Rect uv = new Rect(spriteRect.x / tex.width, spriteRect.y / tex.height, spriteRect.width / tex.width,
+            spriteRect.height / tex.height);
         GUI.DrawTextureWithTexCoords(rect, tex, uv);
     }
 
@@ -267,9 +263,8 @@ public class LevelEditorWindow : EditorWindow
         Event e = Event.current;
         if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition))
         {
-            if (e.button == 0) // Click Trái
+            if (e.button == 0) // Left Click
             {
-                // Nếu click vào ô Target -> Chọn Box nguồn
                 if (box == null && isReserved)
                 {
                     Vector2Int sourcePos = _reservedCells[new Vector2Int(x, y)];
@@ -279,7 +274,6 @@ public class LevelEditorWindow : EditorWindow
                     return;
                 }
 
-                // Nếu click vào ô trống -> Tạo Box mới
                 if (box == null)
                 {
                     Undo.RecordObject(_level, "Create Box");
@@ -289,12 +283,11 @@ public class LevelEditorWindow : EditorWindow
                     EditorUtility.SetDirty(_level);
                 }
 
-                // Chọn Box
                 _selectedBox = box;
                 GUI.changed = true;
                 e.Use();
             }
-            else if (e.button == 1) // Click Phải -> Xóa Box
+            else if (e.button == 1) // Right Click
             {
                 if (box != null)
                 {
@@ -322,11 +315,33 @@ public class LevelEditorWindow : EditorWindow
         // --- 1. General ---
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("General Config", EditorStyles.boldLabel);
-
         EditorGUI.BeginChangeCheck();
 
         bool hidden = EditorGUILayout.Toggle("Is Hidden", _selectedBox.isHidden);
-        bool locked = EditorGUILayout.Toggle("Is Locked", _selectedBox.isLocked);
+
+        // --- LOCK CONFIG UI ---
+        GUILayout.Space(5);
+        EditorGUILayout.LabelField("Lock Settings", EditorStyles.miniBoldLabel);
+        bool hasLock = EditorGUILayout.Toggle("Has Lock", _selectedBox.hasLock);
+        LockType lockType = _selectedBox.lockType;
+        if (hasLock)
+        {
+            EditorGUI.indentLevel++;
+            lockType = (LockType)EditorGUILayout.EnumPopup("Lock Type", _selectedBox.lockType);
+            EditorGUI.indentLevel--;
+        }
+
+        // --- KEYLOCK CONFIG UI ---
+        bool hasKeyLock = EditorGUILayout.Toggle("Has Key Lock", _selectedBox.hasKeyLock);
+        KeyLockType keyLockType = _selectedBox.keyLockType;
+        if (hasKeyLock)
+        {
+            EditorGUI.indentLevel++;
+            keyLockType = (KeyLockType)EditorGUILayout.EnumPopup("Key Lock Type", _selectedBox.keyLockType);
+            EditorGUI.indentLevel--;
+        }
+
+        GUILayout.Space(5);
 
         Vector2Int newPos = _selectedBox.gridPos;
         newPos.x = EditorGUILayout.IntSlider("Grid X", newPos.x, 0, Mathf.Max(0, _level.width - 1));
@@ -336,8 +351,12 @@ public class LevelEditorWindow : EditorWindow
         {
             Undo.RecordObject(_level, "Modify Box General");
             _selectedBox.isHidden = hidden;
-            _selectedBox.isLocked = locked;
-            // Chỉ di chuyển nếu ô mới trống
+
+            _selectedBox.hasLock = hasLock;
+            _selectedBox.lockType = lockType;
+            _selectedBox.hasKeyLock = hasKeyLock;
+            _selectedBox.keyLockType = keyLockType;
+
             if (newPos != _selectedBox.gridPos)
             {
                 bool isBlocked = _reservedCells.ContainsKey(newPos) || _level.GetBoxAt(newPos.x, newPos.y) != null;
@@ -354,7 +373,6 @@ public class LevelEditorWindow : EditorWindow
         // --- 2. Spawner ---
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Spawner Config", EditorStyles.boldLabel);
-
         EditorGUI.BeginChangeCheck();
         bool isStack = EditorGUILayout.Toggle("Is Stack Spawner", _selectedBox.isStackSpawner);
         if (EditorGUI.EndChangeCheck())
@@ -366,7 +384,6 @@ public class LevelEditorWindow : EditorWindow
 
         if (_selectedBox.isStackSpawner)
         {
-            // Hướng Spawner
             EditorGUILayout.Space(2);
             EditorGUILayout.LabelField("Spawn Direction:");
 
@@ -389,7 +406,6 @@ public class LevelEditorWindow : EditorWindow
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            // Target Count (chỉ là dữ liệu, hiển thị dạng text field)
             EditorGUILayout.Space(2);
             _selectedBox.targetStackCount = EditorGUILayout.IntField("Target Total", _selectedBox.targetStackCount);
         }
@@ -402,7 +418,6 @@ public class LevelEditorWindow : EditorWindow
         EditorGUILayout.BeginVertical("box");
         string title = _selectedBox.isStackSpawner ? "Initial Box (On Board)" : "Box Items";
         EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
-
         EditorGUI.BeginChangeCheck();
         Draw4ItemSlots(_selectedBox.itemIds);
         if (EditorGUI.EndChangeCheck())
@@ -413,7 +428,7 @@ public class LevelEditorWindow : EditorWindow
 
         EditorGUILayout.EndVertical();
 
-        // --- 4. Spawn Stack (Hàng đợi) ---
+        // --- 4. Spawn Stack ---
         if (_selectedBox.isStackSpawner)
         {
             EditorGUILayout.Space(5);
@@ -437,15 +452,13 @@ public class LevelEditorWindow : EditorWindow
                 EditorGUILayout.BeginVertical("helpBox");
 
                 EditorGUI.BeginChangeCheck();
-
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField($"Spawn #{i + 1}", EditorStyles.boldLabel, GUILayout.Width(80));
 
-                // Toggle Hidden cho Box trong Stack
+                // Toggle Hidden cho Box Stack
                 stackData.isHidden = EditorGUILayout.ToggleLeft("Hidden", stackData.isHidden, GUILayout.Width(60));
 
                 GUILayout.FlexibleSpace();
-
                 if (GUILayout.Button("X", GUILayout.Width(25)))
                 {
                     Undo.RecordObject(_level, "Remove Stack Box");
@@ -457,6 +470,21 @@ public class LevelEditorWindow : EditorWindow
                 }
 
                 EditorGUILayout.EndHorizontal();
+
+                // --- LOCK/KEYLOCK CHO STACK ---
+                EditorGUILayout.BeginHorizontal();
+                stackData.hasLock = EditorGUILayout.Toggle("Lock", stackData.hasLock, GUILayout.Width(50));
+                if (stackData.hasLock)
+                    stackData.lockType = (LockType)EditorGUILayout.EnumPopup(stackData.lockType, GUILayout.Width(70));
+
+                GUILayout.Space(10);
+
+                stackData.hasKeyLock = EditorGUILayout.Toggle("Key", stackData.hasKeyLock, GUILayout.Width(50));
+                if (stackData.hasKeyLock)
+                    stackData.keyLockType =
+                        (KeyLockType)EditorGUILayout.EnumPopup(stackData.keyLockType, GUILayout.Width(70));
+                EditorGUILayout.EndHorizontal();
+                // ------------------------------
 
                 Draw4ItemSlots(stackData.itemIds);
 
@@ -483,15 +511,12 @@ public class LevelEditorWindow : EditorWindow
         {
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label($"Slot {i}", GUILayout.Width(45));
-
             int cur = items[i];
             int next = EditorGUILayout.IntPopup(cur, _itemNames, _itemIds);
             items[i] = next;
-
             var def = _itemDatabase.GetById(next);
             if (def != null && def.icon != null)
             {
-                // Preview nhỏ trong Inspector
                 Rect r = GUILayoutUtility.GetRect(18, 18, GUILayout.Width(18));
                 DrawSprite(r, def.icon);
             }
@@ -516,7 +541,6 @@ public class LevelEditorWindow : EditorWindow
     {
         _reservedCells.Clear();
         if (_level.boxes == null) return;
-
         foreach (var box in _level.boxes)
         {
             if (box.isStackSpawner)
@@ -535,12 +559,9 @@ public class LevelEditorWindow : EditorWindow
         }
     }
 
-    // ================== LOGIC KIỂM TRA (VALIDATION) ==================
-
     private void DrawValidationStats()
     {
         if (_level == null || _level.boxes == null) return;
-
         Dictionary<int, int> itemCounts = new Dictionary<int, int>();
 
         void AddCount(int id)
@@ -552,19 +573,14 @@ public class LevelEditorWindow : EditorWindow
         foreach (var box in _level.boxes)
         {
             if (box.itemIds != null)
-            {
-                foreach (var id in box.itemIds) AddCount(id);
-            }
-
+                foreach (var id in box.itemIds)
+                    AddCount(id);
             if (box.isStackSpawner && box.spawnStack != null)
             {
                 foreach (var stackBox in box.spawnStack)
-                {
                     if (stackBox.itemIds != null)
-                    {
-                        foreach (var id in stackBox.itemIds) AddCount(id);
-                    }
-                }
+                        foreach (var id in stackBox.itemIds)
+                            AddCount(id);
             }
         }
 
@@ -588,7 +604,6 @@ public class LevelEditorWindow : EditorWindow
 
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Validation", EditorStyles.boldLabel);
-
         if (errors.Count == 0)
         {
             GUI.backgroundColor = Color.green;

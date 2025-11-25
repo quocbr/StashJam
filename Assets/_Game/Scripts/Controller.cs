@@ -44,7 +44,7 @@ public class Controller : Singleton<Controller>
     private void HandleRaycastItemPick(RaycastHit2D hit)
     {
         m_StashChoose = hit.collider.GetComponent<Stash>();
-        if (!m_StashChoose.CanPick)
+        if (!m_StashChoose.CanPick || m_StashChoose.isLock)
         {
             return;
         }
