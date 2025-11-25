@@ -21,6 +21,8 @@ public class ConveyorController : MonoBehaviour
     private Queue<List<Item>> refillQueue = new Queue<List<Item>>();
     private Dictionary<int, int> targetIndices = new Dictionary<int, int>();
 
+    public SpriteRenderer Visual => visual;
+
     #region RESET LOGIC
 
     [Button("RESET LEVEL")]
@@ -117,13 +119,6 @@ public class ConveyorController : MonoBehaviour
     }
 
     #endregion
-
-    [Button]
-    public void Tesuu()
-    {
-        Vector3 bottomLeft = visual.bounds.min;
-        Vector3 topRight = visual.bounds.max;
-    }
 
     #region MOVEMENT LOGIC
 

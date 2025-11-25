@@ -127,6 +127,8 @@ public class Level : MonoBehaviour
         {
             var boxCfg = levelData.boxes[i];
 
+            stashGrid[boxCfg.gridPos.y, boxCfg.gridPos.x + 1].SetHidden(boxCfg.isHidden);
+
 
             if (boxCfg.hasLock)
             {
@@ -191,7 +193,7 @@ public class Level : MonoBehaviour
                 originalMatrix[pos.y, pos.x] = i;
             }
 
-            if (boxCfg.isStackSpawner) //&& boxCfg.direction != BoxDirection.None)
+            if (boxCfg.isStackSpawner)
             {
                 Vector2Int targetPos = pos;
                 switch (boxCfg.direction)
@@ -205,12 +207,17 @@ public class Level : MonoBehaviour
                 if (targetPos.y >= 0 && targetPos.y < levelData.height &&
                     targetPos.x >= 0 && targetPos.x < levelData.width)
                 {
-                    originalMatrix[targetPos.y, targetPos.x] = 100;
+                    switch (boxCfg.direction)
+                    {
+                        case BoxDirection.Up: originalMatrix[targetPos.y, targetPos.x] = 100; break;
+                        case BoxDirection.Down: originalMatrix[targetPos.y, targetPos.x] = 101; break;
+                        case BoxDirection.Left: originalMatrix[targetPos.y, targetPos.x] = 102; break;
+                        case BoxDirection.Right: originalMatrix[targetPos.y, targetPos.x] = 103; break;
+                    }
                 }
             }
         }
 
-        // ================== PHASE 2: pad thêm 1 hàng + 2 cột ==================
         int newHeight = levelData.height + 1;
         int newWidth = levelData.width + 2;
 
@@ -257,7 +264,7 @@ public class Level : MonoBehaviour
 
                 if (boxIndex != -1)
                 {
-                    if (boxIndex == 100)
+                    if (boxIndex >= 100)
                     {
                         Stash box = Instantiate(stackPrefab, levelRoot);
                         box.transform.localPosition = localPos;
@@ -266,6 +273,13 @@ public class Level : MonoBehaviour
                         box.SetIndex(row, col);
                         stashGrid[row, col] = box;
                         Stash.Add(box);
+                        switch (boxIndex)
+                        {
+                            case 100: box.SetBoxDirection(BoxDirection.Up); break;
+                            case 101: box.SetBoxDirection(BoxDirection.Down); break;
+                            case 102: box.SetBoxDirection(BoxDirection.Left); break;
+                            case 103: box.SetBoxDirection(BoxDirection.Right); break;
+                        }
                     }
                     else
                     {
@@ -279,6 +293,7 @@ public class Level : MonoBehaviour
                         box.SetIndex(row, col);
 
                         box.ApplyConfig(boxCfg, itemDatabase);
+                        box.SetHidden(boxCfg.isHidden);
                         Stash.Add(box);
 
                         stashGrid[row, col] = box;
@@ -286,15 +301,11 @@ public class Level : MonoBehaviour
                 }
                 else
                 {
-                    // --- IS BORDER / EMPTY ---
                     stashGrid[row, col] = null;
-
-                    // BƯỚC 1: Kiểm tra 4 hướng chính (Thẳng)
                     int orthoMask = GetOrthogonalMask(row, col, maxRows, maxCols);
 
                     if (orthoMask > 0)
                     {
-                        // Xử lý viền thẳng (như cũ)
                         if (obj != null && orthoMask < obj.Length && obj[orthoMask] != null)
                         {
                             GameObject go = Instantiate(obj[orthoMask], levelRoot);
@@ -305,7 +316,6 @@ public class Level : MonoBehaviour
                     }
                     else
                     {
-                        // BƯỚC 2: Nếu KHÔNG có hàng xóm thẳng -> Kiểm tra 16 trường hợp chéo
                         int diagMask = GetDiagonalMask(row, col, maxRows, maxCols);
 
                         if (diagMask > 0 && cornerBorders != null && diagMask < cornerBorders.Length)
