@@ -131,15 +131,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MainAsset: {fileID: 7969061051656783117}
+  itemContainer: {fileID: 0}
   box1: {fileID: 0}
   box2: {fileID: 0}
   glass: {fileID: 0}
+  lockSprite: {fileID: 0}
+  keyLockSprite: {fileID: 0}
   m_ListItem: []
   m_PosItem: []
   preFabItem: {fileID: 6751208198618142277, guid: 51b6cce14260505438bc1453ada46b19, type: 3}
   stackVisual: {fileID: 0}
+  l_LockSprite: []
+  l_KeyLockSprite: []
   index: {x: 0, y: 0}
   CanPick: 1
+  isLock: 0
+  l_PileSprite:
+  - {fileID: 21300000, guid: 7631671f1576e2c44bafbb4ee12e5245, type: 3}
+  - {fileID: 21300000, guid: e764b870dc75ae641b0fcea1409ce4ab, type: 3}
+  - {fileID: 21300000, guid: 538ed4181a79cc540bf7dee2ffa777e5, type: 3}
+  - {fileID: 21300000, guid: fc8afe4039cc4ab4ca7d8e6df10306da, type: 3}
   pile: {fileID: 5518339581283386478}
   text: {fileID: 3750890344141656795}
 --- !u!1 &4774384663731096371
@@ -168,7 +179,7 @@ Transform:
   m_GameObject: {fileID: 4774384663731096371}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.04, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -215,7 +226,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 21300000, guid: df0111d4ed1589342874f12958a5c22d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 538ed4181a79cc540bf7dee2ffa777e5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -260,8 +271,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0.05}
+  m_SizeDelta: {x: 0.7597, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &9130351388443105446
 MeshRenderer:
@@ -283,7 +294,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: 4489022025781274634, guid: a9b507a2395d4438fa1f717db1fbaa1e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -325,17 +336,17 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 555
+  m_text: 5
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a9b507a2395d4438fa1f717db1fbaa1e, type: 2}
+  m_sharedMaterial: {fileID: 4489022025781274634, guid: a9b507a2395d4438fa1f717db1fbaa1e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4291306352
+  m_fontColor: {r: 0.4382936, g: 0.13665895, b: 0.7830189, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

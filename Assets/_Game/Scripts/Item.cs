@@ -45,8 +45,7 @@ public class Item : MonoBehaviour
 
     public void AnimBackToRoot(Transform parent)
     {
-        m_ItemSprite.enabled = true;
-        m_Hidden.gameObject.SetActive(false);
+        SetVisualHidden(false);
         m_ItemSprite.sortingOrder = 20;
         m_ItemSprite.sortingLayerID = SortingLayer.NameToID("Fly");
 
@@ -62,5 +61,11 @@ public class Item : MonoBehaviour
     {
         m_ItemSprite.sortingLayerName = layerName;
         m_ItemSprite.sortingOrder = orderLayer;
+    }
+
+    public void SetVisualHidden(bool isShow)
+    {
+        m_ItemSprite.enabled = !isShow;
+        m_Hidden.gameObject.SetActive(isShow);
     }
 }

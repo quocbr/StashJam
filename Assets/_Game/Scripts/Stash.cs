@@ -28,6 +28,7 @@ public class Stash : MonoBehaviour
 
     public bool CanPick = true;
     public bool isLock = false;
+    public bool isHidden = false;
     private KeyLockType keyLockType;
     private LockType lockType;
     [ShowInInspector] public Queue<BoxStackData> pendingStack = new Queue<BoxStackData>();
@@ -59,6 +60,7 @@ public class Stash : MonoBehaviour
     {
         CanPick = true;
         isLock = false;
+        isHidden = false;
     }
 
     /// <summary>
@@ -82,6 +84,7 @@ public class Stash : MonoBehaviour
     {
         if (config == null) return;
         sortLayer = 7 - config.gridPos.y;
+        isHidden = config.isHidden;
 
         box1.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
         box2.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
@@ -125,7 +128,24 @@ public class Stash : MonoBehaviour
     public void SetCanPick(bool canPick)
     {
         CanPick = canPick;
-        if (glass != null) glass.gameObject.SetActive(!canPick);
+        if (glass != null)
+        {
+            glass.gameObject.SetActive(!canPick);
+        }
+
+        if (canPick && isHidden)
+        {
+            SetHidden(false);
+        }
+    }
+
+    public void SetHidden(bool isHidden)
+    {
+        this.isHidden = isHidden;
+        for (int i = 0; i < m_ListItem.Count; i++)
+        {
+            m_ListItem[i].SetVisualHidden(isHidden);
+        }
     }
 
     public void OnPick()
@@ -219,7 +239,7 @@ public class Stash : MonoBehaviour
             if (locked)
             {
                 keyLockSprite.gameObject.SetActive(true);
-                keyLockSprite.sprite = l_LockSprite[(int)lockType - 1];
+                keyLockSprite.sprite = l_KeyLockSprite[(int)lockType - 1];
             }
             else
             {
@@ -229,6 +249,10 @@ public class Stash : MonoBehaviour
     }
 
     protected virtual void UpdateStack(int stack)
+    {
+    }
+
+    public virtual void SetBoxDirection(BoxDirection direction)
     {
     }
 }
