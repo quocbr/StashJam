@@ -16,12 +16,18 @@ public class OnStashDestroy : IGameEvent
 
 public class Controller : Singleton<Controller>
 {
+    public bool isPlay = false;
     [SerializeField] private LayerMask filterLayer;
     private Stash m_StashChoose;
     private Ray ray;
 
     private void Update()
     {
+        if (!isPlay)
+        {
+            return;
+        }
+
         //Logic button up
         if (Input.GetMouseButtonUp(0))
         {

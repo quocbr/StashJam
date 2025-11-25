@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GamePlayUI : Singleton<GamePlayUI>
 {
+    [SerializeField] private Button settingBtn;
     public ConveyorController conveyorPrefab;
     public TextMeshProUGUI levelText;
     public RectTransform top;
@@ -17,11 +20,21 @@ public class GamePlayUI : Singleton<GamePlayUI>
     public RectTransform posConveyor;
     private ConveyorController conveyor;
 
+    private void Awake()
+    {
+        settingBtn.onClick.AddListener(OnSettingBtnClickHandler);
+    }
+
+    private void OnSettingBtnClickHandler()
+    {
+        UIManager.Ins.OpenUI<SettingUI>();
+    }
+
     [Button]
     public void SetupCamera()
     {
         Level currentLevel = LevelManager.Ins.currentLevel;
-        levelText.text = $"Level {DataManager.Ins.userData.level + 1}";
+        levelText.text = $"Lv: {DataManager.Ins.userData.level + 1}";
         if (currentLevel == null || currentLevel.min == null || currentLevel.max == null)
         {
             return;
@@ -127,5 +140,6 @@ public class GamePlayUI : Singleton<GamePlayUI>
         // }
         //
         // conveyor.transform.position = cPos;
+        DOVirtual.DelayedCall(0.3f, () => { Controller.Ins.isPlay = true; });
     }
 }

@@ -12,8 +12,8 @@ public class StackStash : Stash
 
     public override void Init()
     {
-        pile.sortingLayerID = SortingLayer.NameToID($"{7 - index.y + 1}");
-        text.sortingLayerID = SortingLayer.NameToID($"{7 - index.y + 1}");
+        pile.sortingLayerID = SortingLayer.NameToID($"{7 - index.x}");
+        text.sortingLayerID = SortingLayer.NameToID($"{7 - index.x}");
     }
 
     protected override void UpdateStack(int stack)
@@ -23,7 +23,7 @@ public class StackStash : Stash
 
         if (stack == 0)
         {
-            MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
+            //MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
             LevelManager.Ins.currentLevel.Stash.Remove(this);
         }
     }

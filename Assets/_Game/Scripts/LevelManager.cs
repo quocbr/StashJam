@@ -21,6 +21,8 @@ public class LevelManager : Singleton<LevelManager>
             currentLevel = null;
         }
 
+        Controller.Ins.isPlay = false;
+
         if (index >= allLevel.Count)
         {
             index = Random.Range(0, allLevel.Count);
@@ -31,5 +33,10 @@ public class LevelManager : Singleton<LevelManager>
         currentLevel = Instantiate(allLevel[index], transform);
         currentLevel.Init();
         GamePlayUI.Ins.SetupCamera();
+    }
+
+    public void Replay()
+    {
+        SpawnLevel(DataManager.Ins.userData.level);
     }
 }

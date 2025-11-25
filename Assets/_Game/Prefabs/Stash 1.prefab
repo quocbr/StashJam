@@ -146,6 +146,7 @@ MonoBehaviour:
   index: {x: 0, y: 0}
   CanPick: 1
   isLock: 0
+  isHidden: 0
   l_PileSprite:
   - {fileID: 21300000, guid: 7631671f1576e2c44bafbb4ee12e5245, type: 3}
   - {fileID: 21300000, guid: e764b870dc75ae641b0fcea1409ce4ab, type: 3}

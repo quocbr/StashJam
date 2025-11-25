@@ -1111,7 +1111,7 @@ Transform:
   m_GameObject: {fileID: 4177727840468417385}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1, y: 1.6499996, z: 0}
+  m_LocalPosition: {x: -1.528, y: 1.4509996, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1277,7 +1277,10 @@ MonoBehaviour:
   - {fileID: 5878022229017212396}
   - {fileID: 4818791271385291509}
   - {fileID: 5996855548669104162}
-  m_QueueConveyor: []
+  m_QueueConveyor:
+  - {fileID: 2385522700722084496}
+  - {fileID: 8496199253880975435}
+  - {fileID: 4371986258891972572}
   m_Waypoints:
   - {fileID: 8433733672455989458}
   - {fileID: 8337703009378706922}
@@ -1457,7 +1460,7 @@ Transform:
   m_GameObject: {fileID: 5129071216526533984}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.6499996, z: 0}
+  m_LocalPosition: {x: -0.856, y: 1.4509996, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1849,7 +1852,7 @@ Transform:
   m_GameObject: {fileID: 6771642651041593828}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2, y: 1.65, z: 0}
+  m_LocalPosition: {x: -2.339, y: 1.451, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
