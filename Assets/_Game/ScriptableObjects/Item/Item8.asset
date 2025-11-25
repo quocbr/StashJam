@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Item8
   m_EditorClassIdentifier: 
   id: 7
-  displayName: 8
+  displayName: Muc_tim
   shortCode: 8
   color: {r: 0.14150941, g: 0, b: 0, a: 1}
   icon: {fileID: 21300000, guid: 829334777d44eac4e88e884710eeed2c, type: 3}

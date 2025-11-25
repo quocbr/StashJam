@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Item1
   m_EditorClassIdentifier: 
   id: 0
-  displayName: 1
+  displayName: Blue
   shortCode: 1
   color: {r: 1, g: 1, b: 1, a: 1}
   icon: {fileID: 21300000, guid: de04e4cdaf3ff234e91cb1024af15f0f, type: 3}

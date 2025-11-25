@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Item13
   m_EditorClassIdentifier: 
   id: 12
-  displayName: 13
+  displayName: Shark
   shortCode: 13
   color: {r: 0.14150941, g: 0, b: 0, a: 1}
   icon: {fileID: 21300000, guid: 48e044c27c293904dae8a597f682c632, type: 3}

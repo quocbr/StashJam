@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Item12
   m_EditorClassIdentifier: 
   id: 11
-  displayName: 12
+  displayName: Pink
   shortCode: 12
   color: {r: 0.14150941, g: 0, b: 0, a: 1}
   icon: {fileID: 21300000, guid: bb38c8e8b17d5b7468ab5e24016e7baa, type: 3}
