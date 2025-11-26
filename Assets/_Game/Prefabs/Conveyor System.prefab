@@ -246,7 +246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3e9b6e9311c6524c805f9554a5d010b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spacing: 1.4
+  spacing: 1.1
   moveDuration: 0.4
   moveEase: 27
   spawnYDistance: 5

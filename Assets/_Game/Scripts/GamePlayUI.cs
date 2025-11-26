@@ -49,6 +49,7 @@ public class GamePlayUI : Singleton<GamePlayUI>
         if (conveyor != null)
         {
             Destroy(conveyor.gameObject);
+            conveyor = null;
         }
 
         // Convert UI → World
@@ -66,22 +67,17 @@ public class GamePlayUI : Singleton<GamePlayUI>
         if (availableWidth <= 0) availableWidth = 1f;
         if (availableHeight <= 0) availableHeight = 1f;
 
-        // Lấy min/max của level (local)
         Vector3 lvlMin = currentLevel.min.localPosition;
         Vector3 lvlMax = currentLevel.max.localPosition;
 
         float lvlWidth = Mathf.Abs(lvlMax.x - lvlMin.x);
         float lvlHeight = Mathf.Abs(lvlMax.y - lvlMin.y);
-
-        // Scale level vừa UI
         float scaleX = availableWidth / lvlWidth;
         float scaleY = availableHeight / lvlHeight;
         float finalScale = Mathf.Min(scaleX, scaleY);
         finalScale = Mathf.Clamp(finalScale, 0.1f, 1f);
 
-        currentLevel.transform.localScale = Vector3.one * finalScale;
-
-        // Tính vị trí đặt Level cho vừa UI
+        currentLevel.levelRoot.transform.localScale = Vector3.one * finalScale;
         float availableAreaLeftX = uiLeftPos.x + paddingLeft;
         float availableAreaRightX = uiRightPos.x - paddingRight;
         float targetCenterX = (availableAreaLeftX + availableAreaRightX) / 2f;
@@ -93,12 +89,7 @@ public class GamePlayUI : Singleton<GamePlayUI>
         float targetBottomY = uiBottomPos.y + paddingBottom;
         float targetY = targetBottomY - lvlMin.y * finalScale;
 
-        currentLevel.transform.position = new Vector3(targetX, targetY, currentLevel.transform.position.z);
-
-
-        // ============================================================================================
-        //                                  >>> CONVEYOR <<<
-        // ============================================================================================
+        currentLevel.levelRoot.transform.position = new Vector3(targetX, targetY, currentLevel.transform.position.z);
 
         conveyor = Instantiate(
             conveyorPrefab,
@@ -111,35 +102,66 @@ public class GamePlayUI : Singleton<GamePlayUI>
         float uiLeftX = uiLeftPos.x + 0.2f;
         float uiRightX = uiRightPos.x - 0.2f;
         float maxAllowedWidth = uiRightX - uiLeftX;
-
         float conveyorWidth = conveyor.Visual.bounds.size.x;
-        //float conveyorHalfWidth = conveyorWidth * 0.5f;
-
         if (conveyorWidth > maxAllowedWidth)
         {
             float scaleFactor = maxAllowedWidth / conveyorWidth;
-
             conveyor.transform.localScale *= scaleFactor;
-
-            //conveyorWidth = conveyor.Visual.bounds.size.x;
-            //conveyorHalfWidth = conveyorWidth * 0.5f;
         }
 
-        // Vector3 cPos = conveyor.transform.position;
-        //
-        // float minX = uiLeftX + conveyorHalfWidth;
-        // float maxX = uiRightX - conveyorHalfWidth;
-        //
-        // if (minX > maxX)
-        // {
-        //     cPos.x = (minX + maxX) / 2f;
-        // }
-        // else
-        // {
-        //     cPos.x = Mathf.Clamp(cPos.x, minX, maxX);
-        // }
-        //
-        // conveyor.transform.position = cPos;
-        DOVirtual.DelayedCall(0.3f, () => { Controller.Ins.isPlay = true; });
+        DOVirtual.DelayedCall(0.3f, () =>
+        {
+            if (DataManager.Ins.userData.level == 0)
+            {
+                StartTutorial();
+            }
+
+            Controller.Ins.isPlay = true;
+        });
+    }
+
+    // TUTORIAL
+    // 1 reference
+    public void StartTutorial()
+    {
+        Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
+
+        Tutorial.Ins.WorldClick(
+            unitTransform.position + Vector3.right * 0.1f,
+            Vector3.forward * 45f,
+            15f
+        );
+
+        Tutorial.Ins.ButtonAction(
+            unitTransform.position,
+            () => DoneStartTutirual()
+        );
+
+        Tutorial.Ins.Message("Tap this one. He will go fishing !.");
+    }
+
+    // 1 reference
+    public void DoneStartTutirual()
+    {
+        DOVirtual.DelayedCall(0.1f, () =>
+        {
+            if (LevelManager.Ins.currentLevel.Stash.Count > 0)
+            {
+                Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
+                Tutorial.Ins.WorldClick(
+                    unitTransform.position + Vector3.up + Vector3.right * 0.25f,
+                    Vector3.forward * 45f,
+                    25f
+                );
+                Tutorial.Ins.ButtonAction(
+                    unitTransform.position + Vector3.up + Vector3.right * 0.25f,
+                    () => DoneStartTutirual()
+                );
+            }
+            else
+            {
+                Tutorial.Ins.Off();
+            }
+        });
     }
 }

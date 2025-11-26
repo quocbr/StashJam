@@ -24,8 +24,9 @@ public class Stash : MonoBehaviour
     [SerializeField] private Sprite[] l_LockSprite;
     [SerializeField] private Sprite[] l_KeyLockSprite;
 
-    [Header("Runtime Info")] public Vector2Int index; // Tọa độ trên Grid
+    [Header("Runtime Info")] public Vector2Int index;
 
+    public bool isEat = false;
     public bool CanPick = true;
     public bool isLock = false;
     public bool isHidden = false;
@@ -61,11 +62,9 @@ public class Stash : MonoBehaviour
         CanPick = true;
         isLock = false;
         isHidden = false;
+        isEat = false;
     }
 
-    /// <summary>
-    /// Hàm cài đặt dữ liệu cho Spawner (được gọi từ Level.cs khi spawn)
-    /// </summary>
     public void SetupSpawner(List<BoxStackData> stackData)
     {
         pendingStack = new Queue<BoxStackData>(stackData);
@@ -77,9 +76,6 @@ public class Stash : MonoBehaviour
         stackVisual.UpdateStack(pendingStack.Count);
     }
 
-    /// <summary>
-    /// Hiển thị Item lên Box dựa trên Config
-    /// </summary>
     public void ApplyConfig(BoxConfig config, ItemDatabase db)
     {
         if (config == null) return;
@@ -151,8 +147,13 @@ public class Stash : MonoBehaviour
     public void OnPick()
     {
         CanPick = false;
+        isEat = true;
 
         MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
+        for (int i = 0; i < m_ListItem.Count; i++)
+        {
+            m_ListItem[i].transform.DOScale(1.2f, 0.2f);
+        }
 
         if (keyLockType != KeyLockType.None)
         {
@@ -168,6 +169,7 @@ public class Stash : MonoBehaviour
     {
         if (pendingStack.Count > 0)
         {
+            isEat = false;
             BoxStackData nextData = pendingStack.Dequeue();
             UpdateVisuals(nextData);
             itemContainer.transform.localPosition = Vector3.zero;

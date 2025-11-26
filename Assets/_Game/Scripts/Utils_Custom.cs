@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Spine.Unity;
 using UnityEngine;
 
 public class Utils_Custom : MonoBehaviour
@@ -119,50 +120,50 @@ public class Utils_Custom : MonoBehaviour
         }
     }
 
-    // public static void PlayAnimation(SkeletonAnimation skeletonAnimation, string animationName,
-    //     Action onStart = null, Action onComplete = null, bool loop = false,
-    //     float timeScale = 1f)
-    // {
-    //     Spine.AnimationState.TrackEntryDelegate completeDelegate = null;
-    //     completeDelegate = (trackEntry) =>
-    //     {
-    //         if (trackEntry.Animation.Name == animationName)
-    //         {
-    //             onComplete?.Invoke();
-    //             skeletonAnimation.AnimationState.Complete -= completeDelegate;
-    //         }
-    //     };
+    public static void PlayAnimation(SkeletonAnimation skeletonAnimation, string animationName,
+        Action onStart = null, Action onComplete = null, bool loop = false,
+        float timeScale = 1f)
+    {
+        Spine.AnimationState.TrackEntryDelegate completeDelegate = null;
+        completeDelegate = (trackEntry) =>
+        {
+            if (trackEntry.Animation.Name == animationName)
+            {
+                onComplete?.Invoke();
+                skeletonAnimation.AnimationState.Complete -= completeDelegate;
+            }
+        };
 
-    //     skeletonAnimation.AnimationState.ClearTracks();
-    //     skeletonAnimation.timeScale = timeScale;
-    //     skeletonAnimation.AnimationState.SetAnimation(0, animationName, loop);
-    //     skeletonAnimation.AnimationState.Complete += completeDelegate;
-    //     onStart?.Invoke();
-    // }
+        skeletonAnimation.AnimationState.ClearTracks();
+        skeletonAnimation.timeScale = timeScale;
+        skeletonAnimation.AnimationState.SetAnimation(0, animationName, loop);
+        skeletonAnimation.AnimationState.Complete += completeDelegate;
+        onStart?.Invoke();
+    }
 
-    // public static void PlayAnimationUI(SkeletonGraphic skeletonGraphic, string animationName,
-    //     Action onStart = null, Action onComplete = null, bool loop = false,
-    //     float timeScale = 1f)
-    // {
-    //     Spine.AnimationState.TrackEntryDelegate completeDelegate = null;
-    //     completeDelegate = (trackEntry) =>
-    //     {
-    //         if (trackEntry.Animation.Name == animationName)
-    //         {
-    //             onComplete?.Invoke();
-    //             skeletonGraphic.AnimationState.Complete -= completeDelegate;
-    //         }
-    //     };
+    public static void PlayAnimationUI(SkeletonGraphic skeletonGraphic, string animationName,
+        Action onStart = null, Action onComplete = null, bool loop = false,
+        float timeScale = 1f)
+    {
+        Spine.AnimationState.TrackEntryDelegate completeDelegate = null;
+        completeDelegate = (trackEntry) =>
+        {
+            if (trackEntry.Animation.Name == animationName)
+            {
+                onComplete?.Invoke();
+                skeletonGraphic.AnimationState.Complete -= completeDelegate;
+            }
+        };
 
-    //     skeletonGraphic.AnimationState.ClearTracks();
-    //     skeletonGraphic.Skeleton.SetToSetupPose(); // <- thêm dòng này
-    //     skeletonGraphic.AnimationState.Apply(skeletonGraphic.Skeleton); // <- và dòng này
+        skeletonGraphic.AnimationState.ClearTracks();
+        skeletonGraphic.Skeleton.SetToSetupPose(); // <- thêm dòng này
+        skeletonGraphic.AnimationState.Apply(skeletonGraphic.Skeleton); // <- và dòng này
 
-    //     skeletonGraphic.timeScale = timeScale;
-    //     skeletonGraphic.AnimationState.SetAnimation(0, animationName, loop);
-    //     skeletonGraphic.AnimationState.Complete += completeDelegate;
-    //     onStart?.Invoke();
-    // }
+        skeletonGraphic.timeScale = timeScale;
+        skeletonGraphic.AnimationState.SetAnimation(0, animationName, loop);
+        skeletonGraphic.AnimationState.Complete += completeDelegate;
+        onStart?.Invoke();
+    }
 
     public static class GenericCache<TKey, TValue>
     {

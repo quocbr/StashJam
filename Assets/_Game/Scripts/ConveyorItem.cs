@@ -22,7 +22,7 @@ public class ConveyorItem : MonoBehaviour
             return;
         }
 
-        item.transform.SetParent(Controller.Ins.transform);
+        item.transform.SetParent(LevelManager.Ins.currentLevel.transform);
         item.AnimBackToRoot(transform);
     }
 
@@ -34,16 +34,27 @@ public class ConveyorItem : MonoBehaviour
     public void Earn()
     {
         Item it = item;
-        DOVirtual.DelayedCall(0.2f,
-            () =>
-            {
-                it.transform.SetParent(Controller.Ins.transform);
-                it.SetLayer("Fly", 10);
-                it.transform.DOScale(1.2f, 0.3f).OnComplete(() =>
-                {
-                    //it.transform.DOScale(0, 0.3f).OnComplete(() => { it.gameObject.SetActive(false); });
-                });
-            });
+
+        // SetItem(null) ngay lập tức để slot trống
         SetItem(null);
+
+        // FIX: Thêm SetTarget(this) để nếu ConveyorItem này bị hủy, lệnh delay cũng hủy luôn
+        DOVirtual.DelayedCall(0.2f, () =>
+        {
+            // FIX: Kiểm tra null cực kỳ quan trọng
+            // Nếu item đã bị destroy (do reset game), return ngay lập tức
+            if (it == null) return;
+
+            it.transform.SetParent(LevelManager.Ins.currentLevel.transform);
+            it.SetLayer("Fly", 10);
+
+            // Dùng SetTarget(it.transform) để an toàn cho tween scale
+            it.transform.DOScale(1.2f, 0.3f)
+                .SetTarget(it.transform)
+                .OnComplete(() =>
+                {
+                    // Logic sau khi scale xong (nếu cần)
+                });
+        }).SetTarget(this);
     }
 }

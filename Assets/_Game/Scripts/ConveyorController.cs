@@ -15,7 +15,7 @@ public class ConveyorController : MonoBehaviour
     private Tween _checkMathTween;
 
     private Tween _refillTween;
-    private bool isRunning = false;
+    private bool isRunning = false; // Cờ kiểm soát hoạt động chung
     private List<Vector3> m_ListPos = new List<Vector3>();
 
     private Queue<List<Item>> refillQueue = new Queue<List<Item>>();
@@ -29,13 +29,15 @@ public class ConveyorController : MonoBehaviour
     public void ResetConveyor()
     {
         Controller.Ins.DestroyAllChildren();
+
         if (_checkMathTween != null) _checkMathTween.Kill();
         if (_refillTween != null) _refillTween.Kill();
-        StopAllCoroutines();
-        _isProcessing = false;
-        isRunning = false;
+        transform.DOKill();
 
-        // Destroy items in _stashInputQueue
+        StopAllCoroutines();
+        isRunning = false;
+        _isProcessing = false;
+
         while (_stashInputQueue.Count > 0)
         {
             var batch = _stashInputQueue.Dequeue();
@@ -73,9 +75,11 @@ public class ConveyorController : MonoBehaviour
             }
         }
 
+        // 3. Clear hàng đợi
         _stashInputQueue.Clear();
         _pendingOverflow.Clear();
         refillQueue.Clear();
+        q.Clear(); // Thêm clear queue 'q'
 
         // 4. Xóa Item trên băng chuyền chính (m_ConveyorList)
         if (m_ConveyorList != null)
@@ -114,6 +118,7 @@ public class ConveyorController : MonoBehaviour
         }
 
         InitItems();
+        // 6. Bật cờ chạy lại SAU KHI khởi tạo xong
         isRunning = true;
         UpdateItemCountUI();
     }
@@ -224,6 +229,10 @@ public class ConveyorController : MonoBehaviour
     private void OnDisable()
     {
         EventManager.RemoveListener<OnStashPick>(OnStashPickCallBack);
+        // THÊM: Dọn dẹp tweens khi component bị disable
+        transform.DOKill();
+        if (_checkMathTween != null) _checkMathTween.Kill();
+        if (_refillTween != null) _refillTween.Kill();
     }
 
     private void FixedUpdate()
@@ -235,18 +244,6 @@ public class ConveyorController : MonoBehaviour
             MoveItemContinuous(m_ConveyorList[i]);
         }
     }
-
-    // private void OnDrawGizmos()
-    // {
-    //     if (Application.isPlaying && m_ListPos.Count > 0)
-    //     {
-    //         Gizmos.color = Color.green;
-    //         for (int i = 0; i < m_ListPos.Count - 1; i++)
-    //             Gizmos.DrawLine(m_ListPos[i], m_ListPos[i + 1]);
-    //
-    //         if (!isLinearPath) Gizmos.DrawLine(m_ListPos[m_ListPos.Count - 1], m_ListPos[0]);
-    //     }
-    // }
 
     #endregion
 
@@ -351,7 +348,9 @@ public class ConveyorController : MonoBehaviour
     // 1. NHẬN INPUT TỪ NGƯỜI DÙNG
     private void OnStashPickCallBack(OnStashPick cb)
     {
-        if (cb.listItem == null || cb.listItem.Count == 0) return;
+        // THAY ĐỔI QUAN TRỌNG: Chỉ chấp nhận input khi băng chuyền đang chạy (isRunning = true)
+        if (!isRunning || cb.listItem == null || cb.listItem.Count == 0) return;
+
         _stashInputQueue.Enqueue(cb.Stash);
         TryProcessNextBatch();
     }
@@ -359,7 +358,8 @@ public class ConveyorController : MonoBehaviour
     // 2. ĐIỀU PHỐI VIÊN
     private void TryProcessNextBatch()
     {
-        if (_isProcessing || _stashInputQueue.Count == 0) return;
+        // THAY ĐỔI QUAN TRỌNG: Kiểm tra cả isRunning
+        if (!isRunning || _isProcessing || _stashInputQueue.Count == 0) return;
 
         _isProcessing = true;
         Stash itemsToProcess = _stashInputQueue.Dequeue();
@@ -403,7 +403,6 @@ public class ConveyorController : MonoBehaviour
         }
 
         UpdateItemCountUI();
-
         CheckMath();
     }
 
@@ -415,6 +414,8 @@ public class ConveyorController : MonoBehaviour
 
         _checkMathTween = DOVirtual.DelayedCall(0.45f, () =>
         {
+            if (!isRunning) return;
+
             Dictionary<int, List<ConveyorItem>> itemGroups = new Dictionary<int, List<ConveyorItem>>();
 
             void AddToGroup(ConveyorItem item)
@@ -466,8 +467,21 @@ public class ConveyorController : MonoBehaviour
                         {
                             BoxSoldOut x = Instantiate(prefabBox, autoCenterLayout.transform);
                             autoCenterLayout.AddBox(x);
-                            DOVirtual.DelayedCall(0.5f,
-                                () => { x.FlyToBox(batch3Items, () => autoCenterLayout.RemoveBox(x)); });
+
+                            DOVirtual.DelayedCall(0.5f, () =>
+                            {
+                                // Kiểm tra an toàn: Nếu box x bị hủy trong lúc chờ, dừng lại.
+                                if (x == null) return;
+
+                                x.FlyToBox(batch3Items, () =>
+                                {
+                                    // Kiểm tra an toàn: Chỉ remove khi x và layout còn tồn tại
+                                    if (x != null && autoCenterLayout != null)
+                                    {
+                                        autoCenterLayout.RemoveBox(x);
+                                    }
+                                });
+                            }).SetTarget(gameObject); // Gắn target vào Controller
                         }
                     }
                 }
@@ -486,22 +500,15 @@ public class ConveyorController : MonoBehaviour
             {
                 OnBatchFinished();
             }
-        });
+        }).SetTarget(gameObject); // <-- SetTarget để tự động kill khi object này bị Destroy
     }
 
     private Queue<List<Item>> q = new Queue<List<Item>>();
     private bool isProcessingSoldOut = false;
 
-    private void SoldOut(List<Item> items)
-    {
-        q.Enqueue(items);
-        ProcessNextSoldOut();
-    }
-
     private void ProcessNextSoldOut()
     {
         if (isProcessingSoldOut || q.Count == 0) return;
-
         isProcessingSoldOut = true;
         List<Item> currentBatch = q.Dequeue();
 
@@ -523,12 +530,17 @@ public class ConveyorController : MonoBehaviour
     private void CallRefillDelayed()
     {
         if (_refillTween != null && _refillTween.IsActive()) _refillTween.Kill();
-        _refillTween = DOVirtual.DelayedCall(0.3f, RefillFromQueueAndOverflow);
+
+        // THAY ĐỔI: Sử dụng SetTarget(this.gameObject)
+        _refillTween = DOVirtual.DelayedCall(0.3f, RefillFromQueueAndOverflow)
+            .SetTarget(gameObject); // <-- SetTarget để tự động kill khi object này bị Destroy
     }
 
     // 5. REFILL THÔNG MINH (Queue -> Conveyor, Overflow -> Queue/Conveyor)
     private void RefillFromQueueAndOverflow()
     {
+        if (!isRunning) return; // Kiểm tra an toàn
+
         bool anyActionTaken = false;
 
         // --- GIAI ĐOẠN A: Đẩy từ m_Queue lên Conveyor (Ưu tiên cao nhất) ---
@@ -617,7 +629,6 @@ public class ConveyorController : MonoBehaviour
                 return;
             }
         }
-
 
         _isProcessing = false;
         TryProcessNextBatch();

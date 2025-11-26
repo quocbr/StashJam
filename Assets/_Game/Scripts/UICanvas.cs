@@ -20,7 +20,7 @@ public class UICanvas : MonoBehaviour
     private RectTransform rectTfMain;
 
     [Header("Close Anim")] [SerializeField]
-    private bool isCloseMove;
+    private bool isCloseAnim;
 
     private float initScale = 1f;
     private Animator m_Animator;
@@ -87,16 +87,21 @@ public class UICanvas : MonoBehaviour
     //dong canvas sau mot khoang thoi gian delay
     public virtual void Close(float delayTime)
     {
-        if (isCloseMove)
-            CloseMoveAnim();
+        if (isCloseAnim)
+        {
+            if (delayTime == 0)
+            {
+                delayTime = 0.5f;
+            }
+
+            CloseAnim();
+        }
 
         Invoke(nameof(CloseDirectly), delayTime);
     }
 
     private void PopUpAnim()
     {
-        initScale = rectTfMain.localScale.x;
-
         cvGroupBackGround.DOKill();
         rectTfMain.DOKill();
 
@@ -107,7 +112,7 @@ public class UICanvas : MonoBehaviour
         }
 
         rectTfMain.localScale = Vector2.zero;
-        rectTfMain.DOScale(initScale, 0.2f).SetEase(Ease.OutBack).SetUpdate(true);
+        rectTfMain.DOScale(1, 0.2f).SetEase(Ease.OutBack).SetUpdate(true);
     }
 
     private void MoveAnim()
@@ -125,7 +130,7 @@ public class UICanvas : MonoBehaviour
         rectTfMain.DOAnchorPos(Vector2.zero, 0.25f).SetEase(Ease.OutBack).SetUpdate(true);
     }
 
-    private void CloseMoveAnim()
+    private void CloseAnim()
     {
         cvGroupBackGround.DOKill();
         rectTfMain.DOKill();
@@ -133,12 +138,20 @@ public class UICanvas : MonoBehaviour
         if (cvGroupBackGround != null)
         {
             cvGroupBackGround.alpha = 1f;
-            cvGroupBackGround.DOFade(0f, 0.2f).SetEase(Ease.Linear);
+            cvGroupBackGround.DOFade(0f, 0.25f).SetEase(Ease.Linear);
         }
 
-        rectTfMain.DOAnchorPos(new Vector2(0, -Screen.height), 0.5f)
-            .SetEase(Ease.OutBack)
-            .From(rectTfMain.anchoredPosition);
+        if (isMoveAnim)
+        {
+            rectTfMain.DOAnchorPos(new Vector2(0, -Screen.height), 0.25f)
+                .SetEase(Ease.OutBack)
+                .From(rectTfMain.anchoredPosition);
+        }
+        else if (isPopupAnim)
+        {
+            rectTfMain.DOScale(0, 0.25f)
+                .SetEase(Ease.InBack);
+        }
     }
 
     protected void PauseGame()

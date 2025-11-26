@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 public class Level : MonoBehaviour
 {
@@ -33,6 +35,13 @@ public class Level : MonoBehaviour
 
     public Stash[,] stashGrid;
 
+    private Item tempItem;
+
+    private void Start()
+    {
+        StartCoroutine(nameof(test));
+    }
+
     private void OnEnable()
     {
         EventManager.AddListener<OnStashDestroy>(OnStashPickCallBack);
@@ -41,6 +50,29 @@ public class Level : MonoBehaviour
     private void OnDisable()
     {
         EventManager.RemoveListener<OnStashDestroy>(OnStashPickCallBack);
+    }
+
+    private IEnumerator test()
+    {
+        yield return new WaitForSeconds(3f);
+        List<Stash> stashTemp = new List<Stash>();
+        for (int i = 0; i < Stash.Count; i++)
+        {
+            if (!Stash[i].isEat && Stash[i].CanPick)
+            {
+                stashTemp.Add(Stash[i]);
+            }
+        }
+
+        if (stashTemp.Count > 0)
+        {
+            int index = 0;
+            int index1 = 0;
+            index = Random.Range(0, stashTemp.Count);
+            index1 = Random.Range(0, stashTemp[index].ListItem.Count);
+            tempItem = stashTemp[index].ListItem[index1];
+            Utils_Custom.PlayAnimation(tempItem.skeletonAnimation, "shake");
+        }
     }
 
     private void OnStashPickCallBack(OnStashDestroy onStashPick)

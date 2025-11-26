@@ -23,11 +23,6 @@ public class Controller : Singleton<Controller>
 
     private void Update()
     {
-        if (!isPlay)
-        {
-            return;
-        }
-
         //Logic button up
         if (Input.GetMouseButtonUp(0))
         {
@@ -37,6 +32,11 @@ public class Controller : Singleton<Controller>
 
     private void OnButtonUp()
     {
+        if (!isPlay)
+        {
+            return;
+        }
+
         ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity, filterLayer);
@@ -50,15 +50,16 @@ public class Controller : Singleton<Controller>
     private void HandleRaycastItemPick(RaycastHit2D hit)
     {
         m_StashChoose = hit.collider.GetComponent<Stash>();
-        if (!m_StashChoose.CanPick || m_StashChoose.isLock)
+        if (!m_StashChoose.CanPick || m_StashChoose.isLock || m_StashChoose.isEat)
         {
             return;
         }
 
+        m_StashChoose.OnPick();
+
         OnStashPick cb = new OnStashPick();
         cb.Stash = m_StashChoose;
         cb.listItem = m_StashChoose.ListItem;
-        m_StashChoose.OnPick();
         EventManager.Trigger(cb);
         m_StashChoose = null;
     }

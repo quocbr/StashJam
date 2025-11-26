@@ -1,44 +1,62 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Spine.Unity;
 using UnityEngine;
 
 public class Item : MonoBehaviour
 {
     public int ID;
-    [SerializeField] private SpriteRenderer m_ItemSprite;
+
+    //[SerializeField] private SpriteRenderer m_ItemSprite;
+    public SkeletonAnimation skeletonAnimation;
     [SerializeField] private SpriteRenderer m_Hidden;
     public bool isEat = false;
 
+    private void OnDestroy()
+    {
+        // 🛠️ FIX 1: Hủy tất cả tweens đang chạy trên Transform này khi đối tượng bị hủy.
+        // Ngăn chặn lỗi "Target or field is missing/null" xảy ra khi transform bị hủy.
+        transform.DOKill();
+    }
+
     public void Init(int id, Sprite sprite, int layer = 0, bool isHidden = false, int index = 0)
     {
-        if (m_ItemSprite == null)
+        skeletonAnimation.gameObject.SetActive(!isHidden);
+        ID = id;
+        SetItem(id + 1);
+
+        if (m_Hidden != null)
         {
-            m_ItemSprite.gameObject.SetActive(false);
-            return;
+            m_Hidden.gameObject.SetActive(isHidden);
         }
 
-        m_ItemSprite.gameObject.SetActive(true);
-        ID = id;
-        m_ItemSprite.sprite = sprite;
-        m_Hidden.gameObject.SetActive(isHidden);
-        m_ItemSprite.enabled = !isHidden;
-        m_ItemSprite.sortingLayerID = SortingLayer.NameToID($"{layer}");
-        m_Hidden.sortingLayerID = SortingLayer.NameToID($"{layer}");
-        if (index == 0)
+        //m_ItemSprite.enabled = !isHidden;
+
+        // Cần đảm bảo m_ItemSprite và m_Hidden không null trước khi thiết lập sorting layer
+        if (skeletonAnimation != null)
         {
-            m_ItemSprite.sortingOrder = 1;
-            m_Hidden.sortingOrder = 1;
+            skeletonAnimation.GetComponent<MeshRenderer>().sortingLayerID = SortingLayer.NameToID($"{layer}");
+            skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder =
+                index == 0 ? 1 : index == 1 || index == 2 ? 2 : 3;
         }
-        else if (index == 1 || index == 2)
+
+        if (m_Hidden != null)
         {
-            m_ItemSprite.sortingOrder = 2;
-            m_Hidden.sortingOrder = 2;
+            m_Hidden.sortingLayerID = SortingLayer.NameToID($"{layer}");
+            m_Hidden.sortingOrder = index == 0 ? 1 : index == 1 || index == 2 ? 2 : 3;
         }
-        else
+    }
+
+    private void SetItem(int id)
+    {
+        var skeleton = skeletonAnimation.Skeleton;
+        var newSkin = skeleton.Data.FindSkin("fish_" + id.ToString());
+        if (newSkin != null)
         {
-            m_ItemSprite.sortingOrder = 3;
-            m_Hidden.sortingOrder = 3;
+            skeleton.SetSkin(newSkin);
+            skeleton.SetSlotsToSetupPose();
+            skeletonAnimation.AnimationState.Apply(skeleton);
         }
     }
 
@@ -46,26 +64,64 @@ public class Item : MonoBehaviour
     public void AnimBackToRoot(Transform parent)
     {
         SetVisualHidden(false);
-        m_ItemSprite.sortingOrder = 20;
-        m_ItemSprite.sortingLayerID = SortingLayer.NameToID("Fly");
 
-        transform.DOScale(1.1f, 0.3f).OnComplete(() =>
+        if (skeletonAnimation != null)
         {
-            transform.SetParent(parent);
-            transform.DOScale(1f, 0.3f);
-            transform.DOLocalMove(Vector3.zero, 0.3f).OnComplete(() => { m_ItemSprite.sortingOrder = 1; });
-        });
+            skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 20;
+            skeletonAnimation.GetComponent<MeshRenderer>().sortingLayerID = SortingLayer.NameToID("Fly");
+        }
+
+
+        // Bắt đầu chuỗi Tween. SetTarget được thêm để tăng cường độ an toàn
+        transform.DOScale(1.1f, 0.3f)
+            .SetTarget(transform)
+            .OnComplete(() =>
+            {
+                // Kiểm tra an toàn trước khi thực hiện các hành động tiếp theo
+                if (this == null) return;
+
+                transform.SetParent(parent);
+
+                // SetTarget cho Tween 2
+                transform.DOScale(1f, 0.3f).SetTarget(transform);
+
+                // SetTarget cho Tween 3
+                transform.DOLocalMove(Vector3.zero, 0.3f)
+                    .SetTarget(transform)
+                    .OnComplete(() =>
+                    {
+                        // Kiểm tra an toàn trước khi truy cập m_ItemSprite
+                        if (skeletonAnimation != null)
+                        {
+                            skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 1;
+                        }
+                    });
+            });
     }
 
     public void SetLayer(string layerName, int orderLayer)
     {
-        m_ItemSprite.sortingLayerName = layerName;
-        m_ItemSprite.sortingOrder = orderLayer;
+        // 🛠️ FIX 2: THÊM KIỂM TRA NULL cho m_ItemSprite
+        // Ngăn chặn lỗi "The object of type 'SpriteRenderer' has been destroyed but you are still trying to access it"
+        if (skeletonAnimation == null)
+        {
+            return;
+        }
+
+        skeletonAnimation.GetComponent<MeshRenderer>().sortingLayerName = layerName;
+        skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = orderLayer;
     }
 
     public void SetVisualHidden(bool isShow)
     {
-        m_ItemSprite.enabled = !isShow;
-        m_Hidden.gameObject.SetActive(isShow);
+        if (skeletonAnimation != null)
+        {
+            skeletonAnimation.gameObject.SetActive(!isShow);
+        }
+
+        if (m_Hidden != null)
+        {
+            m_Hidden.gameObject.SetActive(isShow);
+        }
     }
 }

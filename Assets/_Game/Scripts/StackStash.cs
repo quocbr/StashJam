@@ -25,6 +25,11 @@ public class StackStash : Stash
         {
             //MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
             LevelManager.Ins.currentLevel.Stash.Remove(this);
+            pile.transform.DOScale(1.1f, 0.3f).SetEase(Ease.InOutBack).SetLoops(2, LoopType.Yoyo);
+        }
+        else
+        {
+            pile.transform.DOScale(1.1f, 0.3f).SetEase(Ease.InOutBack).SetLoops(2, LoopType.Yoyo);
         }
     }
 
