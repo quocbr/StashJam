@@ -126,7 +126,15 @@ public class Stash : MonoBehaviour
         CanPick = canPick;
         if (glass != null)
         {
-            glass.gameObject.SetActive(!canPick);
+            //glass.gameObject.SetActive(!canPick);
+            if (!canPick)
+            {
+                glass.gameObject.SetActive(true);
+            }
+            else
+            {
+                AnimOpen();
+            }
         }
 
         if (canPick && isHidden)
@@ -137,7 +145,8 @@ public class Stash : MonoBehaviour
 
     public void AnimOpen()
     {
-        glass.transform.DOMoveY(0.5f, 0.2f);
+        glass.transform.DOLocalMoveY(0.4f, 0.4f);
+        glass.DOFade(0.2f, 0.4f).OnComplete(() => { glass.gameObject.SetActive(false); });
     }
 
     public void SetHidden(bool isHidden)
@@ -176,11 +185,17 @@ public class Stash : MonoBehaviour
         if (pendingStack.Count > 0)
         {
             isEat = false;
+
             BoxStackData nextData = pendingStack.Dequeue();
             UpdateVisuals(nextData);
             itemContainer.transform.localPosition = Vector3.zero;
-            MainAsset.transform.DOScale(1f, 0.4f).SetDelay(0.5f).SetEase(Ease.OutBack)
-                .OnComplete(() => { CanPick = true; });
+            MainAsset.transform.DOScale(1f, 0.4f).SetDelay(0.5f).SetEase(Ease.OutBack).OnStart(() =>
+                {
+                    glass.transform.localPosition = Vector3.up * 0.16f;
+                    glass.DOFade(1, 0);
+                    SetCanPick(false);
+                })
+                .OnComplete(() => { SetCanPick(true); });
             itemContainer.transform.DOScale(1f, 0.4f).From(0).SetDelay(0.5f).SetEase(Ease.OutBack);
         }
     }
