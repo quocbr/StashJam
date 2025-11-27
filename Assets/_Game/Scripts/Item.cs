@@ -45,13 +45,25 @@ public class Item : MonoBehaviour
 
     private void SetItem(int id)
     {
+        var newSkinName = "fish_" + id.ToString();
         var skeleton = skeletonAnimation.Skeleton;
-        var newSkin = skeleton.Data.FindSkin("fish_" + id.ToString());
+        var newSkin = skeleton.Data.FindSkin(newSkinName);
+
         if (newSkin != null)
         {
+            // 1. Gán giá trị Initial Skin mới
+            skeletonAnimation.initialSkinName = newSkinName; // <--- Dòng mới
+
+            // 2. Thiết lập Skin và cập nhật hiển thị ngay lập tức (như trước)
             skeleton.SetSkin(newSkin);
             skeleton.SetSlotsToSetupPose();
             skeletonAnimation.AnimationState.Apply(skeleton);
+
+            // 3. Nếu đang trong Editor, đánh dấu thay đổi để lưu vào scene file
+#if UNITY_EDITOR
+            // Cần phải có using UnityEditor;
+            UnityEditor.EditorUtility.SetDirty(skeletonAnimation);
+#endif
         }
     }
 

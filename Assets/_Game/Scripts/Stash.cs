@@ -135,6 +135,11 @@ public class Stash : MonoBehaviour
         }
     }
 
+    public void AnimOpen()
+    {
+        glass.transform.DOMoveY(0.5f, 0.2f);
+    }
+
     public void SetHidden(bool isHidden)
     {
         this.isHidden = isHidden;

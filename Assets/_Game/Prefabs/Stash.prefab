@@ -98,7 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ID: 4
-  m_ItemSprite: {fileID: 3076313046823463476}
+  skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0
 --- !u!1 &605921898242045680
@@ -318,7 +318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ID: 0
-  m_ItemSprite: {fileID: 7442278114337197545}
+  skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0
 --- !u!1 &1744127519703062870
@@ -431,7 +431,7 @@ Transform:
   m_GameObject: {fileID: 2415973326809219191}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.16100001, z: 0}
+  m_LocalPosition: {x: 0, y: 0.16, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -614,8 +614,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 605f6751a55100f45a995911f139e444, type: 3}
   - {fileID: 21300000, guid: af47afc951bde7d45b8ec9879064ad73, type: 3}
   index: {x: 0, y: 0}
+  isEat: 0
   CanPick: 1
   isLock: 0
+  isHidden: 0
 --- !u!61 &4808754173002921554
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -927,7 +929,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ID: 3
-  m_ItemSprite: {fileID: 5439745111092714501}
+  skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0
 --- !u!1 &7367413850191256165
@@ -1263,6 +1265,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ID: 1
-  m_ItemSprite: {fileID: 1536290192614427460}
+  skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0

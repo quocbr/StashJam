@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
+[ExecuteInEditMode]
 public class Level : MonoBehaviour
 {
     [Header("Data")] public LevelData levelData; // asset LevelData
@@ -131,7 +132,7 @@ public class Level : MonoBehaviour
     }
 
     [Button]
-    private void Test()
+    private void Spawn()
     {
         SpawnLevel();
     }

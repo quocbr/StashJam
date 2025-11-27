@@ -45,21 +45,17 @@ public class BoxSoldOut : MonoBehaviour
                 }
             }
 
-            // 🚨 THÊM KIỂM TRA NULL CHO Cap 🚨
-            // Ngăn chặn lỗi khi BoxSoldOut bị Destroyed trước khi hàm này được gọi từ callback bên ngoài.
             if (Cap == null)
             {
                 onComplete?.Invoke();
                 return;
             }
 
-            // Tạo tween cho Cap
             tween1 = Cap.transform.DOLocalMove(Vector3.zero, 0.5f)
                 .SetDelay(0.4f)
-                .SetTarget(gameObject) // Gắn target vào BoxSoldOut để OnDestroy() quản lý
+                .SetTarget(gameObject)
                 .OnComplete(() =>
                 {
-                    // Kiểm tra an toàn cho BoxSoldOut
                     if (this == null) return;
 
                     isRemove = true;
@@ -77,20 +73,14 @@ public class BoxSoldOut : MonoBehaviour
         if (target != null && source != null)
         {
             source.transform.SetParent(target);
-
-            // Tạo tween cho Item. Dùng SetTarget trên Item để Item tự quản lý tween này
             tween2 = source.transform.DOLocalMove(Vector3.zero, 0.4f)
-                .SetTarget(source.transform) // Gắn target vào Item.transform
+                .SetTarget(source.transform)
                 .OnComplete(() =>
                 {
-                    // Kiểm tra an toàn cho Item
                     if (source == null) return;
 
                     source.transform.localPosition = Vector3.zero;
                     source.SetLayer("Default", 10);
-
-                    // Nếu cần hủy Item sau khi MoveToPos hoàn thành (logic SoldOut), bạn sẽ làm ở đây
-                    // Ví dụ: Destroy(source.gameObject); 
                 });
         }
     }
