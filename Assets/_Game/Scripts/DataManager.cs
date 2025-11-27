@@ -77,10 +77,12 @@ public class UserData
 {
     public int level;
     public int coin;
+    public int indexCurrentFeature;
 
     public UserData()
     {
         level = 0;
         coin = 0;
+        indexCurrentFeature = 0;
     }
 }

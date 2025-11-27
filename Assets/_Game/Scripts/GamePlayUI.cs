@@ -12,6 +12,7 @@ public class GamePlayUI : Singleton<GamePlayUI>
     [SerializeField] private Button settingBtn;
     public ConveyorController conveyorPrefab;
     public TextMeshProUGUI levelText;
+    public TextMeshProUGUI coinText;
     public RectTransform top;
     public RectTransform down;
     public RectTransform left;
@@ -23,6 +24,31 @@ public class GamePlayUI : Singleton<GamePlayUI>
     private void Awake()
     {
         settingBtn.onClick.AddListener(OnSettingBtnClickHandler);
+    }
+
+    private void Start()
+    {
+        SetTextCoin(DataManager.Ins.userData.coin);
+    }
+
+    private void OnEnable()
+    {
+        EventManager.AddListener<AddCoin>(OnAddCoinCallBack);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.RemoveListener<AddCoin>(OnAddCoinCallBack);
+    }
+
+    private void OnAddCoinCallBack(AddCoin obj)
+    {
+        DOVirtual.Int(obj.currentCoin, obj.currentCoin + obj.coinAdd, 0.3f, (i) => { SetTextCoin(i); });
+    }
+
+    private void SetTextCoin(int coin)
+    {
+        coinText.text = $"{coin}";
     }
 
     private void OnSettingBtnClickHandler()
