@@ -6,6 +6,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Sirenix.OdinInspector;
 
 public class WinUI : UICanvas
 {
@@ -14,35 +15,51 @@ public class WinUI : UICanvas
     [SerializeField] private TextMeshProUGUI textCoin;
     [SerializeField] private ParticleImage particleImage;
     [SerializeField] private Button NextButton;
+    [SerializeField] private Button NextButton2;
     [SerializeField] private GameObject content1;
+    [SerializeField] private GameObject container1;
+    [SerializeField] private GameObject content2;
+    [SerializeField] private Transform rewardIcon;
+    [SerializeField] private RectTransform Content;
+
+    [SerializeField] private Image iconFeature;
+    [SerializeField] private Image iconFeatureUnlock;
 
     private void Awake()
     {
         NextButton.onClick.AddListener(OnNextButtonClickHandle);
+        NextButton2.onClick.AddListener(OnNextButtonClickHandle);
     }
 
     public override void Open()
     {
         base.Open();
+        content1.SetActive(true);
+        content2.SetActive(false);
+
         textCoin.text = $"{DataManager.Ins.userData.coin}";
 
         DataManager.Ins.userData.level++;
         DataManager.Ins.SaveData();
 
-        DOVirtual.DelayedCall(0.3f, () => { particleImage.Play(); });
+        DOVirtual.DelayedCall(0.2f, () => { particleImage.Play(); });
         if (DataManager.Ins.userData.indexCurrentFeature < GameManager.Ins.UnlockFeatures.Count)
         {
-            content1.gameObject.SetActive(true);
+            Content.anchoredPosition = new Vector2(0, -100);
+            container1.SetActive(true);
             SetProcessUnlockFeature(DataManager.Ins.userData.indexCurrentFeature);
         }
         else
         {
-            content1.gameObject.SetActive(false);
+            Content.anchoredPosition = new Vector2(0, -250);
+            container1.SetActive(false);
         }
     }
 
+    [Button]
     public void FlyCoin()
     {
+        particleImage.transform.position = rewardIcon.position;
         DOVirtual.Int(DataManager.Ins.userData.coin, DataManager.Ins.userData.coin + 100, 0.5f,
             value => { textCoin.text = $"{value}"; });
         DataManager.Ins.AddCoin(100);
@@ -56,6 +73,8 @@ public class WinUI : UICanvas
 
     private void SetProcessUnlockFeature(int index)
     {
+        UnlockFeature feature = GameManager.Ins.UnlockFeatures[index];
+        iconFeature.sprite = feature.spriteLock;
         int temp = 0;
         if (index > 0)
         {
@@ -68,11 +87,20 @@ public class WinUI : UICanvas
         if (value >= 1)
         {
             DataManager.Ins.userData.indexCurrentFeature++;
-            value = 1;
+            slider.DOValue(1, 1f).SetEase(Ease.OutQuad).OnComplete(() =>
+            {
+                content1.SetActive(false);
+                content2.SetActive(true);
+                iconFeatureUnlock.sprite = feature.spriteUnlock;
+            }).SetDelay(0.2f);
+        }
+        else
+        {
+            slider.DOValue(value, 1f).SetEase(Ease.OutQuad).SetDelay(0.2f);
+            processText.text =
+                $"{DataManager.Ins.userData.level - temp}  / {GameManager.Ins.UnlockFeatures[index].levelUnlock - temp}";
         }
 
-        slider.value = value;
-        processText.text =
-            $"{DataManager.Ins.userData.level - temp}  / {GameManager.Ins.UnlockFeatures[index].levelUnlock - temp}";
+
     }
 }
