@@ -67,3 +67,9 @@ public class UnLockStash : IGameEvent
 {
     public KeyLockType KeyLockType;
 }
+
+public class AddCoin : IGameEvent
+{
+    public int coinAdd;
+    public int currentCoin;
+}

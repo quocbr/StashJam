@@ -38,6 +38,7 @@ public class Stash : MonoBehaviour
     public List<Item> ListItem => m_ListItem;
     public int ItemCount => m_ListItem.Count;
     public bool IsStackSpawner => pendingStack.Count > 0;
+    public SpriteRenderer Glass => glass;
 
     private void OnEnable()
     {

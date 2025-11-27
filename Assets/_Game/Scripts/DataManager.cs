@@ -61,15 +61,26 @@ public class DataManager : Singleton<DataManager>
         userData = new UserData();
         SaveData();
     }
+
+    public void AddCoin(int coin)
+    {
+        AddCoin cb = new AddCoin();
+        cb.currentCoin = userData.coin;
+        cb.coinAdd = coin;
+        EventManager.Trigger(cb);
+        userData.coin += coin;
+    }
 }
 
 [Serializable]
 public class UserData
 {
     public int level;
+    public int coin;
 
     public UserData()
     {
         level = 0;
+        coin = 0;
     }
 }

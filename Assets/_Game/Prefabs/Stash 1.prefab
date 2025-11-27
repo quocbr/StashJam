@@ -144,6 +144,7 @@ MonoBehaviour:
   l_LockSprite: []
   l_KeyLockSprite: []
   index: {x: 0, y: 0}
+  isEat: 0
   CanPick: 1
   isLock: 0
   isHidden: 0
@@ -295,7 +296,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 4489022025781274634, guid: a9b507a2395d4438fa1f717db1fbaa1e, type: 2}
+  - {fileID: 2100000, guid: 5c6e952bedf01a040a26f23fed5c4296, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -339,15 +340,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: 5
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: a9b507a2395d4438fa1f717db1fbaa1e, type: 2}
-  m_sharedMaterial: {fileID: 4489022025781274634, guid: a9b507a2395d4438fa1f717db1fbaa1e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 016ef66eaa3259347ba324ea333a07f1, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 5c6e952bedf01a040a26f23fed5c4296, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4291306352
-  m_fontColor: {r: 0.4382936, g: 0.13665895, b: 0.7830189, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

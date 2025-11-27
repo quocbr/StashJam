@@ -450,6 +450,11 @@ public class Level : MonoBehaviour
                 else if (row == 0)
                 {
                     stashGrid[row, col].SetCanPick(true);
+                    if (stashGrid[row, col].Glass != null)
+                    {
+                        stashGrid[row, col].Glass.gameObject.SetActive(false);
+                    }
+
                     continue;
                 }
 
