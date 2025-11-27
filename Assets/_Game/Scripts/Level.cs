@@ -54,24 +54,50 @@ public class Level : MonoBehaviour
 
     private IEnumerator test()
     {
-        yield return new WaitForSeconds(3f);
-        List<Stash> stashTemp = new List<Stash>();
-        for (int i = 0; i < Stash.Count; i++)
+        while (true)
         {
-            if (!Stash[i].isEat && Stash[i].CanPick)
-            {
-                stashTemp.Add(Stash[i]);
-            }
-        }
+            yield return new WaitForSeconds(3f);
 
-        if (stashTemp.Count > 0)
-        {
-            int index = 0;
-            int index1 = 0;
-            index = Random.Range(0, stashTemp.Count);
-            index1 = Random.Range(0, stashTemp[index].ListItem.Count);
-            tempItem = stashTemp[index].ListItem[index1];
-            Utils_Custom.PlayAnimation(tempItem.skeletonAnimation, "shake");
+            List<Stash> stashTemp = new List<Stash>();
+            for (int i = 0; i < Stash.Count; i++)
+            {
+                if (!Stash[i].isEat && Stash[i].CanPick)
+                {
+                    stashTemp.Add(Stash[i]);
+                }
+            }
+
+            if (stashTemp.Count > 0)
+            {
+                List<Item> allAvailableItems = new List<Item>();
+                foreach (var stash in stashTemp)
+                {
+                    allAvailableItems.AddRange(stash.ListItem);
+                }
+
+                if (allAvailableItems.Count > 0)
+                {
+                    int numberOfItemsToSelect = Random.Range(1, 6);
+                    numberOfItemsToSelect = Mathf.Min(numberOfItemsToSelect, allAvailableItems.Count);
+                    List<Item> selectedItems = new List<Item>();
+                    List<Item> itemsToPickFrom = new List<Item>(allAvailableItems);
+
+                    for (int j = 0; j < numberOfItemsToSelect; j++)
+                    {
+                        int randomIndex = Random.Range(0, itemsToPickFrom.Count);
+                        Item selectedItem = itemsToPickFrom[randomIndex];
+
+                        selectedItems.Add(selectedItem);
+
+                        itemsToPickFrom.RemoveAt(randomIndex);
+                    }
+
+                    foreach (Item item in selectedItems)
+                    {
+                        Utils_Custom.PlayAnimation(item.skeletonAnimation, "Shake");
+                    }
+                }
+            }
         }
     }
 

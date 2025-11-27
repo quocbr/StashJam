@@ -124,38 +124,55 @@ public class GamePlayUI : Singleton<GamePlayUI>
     // 1 reference
     public void StartTutorial()
     {
+        for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
+        {
+            if (i == 0)
+            {
+                LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
+            }
+            else
+            {
+                LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
+            }
+        }
+
         Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
 
+        Tutorial.Ins.AreaTutorial(TutorialName.StartTutorial, () => DoneStartTutirual(),
+            unitTransform.position + Vector3.up * 0.2f);
         Tutorial.Ins.WorldClick(
             unitTransform.position + Vector3.right * 0.1f,
             Vector3.forward * 45f,
             15f
         );
-
-        Tutorial.Ins.ButtonAction(
-            unitTransform.position,
-            () => DoneStartTutirual()
-        );
-
-        Tutorial.Ins.Message("Tap this one. He will go fishing !.");
     }
 
     // 1 reference
     public void DoneStartTutirual()
     {
-        DOVirtual.DelayedCall(0.1f, () =>
+        DOVirtual.DelayedCall(0.2f, () =>
         {
             if (LevelManager.Ins.currentLevel.Stash.Count > 0)
             {
+                for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
+                    }
+                    else
+                    {
+                        LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
+                    }
+                }
+
                 Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
+                Tutorial.Ins.AreaTutorial(TutorialName.StartTutorial, () => DoneStartTutirual(),
+                    unitTransform.position + Vector3.up * 0.2f);
                 Tutorial.Ins.WorldClick(
-                    unitTransform.position + Vector3.up + Vector3.right * 0.25f,
+                    unitTransform.position + Vector3.right * 0.1f,
                     Vector3.forward * 45f,
-                    25f
-                );
-                Tutorial.Ins.ButtonAction(
-                    unitTransform.position + Vector3.up + Vector3.right * 0.25f,
-                    () => DoneStartTutirual()
+                    15f
                 );
             }
             else

@@ -15,8 +15,6 @@ public class Item : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 🛠️ FIX 1: Hủy tất cả tweens đang chạy trên Transform này khi đối tượng bị hủy.
-        // Ngăn chặn lỗi "Target or field is missing/null" xảy ra khi transform bị hủy.
         transform.DOKill();
     }
 
@@ -31,9 +29,6 @@ public class Item : MonoBehaviour
             m_Hidden.gameObject.SetActive(isHidden);
         }
 
-        //m_ItemSprite.enabled = !isHidden;
-
-        // Cần đảm bảo m_ItemSprite và m_Hidden không null trước khi thiết lập sorting layer
         if (skeletonAnimation != null)
         {
             skeletonAnimation.GetComponent<MeshRenderer>().sortingLayerID = SortingLayer.NameToID($"{layer}");
@@ -72,31 +67,31 @@ public class Item : MonoBehaviour
         }
 
 
-        // Bắt đầu chuỗi Tween. SetTarget được thêm để tăng cường độ an toàn
-        transform.DOScale(1.1f, 0.3f)
-            .SetTarget(transform)
-            .OnComplete(() =>
-            {
-                // Kiểm tra an toàn trước khi thực hiện các hành động tiếp theo
-                if (this == null) return;
+        // // Bắt đầu chuỗi Tween. SetTarget được thêm để tăng cường độ an toàn
+        //transform.DOScale(1.1f, 0.2f)
+        //.SetTarget(transform)
+        //.OnComplete(() =>
+        DOVirtual.DelayedCall(0.2f, () =>
+        {
+            if (this == null) return;
 
-                transform.SetParent(parent);
+            transform.SetParent(parent);
 
-                // SetTarget cho Tween 2
-                transform.DOScale(1f, 0.3f).SetTarget(transform);
+            // SetTarget cho Tween 2
+            transform.DOScale(1f, 0.4f).SetTarget(transform);
 
-                // SetTarget cho Tween 3
-                transform.DOLocalMove(Vector3.zero, 0.3f)
-                    .SetTarget(transform)
-                    .OnComplete(() =>
+            // SetTarget cho Tween 3
+            transform.DOLocalMove(Vector3.zero, 0.4f)
+                .SetTarget(transform)
+                .OnComplete(() =>
+                {
+                    if (skeletonAnimation != null)
                     {
-                        // Kiểm tra an toàn trước khi truy cập m_ItemSprite
-                        if (skeletonAnimation != null)
-                        {
-                            skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 1;
-                        }
-                    });
-            });
+                        skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 1;
+                        Utils_Custom.PlayAnimation(skeletonAnimation, "Idle");
+                    }
+                });
+        });
     }
 
     public void SetLayer(string layerName, int orderLayer)

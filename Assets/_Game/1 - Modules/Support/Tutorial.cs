@@ -52,12 +52,12 @@ public class Tutorial : Singleton<Tutorial>
     [Header("Area Button")] [SerializeField]
     private Image buttonArea;
 
+    [SerializeField] private BaseButton tutorialBtn;
+
     private Action clickAction = null;
     private TutorialData currentData;
 
     private Vector3 handRenderRotation;
-
-    [SerializeField] private BaseButton tutorialBtn;
 
     private void Awake()
     {
@@ -74,7 +74,7 @@ public class Tutorial : Singleton<Tutorial>
         Vector3 UIPosition = Utils_Custom.ConvertWorldToUIPosition(worldPosition, GameManager.Ins.MainCanvasRect);
         tutorialBtn.Rect.anchoredPosition = UIPosition;
 
-        tutorialBtn.AddListener(() => btnAction.Invoke());
+        tutorialBtn.AddListener(() => btnAction?.Invoke());
     }
 
     public void Message(string content)
@@ -104,14 +104,14 @@ public class Tutorial : Singleton<Tutorial>
 
     public void AreaTutorial(TutorialName name, Action btnAction, Vector3 worldPosition, bool isFullRect = true)
     {
-        tutorialBtn.SetInteractable(false);
+        //tutorialBtn.SetInteractable(false);
         transform.SetAsLastSibling();
-
+        buttonArea.gameObject.SetActive(true);
         tutorialBtn.Rect.sizeDelta = new Vector2(Screen.width, Screen.height);
         tutorialBtn.AddListener(() =>
         {
-            btnAction.Invoke();
-            tutorialBtn.SetInteractable(false);
+            btnAction?.Invoke();
+            //tutorialBtn.SetInteractable(false);
         });
 
         if (name == TutorialName.None)
@@ -130,7 +130,7 @@ public class Tutorial : Singleton<Tutorial>
             area.gameObject.SetActive(true);
             areaBG.DOKill();
             tutorialBtn.DOKill();
-            areaBG.DOFade(0.5f, 0.5f).From(0);
+            areaBG.DOFade(0.9f, 0.5f).From(0);
             delay = 0.5f;
         }
 
@@ -171,10 +171,12 @@ public class Tutorial : Singleton<Tutorial>
         }
 
         tutorialText.text = currentData.Description;
+        tutorialText.gameObject.SetActive(true);
+        tutorialText.GetComponent<RectTransform>().anchoredPosition = UIPosition + currentData.DescriptionPosition;
 
         if (!isFullRect)
         {
-            tutorialBtn.Rect.sizeDelta = Vector2.one * 300;
+            tutorialBtn.Rect.sizeDelta = Vector2.one * 400;
             tutorialBtn.Rect.anchoredPosition = UIPosition;
         }
     }

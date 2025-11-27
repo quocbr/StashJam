@@ -152,7 +152,8 @@ public class Stash : MonoBehaviour
         MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
         for (int i = 0; i < m_ListItem.Count; i++)
         {
-            m_ListItem[i].transform.DOScale(1.2f, 0.2f);
+            //m_ListItem[i].transform.DOScale(1.1f, 0.2f);
+            Utils_Custom.PlayAnimation(m_ListItem[i].skeletonAnimation, "Jump", loop: true);
         }
 
         if (keyLockType != KeyLockType.None)
