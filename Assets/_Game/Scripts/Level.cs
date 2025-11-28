@@ -23,6 +23,7 @@ public class Level : MonoBehaviour
     public Transform levelRoot;
 
     [SerializeField] private GameObject[] obj;
+    [SerializeField] private GameObject prefabToSpawn;
 
     [Header("Prefabs - Diagonal Borders (16 Cases)")]
     [InfoBox("Index tính theo Bitmask: TL=1, TR=2, BL=4, BR=8. Tổng cộng 16 trường hợp.")]
@@ -320,6 +321,45 @@ public class Level : MonoBehaviour
                     (row - centerY) * cellSize,
                     0f
                 );
+
+                if (row == 0)
+                {
+                    if (col == 0)
+                    {
+                        for (int i = 1; i <= 3; i++)
+                        {
+                            // Tính vị trí lùi sang trái: trừ đi (i * cellSize) vào trục X
+                            Vector3 extraPos = localPos - new Vector3(cellSize * i, 0f, 0f);
+
+                            if (prefabToSpawn != null)
+                            {
+                                GameObject go = Instantiate(prefabToSpawn, levelRoot);
+                                go.transform.localPosition = extraPos;
+                                go.transform.localRotation = Quaternion.identity;
+                                go.transform.localScale = Vector3.one;
+                                go.name = $"ExtraLeft_{row}_{i}"; // Đặt tên để dễ debug
+                            }
+                        }
+                    }
+
+                    else if (col == maxCols - 1)
+                    {
+                        for (int i = 1; i <= 3; i++)
+                        {
+                            // Tính vị trí tiến sang phải: cộng thêm (i * cellSize) vào trục X
+                            Vector3 extraPos = localPos + new Vector3(cellSize * i, 0f, 0f);
+
+                            if (prefabToSpawn != null)
+                            {
+                                GameObject go = Instantiate(prefabToSpawn, levelRoot);
+                                go.transform.localPosition = extraPos;
+                                go.transform.localRotation = Quaternion.identity;
+                                go.transform.localScale = Vector3.one;
+                                go.name = $"ExtraRight_{row}_{i}";
+                            }
+                        }
+                    }
+                }
 
                 if (boxIndex != -1)
                 {
