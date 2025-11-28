@@ -12,6 +12,7 @@ public class Item : MonoBehaviour
     public SkeletonAnimation skeletonAnimation;
     [SerializeField] private SpriteRenderer m_Hidden;
     public bool isEat = false;
+    public Sprite Sprite;
 
     private void OnDestroy()
     {
@@ -23,6 +24,7 @@ public class Item : MonoBehaviour
         skeletonAnimation.gameObject.SetActive(!isHidden);
         ID = id;
         SetItem(id + 1);
+        Sprite = sprite;
 
         if (m_Hidden != null)
         {
@@ -76,6 +78,7 @@ public class Item : MonoBehaviour
         {
             skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 20;
             skeletonAnimation.GetComponent<MeshRenderer>().sortingLayerID = SortingLayer.NameToID("Fly");
+            Utils_Custom.PlayAnimation(skeletonAnimation, "Idle");
         }
 
 
@@ -100,7 +103,6 @@ public class Item : MonoBehaviour
                     if (skeletonAnimation != null)
                     {
                         skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 1;
-                        Utils_Custom.PlayAnimation(skeletonAnimation, "Idle");
                     }
                 });
         });

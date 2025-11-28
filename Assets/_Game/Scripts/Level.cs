@@ -32,8 +32,10 @@ public class Level : MonoBehaviour
     public List<Stash> Stash = new List<Stash>();
     public Transform max;
     public Transform min;
+    private Coroutine animShake;
 
     private int[,] levelIndexMatrix;
+    private List<Item> selectedItems = new List<Item>();
 
     public Stash[,] stashGrid;
 
@@ -41,7 +43,7 @@ public class Level : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(nameof(test));
+        animShake = StartCoroutine(nameof(AnimShake));
     }
 
     private void OnEnable()
@@ -54,11 +56,14 @@ public class Level : MonoBehaviour
         EventManager.RemoveListener<OnStashDestroy>(OnStashPickCallBack);
     }
 
-    private IEnumerator test()
+    private IEnumerator AnimShake()
     {
         while (true)
         {
             yield return new WaitForSeconds(3f);
+
+
+            selectedItems.Clear();
 
             List<Stash> stashTemp = new List<Stash>();
             for (int i = 0; i < Stash.Count; i++)
@@ -81,7 +86,6 @@ public class Level : MonoBehaviour
                 {
                     int numberOfItemsToSelect = Random.Range(1, 6);
                     numberOfItemsToSelect = Mathf.Min(numberOfItemsToSelect, allAvailableItems.Count);
-                    List<Item> selectedItems = new List<Item>();
                     List<Item> itemsToPickFrom = new List<Item>(allAvailableItems);
 
                     for (int j = 0; j < numberOfItemsToSelect; j++)
@@ -96,7 +100,8 @@ public class Level : MonoBehaviour
 
                     foreach (Item item in selectedItems)
                     {
-                        Utils_Custom.PlayAnimation(item.skeletonAnimation, "Shake");
+                        Utils_Custom.PlayAnimation(item.skeletonAnimation, "Shake",
+                            onComplete: () => { Utils_Custom.PlayAnimation(item.skeletonAnimation, "Idle"); });
                     }
                 }
             }

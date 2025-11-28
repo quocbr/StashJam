@@ -531,19 +531,16 @@ public class ConveyorController : MonoBehaviour
     {
         if (_refillTween != null && _refillTween.IsActive()) _refillTween.Kill();
 
-        // THAY ĐỔI: Sử dụng SetTarget(this.gameObject)
         _refillTween = DOVirtual.DelayedCall(0.3f, RefillFromQueueAndOverflow)
-            .SetTarget(gameObject); // <-- SetTarget để tự động kill khi object này bị Destroy
+            .SetTarget(gameObject);
     }
 
-    // 5. REFILL THÔNG MINH (Queue -> Conveyor, Overflow -> Queue/Conveyor)
     private void RefillFromQueueAndOverflow()
     {
         if (!isRunning) return; // Kiểm tra an toàn
 
         bool anyActionTaken = false;
 
-        // --- GIAI ĐOẠN A: Đẩy từ m_Queue lên Conveyor (Ưu tiên cao nhất) ---
         if (m_QueueConveyor != null && m_QueueConveyor.Count > 0)
         {
             var validSourceItems = m_QueueConveyor.Where(q => !q.IsEmpty).ToList();

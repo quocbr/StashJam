@@ -12,6 +12,12 @@ public class LoseUI : UICanvas
         ReTryButton.onClick.AddListener(OnNextButtonClickHandle);
     }
 
+    public override void Open()
+    {
+        base.Open();
+        SoundManager.Ins.PlaySoundBG(SoundBg.lose);
+    }
+
     private void OnNextButtonClickHandle()
     {
         LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);

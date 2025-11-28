@@ -53,6 +53,9 @@ public class DataManager : Singleton<DataManager>
             SaveData();
         }
 
+        SoundManager.Ins.SetActiveSoundBG(!userData.isMusic);
+        SoundManager.Ins.SetActiveSoundFx(!userData.isFX);
+
         LevelManager.Ins.SpawnLevel(userData.level);
     }
 
@@ -78,11 +81,17 @@ public class UserData
     public int level;
     public int coin;
     public int indexCurrentFeature;
+    public bool isMusic;
+    public bool isFX;
+    public bool isHaptic;
 
     public UserData()
     {
         level = 0;
         coin = 0;
         indexCurrentFeature = 0;
+        isMusic = true;
+        isFX = true;
+        isHaptic = true;
     }
 }

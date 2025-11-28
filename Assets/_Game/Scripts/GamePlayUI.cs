@@ -59,8 +59,9 @@ public class GamePlayUI : Singleton<GamePlayUI>
     [Button]
     public void SetupCamera()
     {
+        SoundManager.Ins.PlaySoundBG(SoundBg.bg);
         Level currentLevel = LevelManager.Ins.currentLevel;
-        levelText.text = $"Lv: {DataManager.Ins.userData.level + 1}";
+        levelText.text = $"Lv.{DataManager.Ins.userData.level + 1}";
         if (currentLevel == null || currentLevel.min == null || currentLevel.max == null)
         {
             return;

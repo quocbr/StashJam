@@ -55,6 +55,7 @@ public class Controller : Singleton<Controller>
             return;
         }
 
+        SoundManager.Ins.PlaySoundFx(SoundFx.ClickStask);
         m_StashChoose.OnPick();
 
         OnStashPick cb = new OnStashPick();

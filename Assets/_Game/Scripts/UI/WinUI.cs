@@ -25,6 +25,10 @@ public class WinUI : UICanvas
     [SerializeField] private Image iconFeature;
     [SerializeField] private Image iconFeatureUnlock;
 
+    public TextMeshProUGUI title;
+    public TextMeshProUGUI description;
+    private bool canNext = false;
+
     private void Awake()
     {
         NextButton.onClick.AddListener(OnNextButtonClickHandle);
@@ -34,11 +38,13 @@ public class WinUI : UICanvas
     public override void Open()
     {
         base.Open();
+        SoundManager.Ins.PlaySoundBG(SoundBg.win);
         content1.SetActive(true);
         content2.SetActive(false);
 
         textCoin.text = $"{DataManager.Ins.userData.coin}";
 
+        canNext = false;
         DataManager.Ins.userData.level++;
         DataManager.Ins.SaveData();
 
@@ -61,12 +67,14 @@ public class WinUI : UICanvas
     {
         particleImage.transform.position = rewardIcon.position;
         DOVirtual.Int(DataManager.Ins.userData.coin, DataManager.Ins.userData.coin + 100, 0.5f,
-            value => { textCoin.text = $"{value}"; });
+            value => { textCoin.text = $"{value}"; }).OnComplete(() => { canNext = true; });
         DataManager.Ins.AddCoin(100);
     }
 
     private void OnNextButtonClickHandle()
     {
+        if (!canNext) return;
+        canNext = false;
         LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
         Close(0);
     }
@@ -75,32 +83,51 @@ public class WinUI : UICanvas
     {
         UnlockFeature feature = GameManager.Ins.UnlockFeatures[index];
         iconFeature.sprite = feature.spriteLock;
+
         int temp = 0;
         if (index > 0)
         {
             temp = GameManager.Ins.UnlockFeatures[index - 1].levelUnlock;
         }
 
-        float value = (DataManager.Ins.userData.level - temp) /
-                      ((GameManager.Ins.UnlockFeatures[index].levelUnlock - temp) * 1.0f);
+        // Lấy các thông số cần thiết
+        int currentLevel = DataManager.Ins.userData.level;
+        int targetLevel = GameManager.Ins.UnlockFeatures[index].levelUnlock;
+        float totalRange = (targetLevel - temp) * 1.0f;
 
-        if (value >= 1)
+        // 1. Tính giá trị ĐÍCH (Level hiện tại)
+        float endValue = (currentLevel - temp) / totalRange;
+
+        // 2. Tính giá trị BẮT ĐẦU (Level trước đó = Level hiện tại - 1)
+        // Dùng Mathf.Max(0, ...) để đảm bảo không bị âm nếu là level đầu tiên
+        float startValue = (currentLevel - 1 - temp) / totalRange;
+        if (startValue < 0) startValue = 0;
+
+        // 3. Đặt slider ngay lập tức về vị trí cũ
+        slider.value = startValue;
+
+        // Cập nhật Text hiện tại (có thể để nó chạy theo slider nếu muốn, ở đây đang hiển thị số cuối cùng)
+        processText.text = $"{currentLevel - temp} / {targetLevel - temp}";
+
+        // Xử lý Logic hoàn thành (Unlock)
+        if (endValue >= 1)
         {
             DataManager.Ins.userData.indexCurrentFeature++;
+
+            // Chạy từ startValue lên 1
             slider.DOValue(1, 1f).SetEase(Ease.OutQuad).OnComplete(() =>
             {
                 content1.SetActive(false);
                 content2.SetActive(true);
                 iconFeatureUnlock.sprite = feature.spriteUnlock;
+                title.text = feature.Title;
+                description.text = feature.Description;
             }).SetDelay(0.2f);
         }
         else
         {
-            slider.DOValue(value, 1f).SetEase(Ease.OutQuad).SetDelay(0.2f);
-            processText.text =
-                $"{DataManager.Ins.userData.level - temp}  / {GameManager.Ins.UnlockFeatures[index].levelUnlock - temp}";
+            // Chạy từ startValue lên endValue
+            slider.DOValue(endValue, 1f).SetEase(Ease.OutQuad).SetDelay(0.2f);
         }
-
-
     }
 }

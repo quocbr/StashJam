@@ -404,9 +404,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Next
-
-'
+  m_text: Retry
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 016ef66eaa3259347ba324ea333a07f1, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: e081bf7ea823d824492473bc22be6bf7, type: 2}

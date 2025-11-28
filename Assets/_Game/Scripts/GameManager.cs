@@ -9,6 +9,8 @@ public struct UnlockFeature
     public int levelUnlock;
     public Sprite spriteLock;
     public Sprite spriteUnlock;
+    public string Title;
+    public string Description;
 }
 
 public class GameManager : Singleton<GameManager>
