@@ -78,8 +78,6 @@ public class BoxSoldOut : MonoBehaviour
                     sprite[index].sprite = source.Sprite;
                     sprite[index].enabled = true;
                     Destroy(source.gameObject);
-                    //source.transform.localPosition = Vector3.zero;
-                    //source.SetLayer("Default", 10);
                 });
         }
     }

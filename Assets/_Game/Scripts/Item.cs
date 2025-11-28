@@ -13,6 +13,7 @@ public class Item : MonoBehaviour
     [SerializeField] private SpriteRenderer m_Hidden;
     public bool isEat = false;
     public Sprite Sprite;
+    public TrailRenderer trail;
 
     private void OnDestroy()
     {
@@ -34,6 +35,7 @@ public class Item : MonoBehaviour
         if (skeletonAnimation != null)
         {
             skeletonAnimation.GetComponent<MeshRenderer>().sortingLayerID = SortingLayer.NameToID($"{layer}");
+            trail.sortingLayerID = SortingLayer.NameToID($"{layer}");
             skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder =
                 index == 0 ? 1 : index == 1 || index == 2 ? 2 : 3;
         }
@@ -53,22 +55,15 @@ public class Item : MonoBehaviour
 
         if (newSkin != null)
         {
-            // 1. Gán giá trị Initial Skin mới
-            skeletonAnimation.initialSkinName = newSkinName; // <--- Dòng mới
-
-            // 2. Thiết lập Skin và cập nhật hiển thị ngay lập tức (như trước)
+            skeletonAnimation.initialSkinName = newSkinName;
             skeleton.SetSkin(newSkin);
             skeleton.SetSlotsToSetupPose();
             skeletonAnimation.AnimationState.Apply(skeleton);
-
-            // 3. Nếu đang trong Editor, đánh dấu thay đổi để lưu vào scene file
 #if UNITY_EDITOR
-            // Cần phải có using UnityEditor;
             UnityEditor.EditorUtility.SetDirty(skeletonAnimation);
 #endif
         }
     }
-
 
     public void AnimBackToRoot(Transform parent)
     {
@@ -81,22 +76,20 @@ public class Item : MonoBehaviour
             Utils_Custom.PlayAnimation(skeletonAnimation, "Idle");
         }
 
-
-        // // Bắt đầu chuỗi Tween. SetTarget được thêm để tăng cường độ an toàn
-        //transform.DOScale(1.1f, 0.2f)
-        //.SetTarget(transform)
-        //.OnComplete(() =>
         DOVirtual.DelayedCall(0.2f, () =>
         {
             if (this == null) return;
 
             transform.SetParent(parent);
 
-            // SetTarget cho Tween 2
+            // Scale về 1
             transform.DOScale(1f, 0.4f).SetTarget(transform);
 
-            // SetTarget cho Tween 3
-            transform.DOLocalMove(Vector3.zero, 0.4f)
+            float jumpPower = 1.5f;
+            int numJumps = 1;
+
+            transform.DOLocalJump(Vector3.zero, jumpPower, numJumps, Random.Range(0.2f, 0.4f))
+                .SetEase(Ease.Linear)
                 .SetTarget(transform)
                 .OnComplete(() =>
                 {
@@ -108,10 +101,9 @@ public class Item : MonoBehaviour
         });
     }
 
+
     public void SetLayer(string layerName, int orderLayer)
     {
-        // 🛠️ FIX 2: THÊM KIỂM TRA NULL cho m_ItemSprite
-        // Ngăn chặn lỗi "The object of type 'SpriteRenderer' has been destroyed but you are still trying to access it"
         if (skeletonAnimation == null)
         {
             return;
