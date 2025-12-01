@@ -66,6 +66,7 @@ public interface IGameEvent
 public class UnLockStash : IGameEvent
 {
     public KeyLockType KeyLockType;
+    public Transform keyTranform;
 }
 
 public class AddCoin : IGameEvent

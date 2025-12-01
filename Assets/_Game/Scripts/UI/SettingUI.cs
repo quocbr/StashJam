@@ -34,7 +34,7 @@ public class SettingUI : UICanvas
     private void OnHapticClickHandler()
     {
         DataManager.Ins.userData.isHaptic = !DataManager.Ins.userData.isHaptic;
-        if (DataManager.Ins.userData.isMusic)
+        if (DataManager.Ins.userData.isHaptic)
         {
             hapticOn.SetActive(true);
             hapticOff.SetActive(false);
@@ -67,7 +67,7 @@ public class SettingUI : UICanvas
     {
         DataManager.Ins.userData.isFX = !DataManager.Ins.userData.isFX;
         SoundManager.Ins.SetActiveSoundFx(!DataManager.Ins.userData.isFX);
-        if (DataManager.Ins.userData.isMusic)
+        if (DataManager.Ins.userData.isFX)
         {
             soundOn.SetActive(true);
             soundOff.SetActive(false);
@@ -83,7 +83,7 @@ public class SettingUI : UICanvas
     {
         base.Open();
         Controller.Ins.isPlay = false;
-        if (DataManager.Ins.userData.isMusic)
+        if (DataManager.Ins.userData.isHaptic)
         {
             hapticOn.SetActive(true);
             hapticOff.SetActive(false);
@@ -105,7 +105,7 @@ public class SettingUI : UICanvas
             musicOff.SetActive(true);
         }
 
-        if (DataManager.Ins.userData.isMusic)
+        if (DataManager.Ins.userData.isFX)
         {
             soundOn.SetActive(true);
             soundOff.SetActive(false);

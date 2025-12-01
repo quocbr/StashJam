@@ -23,6 +23,8 @@ public class Stash : MonoBehaviour
     [SerializeField] private Stash stackVisual;
     [SerializeField] private Sprite[] l_LockSprite;
     [SerializeField] private Sprite[] l_KeyLockSprite;
+    [SerializeField] private Transform l_KeyTranform;
+    [SerializeField] private Transform l_ParentKeyTranform;
 
     [Header("Runtime Info")] public Vector2Int index;
 
@@ -54,7 +56,24 @@ public class Stash : MonoBehaviour
     {
         if (isLock && (int)lockType == (int)obj.KeyLockType)
         {
-            SetLock(false, LockType.None);
+            obj.keyTranform.DOKill();
+            obj.keyTranform.SetParent(transform);
+            Sequence seq = DOTween.Sequence();
+            float flyTime = 0.6f;
+            seq.Append(obj.keyTranform.DOLocalJump(Vector3.zero, 1.5f, 1, flyTime).SetEase(Ease.OutQuad));
+            seq.Join(obj.keyTranform.DORotate(new Vector3(0, 0, 360), flyTime, RotateMode.FastBeyond360)
+                .SetEase(Ease.OutQuad));
+            seq.Join(obj.keyTranform.DOScale(Vector3.one, flyTime));
+            seq.Append(transform.DOShakeRotation(0.2f, new Vector3(0, 0, 20), 10));
+            seq.OnComplete(() =>
+            {
+                // Hiệu ứng nổ hạt (VFX) nếu có
+                // if(vfxUnlock != null) Instantiate(vfxUnlock, transform.position, Quaternion.identity);
+
+                Destroy(obj.keyTranform.gameObject);
+                SetLock(false, LockType.None);
+                transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 1);
+            });
         }
     }
 
@@ -175,8 +194,9 @@ public class Stash : MonoBehaviour
         {
             UnLockStash cb = new UnLockStash();
             cb.KeyLockType = keyLockType;
+            cb.keyTranform = l_KeyTranform;
             EventManager.Trigger(cb);
-            SetKeyLock(false, KeyLockType.None);
+            //SetKeyLock(false, KeyLockType.None);
         }
     }
 
@@ -255,6 +275,7 @@ public class Stash : MonoBehaviour
         if (lockType == KeyLockType.None)
         {
             keyLockSprite.gameObject.SetActive(false);
+            l_ParentKeyTranform.gameObject.SetActive(false);
             return;
         }
 
@@ -262,11 +283,13 @@ public class Stash : MonoBehaviour
         {
             if (locked)
             {
+                l_ParentKeyTranform.gameObject.SetActive(true);
                 keyLockSprite.gameObject.SetActive(true);
                 keyLockSprite.sprite = l_KeyLockSprite[(int)lockType - 1];
             }
             else
             {
+                l_ParentKeyTranform.gameObject.SetActive(false);
                 keyLockSprite.gameObject.SetActive(false);
             }
         }

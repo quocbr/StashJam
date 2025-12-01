@@ -177,7 +177,8 @@ public class GamePlayUI : Singleton<GamePlayUI>
     // 1 reference
     public void DoneStartTutirual()
     {
-        DOVirtual.DelayedCall(0.2f, () =>
+        Tutorial.Ins.Off();
+        DOVirtual.DelayedCall(1.4f, () =>
         {
             if (LevelManager.Ins.currentLevel.Stash.Count > 0)
             {

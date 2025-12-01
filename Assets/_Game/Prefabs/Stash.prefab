@@ -101,6 +101,8 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0
+  Sprite: {fileID: 0}
+  trail: {fileID: 0}
 --- !u!1 &605921898242045680
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,12 +114,12 @@ GameObject:
   - component: {fileID: 2167539883756671325}
   - component: {fileID: 737822638709656838}
   m_Layer: 8
-  m_Name: KeyLock
+  m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2167539883756671325
 Transform:
   m_ObjectHideFlags: 0
@@ -126,12 +128,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 605921898242045680}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.15, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 963941697168377850}
+  m_Father: {fileID: 2729717220024620454}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &737822638709656838
 SpriteRenderer:
@@ -321,6 +323,8 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0
+  Sprite: {fileID: 0}
+  trail: {fileID: 0}
 --- !u!1 &1744127519703062870
 GameObject:
   m_ObjectHideFlags: 0
@@ -525,7 +529,7 @@ Transform:
   - {fileID: 4832080982058539069}
   - {fileID: 1561730744705730478}
   - {fileID: 1801995021102137179}
-  - {fileID: 2167539883756671325}
+  - {fileID: 2729717220024620454}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &955806863892026070
@@ -613,6 +617,8 @@ MonoBehaviour:
   l_KeyLockSprite:
   - {fileID: 21300000, guid: 605f6751a55100f45a995911f139e444, type: 3}
   - {fileID: 21300000, guid: af47afc951bde7d45b8ec9879064ad73, type: 3}
+  l_KeyTranform: {fileID: 2167539883756671325}
+  l_ParentKeyTranform: {fileID: 2729717220024620454}
   index: {x: 0, y: 0}
   isEat: 0
   CanPick: 1
@@ -747,6 +753,38 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 2
   m_SpriteSortPoint: 0
+--- !u!1 &5246582148474595699
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2729717220024620454}
+  m_Layer: 8
+  m_Name: KeyLock
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &2729717220024620454
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5246582148474595699}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.15, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2167539883756671325}
+  m_Father: {fileID: 963941697168377850}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6032884505528968733
 GameObject:
   m_ObjectHideFlags: 0
@@ -932,6 +970,8 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0
+  Sprite: {fileID: 0}
+  trail: {fileID: 0}
 --- !u!1 &7367413850191256165
 GameObject:
   m_ObjectHideFlags: 0
@@ -1268,3 +1308,5 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 0}
   m_Hidden: {fileID: 0}
   isEat: 0
+  Sprite: {fileID: 0}
+  trail: {fileID: 0}

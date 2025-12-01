@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Spine.Unity;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Item : MonoBehaviour
 {
@@ -45,6 +47,8 @@ public class Item : MonoBehaviour
             m_Hidden.sortingLayerID = SortingLayer.NameToID($"{layer}");
             m_Hidden.sortingOrder = index == 0 ? 1 : index == 1 || index == 2 ? 2 : 3;
         }
+
+        trail.gameObject.SetActive(false);
     }
 
     private void SetItem(int id)
@@ -65,39 +69,49 @@ public class Item : MonoBehaviour
         }
     }
 
-    public void AnimBackToRoot(Transform parent)
+    public void AnimBackToRoot(Transform parent, Action onComplete = null)
     {
         SetVisualHidden(false);
+        trail.gameObject.SetActive(true);
 
         if (skeletonAnimation != null)
         {
-            skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 20;
-            skeletonAnimation.GetComponent<MeshRenderer>().sortingLayerID = SortingLayer.NameToID("Fly");
-            Utils_Custom.PlayAnimation(skeletonAnimation, "Idle");
+            var meshRenderer = skeletonAnimation.GetComponent<MeshRenderer>();
+            if (meshRenderer != null)
+            {
+                meshRenderer.sortingOrder = 20;
+                meshRenderer.sortingLayerID = SortingLayer.NameToID("Fly");
+                Utils_Custom.PlayAnimation(skeletonAnimation, "Idle");
+            }
         }
 
-        DOVirtual.DelayedCall(0.2f, () =>
+        transform.DOKill();
+
+        transform.SetParent(parent);
+
+        Sequence seq = DOTween.Sequence();
+
+        float duration = Random.Range(0.35f, 0.4f);
+        float jumpPower = Random.Range(1f, 1.5f);
+
+        seq.Append(transform.DOLocalJump(Vector3.zero, jumpPower, 1, duration)
+            .SetEase(Ease.OutQuad));
+        seq.Join(transform.DOLocalRotate(Vector3.zero, duration).SetEase(Ease.OutSine));
+        seq.Join(transform.DOScale(Vector3.one, duration).SetEase(Ease.OutSine));
+        seq.OnComplete(() =>
         {
             if (this == null) return;
+            if (skeletonAnimation != null)
+            {
+                var meshRenderer = skeletonAnimation.GetComponent<MeshRenderer>();
+                if (meshRenderer != null) meshRenderer.sortingOrder = 1;
+            }
 
-            transform.SetParent(parent);
-
-            // Scale về 1
-            transform.DOScale(1f, 0.4f).SetTarget(transform);
-
-            float jumpPower = 1.5f;
-            int numJumps = 1;
-
-            transform.DOLocalJump(Vector3.zero, jumpPower, numJumps, Random.Range(0.2f, 0.4f))
-                .SetEase(Ease.Linear)
-                .SetTarget(transform)
-                .OnComplete(() =>
-                {
-                    if (skeletonAnimation != null)
-                    {
-                        skeletonAnimation.GetComponent<MeshRenderer>().sortingOrder = 1;
-                    }
-                });
+            transform.DOPunchScale(new Vector3(0.15f, -0.15f, 0), 0.3f, 10, 1).OnComplete(() =>
+            {
+                trail.gameObject.SetActive(false);
+            });
+            onComplete?.Invoke();
         });
     }
 

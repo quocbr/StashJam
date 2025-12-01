@@ -1356,7 +1356,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1373,26 +1373,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allLevel:
-  - {fileID: 9152654379301594138, guid: 02a38fcc650b124428bf112548e77841, type: 3}
-  - {fileID: 9152654379301594138, guid: 5f263a8e942975c498b9d26e62859893, type: 3}
-  - {fileID: 9152654379301594138, guid: f26eb4832dfbf9844b6afe4e7bb7de7b, type: 3}
-  - {fileID: 9152654379301594138, guid: e3ac85552464ba04297e7258c40daaf5, type: 3}
-  - {fileID: 9152654379301594138, guid: d93ad84c3d10694418efeeadae17aff8, type: 3}
-  - {fileID: 9152654379301594138, guid: 8d164999964441a4e8bf098a16435ad0, type: 3}
-  - {fileID: 9152654379301594138, guid: 587d6b77510041d439dc99f699e68932, type: 3}
-  - {fileID: 9152654379301594138, guid: c2dce8939d43de84c9b018d2d9da0e55, type: 3}
-  - {fileID: 9152654379301594138, guid: fed146a932baa1f40bc64586af3e1735, type: 3}
-  - {fileID: 9152654379301594138, guid: 2e3b40dbdf542bc4886a00528e19db4f, type: 3}
-  - {fileID: 9152654379301594138, guid: 3a05f9bcc8d58fe4ea152fdf98f0f033, type: 3}
-  - {fileID: 9152654379301594138, guid: 50be4b38991e8b94a881a82361350e1e, type: 3}
-  - {fileID: 9152654379301594138, guid: 5a6cf7dc190d86547993820c119a80f2, type: 3}
-  - {fileID: 9152654379301594138, guid: f5bf8f1e6c10a414093fb08fd3cfe0d7, type: 3}
-  - {fileID: 9152654379301594138, guid: 94214055bddb8d94dbb0586dfb4f24b3, type: 3}
-  - {fileID: 9152654379301594138, guid: 8e32ae278ab627648a7889217c6155d7, type: 3}
-  - {fileID: 9152654379301594138, guid: eafcb3f4fa5e204498a951858d1cf432, type: 3}
-  - {fileID: 9152654379301594138, guid: 52ec4773b2c00c94d927f3276dd1e8e7, type: 3}
-  - {fileID: 9152654379301594138, guid: b4997238fbe7b0d4997674657c0c342a, type: 3}
-  - {fileID: 9152654379301594138, guid: aac93e5895917fd40895f1fc75e89efe, type: 3}
+  - {fileID: 9152654379301594138, guid: 434a612afa6eafa49868e17c6eedc639, type: 3}
+  - {fileID: 9152654379301594138, guid: a1e87f76824a9f148a3e00c651bb6026, type: 3}
   itemDatabase: {fileID: 11400000, guid: 7ecb08f41f7cd7a47b744712e9c39727, type: 2}
   currentLevel: {fileID: 0}
 --- !u!224 &1498527959 stripped

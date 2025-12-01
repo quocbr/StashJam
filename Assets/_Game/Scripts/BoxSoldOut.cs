@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BoxSoldOut : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class BoxSoldOut : MonoBehaviour
     [SerializeField] private Transform[] pos;
     [SerializeField] private List<SpriteRenderer> sprite;
     public bool isRemove = false;
+    public GameObject vfxLandingPrefab;
 
     private Tween tween1;
     private Tween tween2;
@@ -70,11 +72,20 @@ public class BoxSoldOut : MonoBehaviour
         {
             Utils_Custom.PlayAnimation(source.skeletonAnimation, "Idle");
             source.transform.SetParent(pos[index]);
-            tween2 = source.transform.DOLocalMove(Vector3.zero, 0.4f)
+            float jumpPower = Random.Range(0.8f, 1.2f);
+            source.transform.DOScale(new Vector3(0.95f, 1.15f, 1f), 0.1f).SetLoops(2, LoopType.Yoyo);
+            tween2 = source.transform.DOLocalJump(Vector3.zero, jumpPower, 1, 0.3f)
+                .SetEase(Ease.Linear)
                 .SetTarget(source.transform)
                 .OnComplete(() =>
                 {
                     if (source == null) return;
+                    if (vfxLandingPrefab != null)
+                    {
+                        GameObject vfx = Instantiate(vfxLandingPrefab, pos[index].position, Quaternion.identity);
+                        Destroy(vfx, 1.0f);
+                    }
+
                     sprite[index].sprite = source.Sprite;
                     sprite[index].enabled = true;
                     Destroy(source.gameObject);
