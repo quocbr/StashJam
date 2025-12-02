@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using AssetKits.ParticleImage;
 using DG.Tweening;
+using MaskTransitions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -75,8 +76,12 @@ public class WinUI : UICanvas
     {
         if (!canNext) return;
         canNext = false;
-        LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
-        Close(0);
+        TransitionManager.Instance.PlayStartHalfTransition(0.4f, 0f, () =>
+        {
+            LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
+            TransitionManager.Instance.PlayEndHalfTransition(0.4f, 0.5f);
+            Close(0);
+        });
     }
 
     private void SetProcessUnlockFeature(int index)

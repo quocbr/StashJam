@@ -107,6 +107,9 @@ public class Item : MonoBehaviour
                 if (meshRenderer != null) meshRenderer.sortingOrder = 1;
             }
 
+            var x = PoolManager.Ins.Spawn<ParticleSystem>(PoolName.SplashFX, transform);
+            x.transform.localPosition = Vector3.zero;
+
             transform.DOPunchScale(new Vector3(0.15f, -0.15f, 0), 0.3f, 10, 1).OnComplete(() =>
             {
                 trail.gameObject.SetActive(false);

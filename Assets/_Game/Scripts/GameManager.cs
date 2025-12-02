@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
+using MaskTransitions;
 using UnityEngine;
 
 [Serializable]
@@ -17,4 +19,9 @@ public class GameManager : Singleton<GameManager>
 {
     public List<UnlockFeature> UnlockFeatures;
     public RectTransform MainCanvasRect;
+
+    private void Start()
+    {
+        TransitionManager.Instance.PlayEndHalfTransition(0.8f, 0.4f);
+    }
 }

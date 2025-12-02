@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MaskTransitions;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class OnStashPick : IGameEvent
@@ -50,8 +52,16 @@ public class Controller : Singleton<Controller>
     private void HandleRaycastItemPick(RaycastHit2D hit)
     {
         m_StashChoose = hit.collider.GetComponent<Stash>();
-        if (!m_StashChoose.CanPick || m_StashChoose.isLock || m_StashChoose.isEat)
+        if (m_StashChoose == null) return;
+        if (m_StashChoose.isEat)
         {
+            return;
+        }
+
+        if (!m_StashChoose.CanPick || m_StashChoose.isLock)
+        {
+            PoolManager.Ins.Spawn<ParticleSystem>(PoolName.LockFX, m_StashChoose.transform.position,
+                m_StashChoose.transform.rotation);
             return;
         }
 
