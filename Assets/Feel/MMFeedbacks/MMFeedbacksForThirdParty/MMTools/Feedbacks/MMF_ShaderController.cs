@@ -110,6 +110,11 @@ namespace MoreMountains.Feedbacks
 		/// <param name="owner"></param>
 		protected override void CustomInitialization(MMF_Player owner)
 		{
+			if (TargetShaderControllerList == null)
+			{
+				TargetShaderControllerList = new List<ShaderController>();
+			}
+			
 			if (Active && (TargetShaderController != null))
 			{
 				_oneTimeDurationStorage = TargetShaderController.OneTimeDuration;
@@ -177,6 +182,24 @@ namespace MoreMountains.Feedbacks
 			}   
 		}
         
+		/// <summary>
+		/// Sets the final value on the target shader controller(s)
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="feedbacksIntensity"></param>
+		protected override void CustomSkipToTheEnd(Vector3 position, float feedbacksIntensity = 1.0f)
+		{
+			if (Active && FeedbackTypeAuthorized)
+			{
+				TargetShaderController.SetFinalValue();     
+
+				foreach (ShaderController shaderController in TargetShaderControllerList)
+				{
+					shaderController.SetFinalValue();
+				}    
+			}
+		}
+		
 		/// <summary>
 		/// Stops this feedback
 		/// </summary>

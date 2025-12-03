@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 #if MM_CINEMACHINE
 using Cinemachine;
 #elif MM_CINEMACHINE3
@@ -11,7 +12,7 @@ namespace MoreMountains.FeedbacksForThirdParty
 	/// <summary>
 	/// Add this to a Cinemachine virtual camera and it'll be able to listen to MMCinemachinePriorityEvent, usually triggered by a MMFeedbackCinemachineTransition
 	/// </summary>
-	[AddComponentMenu("More Mountains/Feedbacks/Shakers/Cinemachine/MMCinemachinePriorityListener")]
+	[AddComponentMenu("More Mountains/Feedbacks/Shakers/Cinemachine/MM Cinemachine Priority Listener")]
 	#if MM_CINEMACHINE || MM_CINEMACHINE3
 	[RequireComponent(typeof(CinemachineVirtualCameraBase))]
 	#endif
@@ -72,13 +73,20 @@ namespace MoreMountains.FeedbacksForThirdParty
 		/// <param name="resetValuesAfterTransition"></param>
 		public virtual void OnMMCinemachinePriorityEvent(MMChannelData channelData, bool forceMaxPriority, int newPriority, bool forceTransition, CinemachineBlendDefinition blendDefinition, bool resetValuesAfterTransition, TimescaleModes timescaleMode, bool restore = false)
 		{
+			StartCoroutine(OnMMCinemachinePriorityEventCo(channelData, forceMaxPriority, newPriority, forceTransition,
+				blendDefinition, resetValuesAfterTransition, timescaleMode, restore));
+		}
+
+		protected virtual IEnumerator OnMMCinemachinePriorityEventCo(MMChannelData channelData, bool forceMaxPriority, int newPriority, bool forceTransition, CinemachineBlendDefinition blendDefinition, bool resetValuesAfterTransition, TimescaleModes timescaleMode, bool restore = false)
+		{
+			yield return null;
 			TimescaleMode = timescaleMode;
 			if (MMChannel.Match(channelData, ChannelMode, Channel, MMChannelDefinition))
 			{
 				if (restore)
 				{
 					SetPriority(_initialPriority);	
-					return;
+					yield break;
 				}
 				SetPriority(newPriority);
 			}
@@ -89,7 +97,7 @@ namespace MoreMountains.FeedbacksForThirdParty
 					if (restore)
 					{
 						SetPriority(_initialPriority);	
-						return;
+						yield break;;
 					}
 					SetPriority(0);
 				}

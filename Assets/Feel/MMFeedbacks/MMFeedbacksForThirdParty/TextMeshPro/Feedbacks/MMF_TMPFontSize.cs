@@ -1,6 +1,6 @@
 ﻿using MoreMountains.Tools;
 using UnityEngine;
-#if (MM_TEXTMESHPRO || MM_UGUI2)
+#if MM_UGUI2
 using TMPro;
 #endif
 using UnityEngine.Scripting.APIUpdating;
@@ -12,7 +12,7 @@ namespace MoreMountains.Feedbacks
 	/// </summary>
 	[AddComponentMenu("")]
 	[FeedbackHelp("This feedback lets you control the font size of a target TMP over time.")]
-	#if (MM_TEXTMESHPRO || MM_UGUI2)
+	#if MM_UGUI2
 	[FeedbackPath("TextMesh Pro/TMP Font Size")]
 	#endif
 	[MovedFrom(false, null, "MoreMountains.Feedbacks.TextMeshPro")]
@@ -35,7 +35,7 @@ namespace MoreMountains.Feedbacks
 		}
 		#endif
 		
-		#if UNITY_EDITOR && (MM_TEXTMESHPRO || MM_UGUI2)
+		#if UNITY_EDITOR && MM_UGUI2
 		public override bool EvaluateRequiresSetup()
 		{
 			return (TargetTMPText == null);
@@ -47,7 +47,7 @@ namespace MoreMountains.Feedbacks
 		}
 		#endif
 
-		#if (MM_TEXTMESHPRO || MM_UGUI2)
+		#if MM_UGUI2
 		public override bool HasAutomatedTargetAcquisition => true;
 		public override bool CanForceInitialValue => true;
 		protected override void AutomateTargetAcquisition() => TargetTMPText = FindAutomatedTarget<TMP_Text>();
@@ -61,25 +61,25 @@ namespace MoreMountains.Feedbacks
 		[MMFInspectorGroup("Font Size", true, 16)]
 		/// the curve to tween on
 		[Tooltip("the curve to tween on")]
-		[MMFEnumCondition("Mode", (int)MMFeedbackBase.Modes.OverTime)]
-		public MMTweenType FontSizeCurve =
-			new MMTweenType(new AnimationCurve(new Keyframe(0, 0), new Keyframe(0.3f, 1f), new Keyframe(1, 0)));
-
+		[MMFEnumCondition("Mode", (int)MMFeedbackBase.Modes.OverTime, (int)Modes.ToDestination)]
+		public MMTweenType FontSizeCurve = new MMTweenType(new AnimationCurve(new Keyframe(0, 0), new Keyframe(0.3f, 1f), new Keyframe(1, 0)));
 		/// the value to remap the curve's 0 to
 		[Tooltip("the value to remap the curve's 0 to")] [MMFEnumCondition("Mode", (int)MMFeedbackBase.Modes.OverTime)]
 		public float RemapZero = 0f;
-
 		/// the value to remap the curve's 1 to
 		[Tooltip("the value to remap the curve's 1 to")] [MMFEnumCondition("Mode", (int)MMFeedbackBase.Modes.OverTime)]
 		public float RemapOne = 1f;
-
 		/// the value to move to in instant mode
 		[Tooltip("the value to move to in instant mode")] [MMFEnumCondition("Mode", (int)MMFeedbackBase.Modes.Instant)]
 		public float InstantFontSize;
+		/// the value to move to in destination mode
+		[Tooltip("the value to move to in destination mode")]
+		[MMFEnumCondition("Mode", (int)Modes.ToDestination)]
+		public float DestinationFontSize;
 
 		protected override void FillTargets()
 		{
-			#if (MM_TEXTMESHPRO || MM_UGUI2)
+			#if MM_UGUI2
 			if (TargetTMPText == null)
 			{
 				return;
@@ -96,6 +96,7 @@ namespace MoreMountains.Feedbacks
 			target.RemapLevelZero = RemapZero;
 			target.RemapLevelOne = RemapOne;
 			target.InstantLevel = InstantFontSize;
+			target.ToDestinationLevel = DestinationFontSize;
 
 			_targets.Add(target);
 			#endif

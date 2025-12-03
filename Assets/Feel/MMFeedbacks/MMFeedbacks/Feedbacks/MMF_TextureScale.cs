@@ -93,6 +93,13 @@ namespace MoreMountains.Feedbacks
 		protected override void CustomInitialization(MMF_Player owner)
 		{
 			base.CustomInitialization(owner);
+			
+			if (TargetRenderer == null)
+			{
+				Debug.LogWarning("[Texture Scale Feedback] The texture scale feedback on "+Owner.name+" doesn't have a target renderer, it won't work. You need to specify a renderer in its inspector.");
+				return;
+			}
+			
 			if (UseMaterialPropertyBlocks)
 			{
 				_propertyBlock = new MaterialPropertyBlock();
@@ -119,13 +126,25 @@ namespace MoreMountains.Feedbacks
 			{
 				return;
 			}
+
+			if (TargetRenderer == null)
+			{
+				return;
+			}
             
 			float intensityMultiplier = ComputeIntensity(feedbacksIntensity, position);
             
 			switch (Mode)
 			{
-				case Modes.Instant:      
-					ApplyValue(InstantScale * intensityMultiplier);
+				case Modes.Instant:
+					if (NormalPlayDirection)
+					{
+						ApplyValue(InstantScale * intensityMultiplier);	
+					}
+					else
+					{
+						ApplyValue(_initialValue);
+					}
 					break;
 				case Modes.OverTime:
 					if (!AllowAdditivePlays && (_coroutine != null))
@@ -156,7 +175,7 @@ namespace MoreMountains.Feedbacks
 				yield return null;
 			}
 			SetMaterialValues(FinalNormalizedTime, intensityMultiplier);
-			IsPlaying = true;
+			IsPlaying = false;
 			_coroutine = null;
 			yield return null;
 		}

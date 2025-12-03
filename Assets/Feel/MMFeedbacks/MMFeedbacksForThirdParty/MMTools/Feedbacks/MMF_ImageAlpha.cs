@@ -56,8 +56,7 @@ namespace MoreMountains.Feedbacks
 		public float InstantAlpha = 1f;
 		/// the curve to use when interpolating towards the destination alpha
 		[Tooltip("the curve to use when interpolating towards the destination alpha")]
-		[MMFEnumCondition("Mode", (int)Modes.OverTime, (int)Modes.ToDestination)]
-		public MMTweenType Curve = new MMTweenType(MMTween.MMTweenCurve.EaseInCubic);
+		public MMTweenType Curve = new MMTweenType(MMTween.MMTweenCurve.EaseInCubic, "", "Mode", (int)Modes.OverTime, (int)Modes.ToDestination);
 		/// the value to which the curve's 0 should be remapped
 		[Tooltip("the value to which the curve's 0 should be remapped")]
 		[MMFEnumCondition("Mode", (int)Modes.OverTime)]
@@ -81,6 +80,23 @@ namespace MoreMountains.Feedbacks
 		protected Color _imageColor;
 		protected Color _initialColor;
 		protected float _initialAlpha;
+		protected float _initialInstantAlpha;
+		
+		protected override void CustomInitialization(MMF_Player owner)
+		{
+			base.CustomInitialization(owner);
+			
+			if (BoundImage == null)
+			{
+				Debug.LogWarning("[Image Alpha Feedback] The image alpha feedback on "+Owner.name+" doesn't have a bound image, it won't work. You need to specify an image in its inspector.");
+				return;
+			}
+
+			if (Active)
+			{
+				_initialInstantAlpha = BoundImage.color.a;
+			}
+		}
 
 		/// <summary>
 		/// On Play we turn our Image on and start an over time coroutine if needed
@@ -89,7 +105,7 @@ namespace MoreMountains.Feedbacks
 		/// <param name="feedbacksIntensity"></param>
 		protected override void CustomPlayFeedback(Vector3 position, float feedbacksIntensity = 1.0f)
 		{
-			if (!Active || !FeedbackTypeAuthorized)
+			if (!Active || !FeedbackTypeAuthorized || (BoundImage == null))
 			{
 				return;
 			}
@@ -99,7 +115,7 @@ namespace MoreMountains.Feedbacks
 			{
 				case Modes.Instant:
 					_imageColor = BoundImage.color;
-					_imageColor.a = InstantAlpha;
+					_imageColor.a = NormalPlayDirection ? InstantAlpha : _initialInstantAlpha;
 					BoundImage.color = _imageColor;
 					break;
 				case Modes.OverTime:
@@ -213,6 +229,21 @@ namespace MoreMountains.Feedbacks
 				return;
 			}
 			BoundImage.color = _initialColor;
+		}
+		
+		/// <summary>
+		/// On Validate, we init our curves conditions if needed
+		/// </summary>
+		public override void OnValidate()
+		{
+			base.OnValidate();
+			if (string.IsNullOrEmpty(Curve.EnumConditionPropertyName))
+			{
+				Curve.EnumConditionPropertyName = "Mode";
+				Curve.EnumConditions = new bool[32];
+				Curve.EnumConditions[(int)Modes.OverTime] = true;
+				Curve.EnumConditions[(int)Modes.ToDestination] = true;
+			}
 		}
 	}
 }

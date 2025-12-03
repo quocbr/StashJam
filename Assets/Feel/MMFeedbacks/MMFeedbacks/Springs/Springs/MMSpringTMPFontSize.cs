@@ -1,10 +1,10 @@
 using UnityEngine;
-#if (MM_TEXTMESHPRO || MM_UGUI2)
+#if MM_UGUI2
 using TMPro;
 
 namespace MoreMountains.Feedbacks
 {
-	[AddComponentMenu("More Mountains/Springs/MMSpringTMPFontSize")]
+	[AddComponentMenu("More Mountains/Springs/MM Spring TMP Font Size")]
 	public class MMSpringTMPFontSize : MMSpringFloatComponent<TMP_Text>
 	{
 		public override float TargetFloat

@@ -2,8 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using MoreMountains.Feedbacks;
+using Sirenix.OdinInspector;
 using Spine.Unity;
 using UnityEngine;
+using UnityEngine.Events;
 using Random = UnityEngine.Random;
 
 public class Item : MonoBehaviour
@@ -16,10 +19,19 @@ public class Item : MonoBehaviour
     public bool isEat = false;
     public Sprite Sprite;
     public TrailRenderer trail;
+    public MMF_Player squashAndStretch;
+
+    public UnityEvent flash;
 
     private void OnDestroy()
     {
         transform.DOKill();
+    }
+
+    [Button]
+    public void SquashAndStretch()
+    {
+        squashAndStretch.PlayFeedbacks();
     }
 
     public void Init(int id, Sprite sprite, int layer = 0, bool isHidden = false, int index = 0)
@@ -109,11 +121,9 @@ public class Item : MonoBehaviour
 
             var x = PoolManager.Ins.Spawn<ParticleSystem>(PoolName.SplashFX, transform);
             x.transform.localPosition = Vector3.zero;
-
-            transform.DOPunchScale(new Vector3(0.15f, -0.15f, 0), 0.3f, 10, 1).OnComplete(() =>
-            {
-                trail.gameObject.SetActive(false);
-            });
+            SquashAndStretch();
+            trail.gameObject.SetActive(false);
+            flash?.Invoke();
             onComplete?.Invoke();
         });
     }

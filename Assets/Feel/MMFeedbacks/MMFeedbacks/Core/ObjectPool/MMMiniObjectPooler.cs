@@ -82,7 +82,7 @@ namespace MoreMountains.Feedbacks
             
 			if (_pools.Count == 0)
 			{
-				var pools = FindObjectsOfType<MMMiniObjectPool>();
+				var pools = FindObjectsByType<MMMiniObjectPool>(FindObjectsSortMode.None);
 				if (pools.Length > 0)
 				{
 					_pools.AddRange(pools);
@@ -201,8 +201,10 @@ namespace MoreMountains.Feedbacks
 				Debug.LogWarning("The " + gameObject.name + " ObjectPooler doesn't have any GameObjectToPool defined.", gameObject);
 				return null;
 			}
+			bool objectWasActive = GameObjectToPool.gameObject.activeSelf;
 			GameObjectToPool.gameObject.SetActive(false);
 			GameObject newGameObject = (GameObject)Instantiate(GameObjectToPool);
+			GameObjectToPool.gameObject.SetActive(objectWasActive);
 			SceneManager.MoveGameObjectToScene(newGameObject, this.gameObject.scene);
 			if (NestWaitingPool)
 			{

@@ -84,8 +84,13 @@ namespace MoreMountains.Tools
 		public override float GetLevel(MMPropertyEmitter emitter, MMProperty property)
 		{
 			_color = _getterSetterInitialized ? GetColorDelegate() : (Color)GetPropertyValue(property);
-
-			return _color.MeanRGB();
+			return _color.MMMeanRGB();
+		}
+		
+		public override float GetLevel(MMPropertyReceiver receiver, MMProperty property)
+		{
+			_color = _getterSetterInitialized ? GetColorDelegate() : (Color)GetPropertyValue(property);
+			return _color.MMMeanRGB();
 		}
 
 		/// <summary>

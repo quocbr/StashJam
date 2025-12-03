@@ -1,7 +1,7 @@
 ﻿using MoreMountains.Tools;
 using UnityEngine;
 using System.Collections;
-#if (MM_TEXTMESHPRO || MM_UGUI2)
+#if MM_UGUI2
 using TMPro;
 #endif
 using UnityEngine.Scripting.APIUpdating;
@@ -13,7 +13,7 @@ namespace MoreMountains.Feedbacks
 	/// </summary>
 	[AddComponentMenu("")]
 	[FeedbackHelp("This feedback lets you control the alpha of a target TMP over time.")]
-	#if (MM_TEXTMESHPRO || MM_UGUI2)
+	#if MM_UGUI2
 	[FeedbackPath("TextMesh Pro/TMP Alpha")]
 	#endif
 	[MovedFrom(false, null, "MoreMountains.Feedbacks.TextMeshPro")]
@@ -24,7 +24,7 @@ namespace MoreMountains.Feedbacks
 		public override Color FeedbackColor { get { return MMFeedbacksInspectorColors.TMPColor; } }
 		public override string RequiresSetupText { get { return "This feedback requires that a TargetTMPText be set to be able to work properly. You can set one below."; } }
 		#endif
-		#if UNITY_EDITOR && (MM_TEXTMESHPRO || MM_UGUI2)
+		#if UNITY_EDITOR && MM_UGUI2
 		public override bool EvaluateRequiresSetup() { return (TargetTMPText == null); }
 		public override string RequiredTargetText { get { return TargetTMPText != null ? TargetTMPText.name : "";  } }
 		#endif
@@ -36,7 +36,7 @@ namespace MoreMountains.Feedbacks
 		/// the duration of this feedback is the duration of the color transition, or 0 if instant
 		public override float FeedbackDuration { get { return (AlphaMode == AlphaModes.Instant) ? 0f : ApplyTimeMultiplier(Duration); } set { Duration = value; } }
 
-		#if (MM_TEXTMESHPRO || MM_UGUI2)
+		#if MM_UGUI2
 		public override bool HasAutomatedTargetAcquisition => true;
 		protected override void AutomateTargetAcquisition() => TargetTMPText = FindAutomatedTarget<TMP_Text>();
 		public override bool HasCustomInspectors => true;
@@ -68,8 +68,7 @@ namespace MoreMountains.Feedbacks
 
 		/// the curve to use when interpolating towards the destination alpha
 		[Tooltip("the curve to use when interpolating towards the destination alpha")]
-		[MMFEnumCondition("AlphaMode", (int)AlphaModes.Interpolate, (int)AlphaModes.ToDestination)]
-		public MMTweenType Curve = new MMTweenType(MMTween.MMTweenCurve.EaseInCubic);
+		public MMTweenType Curve = new MMTweenType(MMTween.MMTweenCurve.EaseInCubic, "", "AlphaMode", (int)AlphaModes.Interpolate, (int)AlphaModes.ToDestination);
 		/// the value to which the curve's 0 should be remapped
 		[Tooltip("the value to which the curve's 0 should be remapped")]
 		[MMFEnumCondition("AlphaMode", (int)AlphaModes.Interpolate)]
@@ -98,7 +97,7 @@ namespace MoreMountains.Feedbacks
 		{
 			base.CustomInitialization(owner);
 
-			#if (MM_TEXTMESHPRO || MM_UGUI2)
+			#if MM_UGUI2
 			if (TargetTMPText == null)
 			{
 				return;
@@ -119,7 +118,7 @@ namespace MoreMountains.Feedbacks
 				return;
 			}
         
-			#if (MM_TEXTMESHPRO || MM_UGUI2)
+			#if MM_UGUI2
 			if (TargetTMPText == null)
 			{
 				return;
@@ -128,7 +127,7 @@ namespace MoreMountains.Feedbacks
 			switch (AlphaMode)
 			{
 				case AlphaModes.Instant:
-					TargetTMPText.alpha = InstantAlpha;
+					TargetTMPText.alpha = NormalPlayDirection ? InstantAlpha : _initialAlpha;
 					break;
 				case AlphaModes.Interpolate:
 					if (!AllowAdditivePlays && (_coroutine != null))
@@ -200,7 +199,7 @@ namespace MoreMountains.Feedbacks
 		/// <param name="time"></param>
 		protected virtual void SetAlpha(float time)
 		{
-			#if (MM_TEXTMESHPRO || MM_UGUI2)
+			#if MM_UGUI2
 			float newAlpha = 0f;
 			if (AlphaMode == AlphaModes.Interpolate)
 			{
@@ -223,9 +222,24 @@ namespace MoreMountains.Feedbacks
 			{
 				return;
 			}
-			#if (MM_TEXTMESHPRO || MM_UGUI2)
+			#if MM_UGUI2
 			TargetTMPText.alpha = _initialAlpha;
 			#endif
+		}
+		
+		/// <summary>
+		/// On Validate, we init our curves conditions if needed
+		/// </summary>
+		public override void OnValidate()
+		{
+			base.OnValidate();
+			if (string.IsNullOrEmpty(Curve.EnumConditionPropertyName))
+			{
+				Curve.EnumConditionPropertyName = "AlphaMode";
+				Curve.EnumConditions = new bool[32];
+				Curve.EnumConditions[(int)AlphaModes.Interpolate] = true;
+				Curve.EnumConditions[(int)AlphaModes.ToDestination] = true;
+			}
 		}
 	}
 }
