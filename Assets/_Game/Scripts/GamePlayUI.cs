@@ -21,6 +21,10 @@ public class GamePlayUI : Singleton<GamePlayUI>
     public RectTransform posConveyor;
     private ConveyorController conveyor;
 
+    // TUTORIAL
+    // 1 reference
+    private bool showTutorial = false;
+
     private void Awake()
     {
         settingBtn.onClick.AddListener(OnSettingBtnClickHandler);
@@ -147,26 +151,24 @@ public class GamePlayUI : Singleton<GamePlayUI>
         });
     }
 
-    // TUTORIAL
-    // 1 reference
     public void StartTutorial()
     {
-        for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
-        {
-            if (i == 0)
-            {
-                LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
-            }
-            else
-            {
-                LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
-            }
-        }
+        showTutorial = true;
+        // for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
+        // {
+        //     if (i == 0)
+        //     {
+        //         LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
+        //     }
+        //     else
+        //     {
+        //         LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
+        //     }
+        // }
 
         Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
 
-        Tutorial.Ins.AreaTutorial(TutorialName.StartTutorial, () => DoneStartTutirual(),
-            unitTransform.position + Vector3.up * 0.2f);
+        Tutorial.Ins.ButtonAction(unitTransform.position + Vector3.up * 0.2f, () => DoneStartTutirual());
         Tutorial.Ins.WorldClick(
             unitTransform.position + Vector3.right * 0.1f,
             Vector3.forward * 45f,
@@ -178,25 +180,30 @@ public class GamePlayUI : Singleton<GamePlayUI>
     public void DoneStartTutirual()
     {
         Tutorial.Ins.Off();
+        if (!showTutorial)
+        {
+            return;
+        }
+
+        showTutorial = false;
         DOVirtual.DelayedCall(1.4f, () =>
         {
             if (LevelManager.Ins.currentLevel.Stash.Count > 0)
             {
-                for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
-                    }
-                    else
-                    {
-                        LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
-                    }
-                }
+                // for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
+                // {
+                //     if (i == 0)
+                //     {
+                //         LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
+                //     }
+                //     else
+                //     {
+                //         LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
+                //     }
+                // }
 
                 Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
-                Tutorial.Ins.AreaTutorial(TutorialName.StartTutorial, () => DoneStartTutirual(),
-                    unitTransform.position + Vector3.up * 0.2f);
+                Tutorial.Ins.ButtonAction(unitTransform.position + Vector3.up * 0.2f, () => DoneStartTutirual());
                 Tutorial.Ins.WorldClick(
                     unitTransform.position + Vector3.right * 0.1f,
                     Vector3.forward * 45f,
