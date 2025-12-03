@@ -15,14 +15,18 @@ public enum LockType
 {
     None = 0,
     Yellow = 1,
-    Red = 2
+    Red = 2,
+    Blue=3,
+    Pink=4
 }
 
 public enum KeyLockType
 {
     None = 0,
     Yellow = 1,
-    Red = 2
+    Red = 2,
+    Blue = 3,
+    Pink = 4
 }
 
 // --- DATA CLASSES ---
