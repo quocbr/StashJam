@@ -154,17 +154,17 @@ public class GamePlayUI : Singleton<GamePlayUI>
     public void StartTutorial()
     {
         showTutorial = true;
-        // for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
-        // {
-        //     if (i == 0)
-        //     {
-        //         LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
-        //     }
-        //     else
-        //     {
-        //         LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
-        //     }
-        // }
+        for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
+        {
+            if (i == 0)
+            {
+                LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
+            }
+            else
+            {
+                LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
+            }
+        }
 
         Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
 
@@ -182,25 +182,31 @@ public class GamePlayUI : Singleton<GamePlayUI>
         Tutorial.Ins.Off();
         if (!showTutorial)
         {
+            for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
+            {
+                LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
+            }
+
             return;
         }
+
 
         showTutorial = false;
         DOVirtual.DelayedCall(1.4f, () =>
         {
             if (LevelManager.Ins.currentLevel.Stash.Count > 0)
             {
-                // for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
-                // {
-                //     if (i == 0)
-                //     {
-                //         LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
-                //     }
-                //     else
-                //     {
-                //         LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
-                //     }
-                // }
+                for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        LevelManager.Ins.currentLevel.Stash[i].CanPick = true;
+                    }
+                    else
+                    {
+                        LevelManager.Ins.currentLevel.Stash[i].CanPick = false;
+                    }
+                }
 
                 Transform unitTransform = LevelManager.Ins.currentLevel.Stash[0].transform;
                 Tutorial.Ins.ButtonAction(unitTransform.position + Vector3.up * 0.2f, () => DoneStartTutirual());
