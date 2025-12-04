@@ -1,0 +1,294 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c49149dabad12e4aa25bff25652649f, type: 3}
+  m_Name: Level_21
+  m_EditorClassIdentifier: 
+  width: 6
+  height: 8
+  boxes:
+  - targetStackCount: 0
+    gridPos: {x: 2, y: 0}
+    isHidden: 0
+    itemIds: 08000000080000000c00000004000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 0}
+    isHidden: 0
+    itemIds: 0c0000000c0000000200000002000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 2, y: 1}
+    isHidden: 0
+    itemIds: 04000000040000000c00000001000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 1}
+    isHidden: 0
+    itemIds: 09000000020000000300000003000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 2, y: 2}
+    isHidden: 0
+    itemIds: 0c0000000c0000000c00000003000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 2}
+    isHidden: 0
+    itemIds: 09000000090000000900000000000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 1
+    direction: 3
+    spawnStack:
+    - itemIds: 03000000030000000200000002000000
+      isHidden: 0
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
+    - itemIds: 03000000030000000900000009000000
+      isHidden: 0
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
+  - targetStackCount: 0
+    gridPos: {x: 2, y: 3}
+    isHidden: 0
+    itemIds: 02000000000000000c0000000c000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 3}
+    isHidden: 0
+    itemIds: 01000000010000000200000002000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 2, y: 4}
+    isHidden: 0
+    itemIds: 04000000040000000200000009000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 4}
+    isHidden: 0
+    itemIds: 01000000010000000100000000000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 1, y: 4}
+    isHidden: 1
+    itemIds: 0c0000000c0000000c00000002000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 0, y: 4}
+    isHidden: 0
+    itemIds: 02000000020000000100000001000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 0, y: 5}
+    isHidden: 1
+    itemIds: 02000000020000000300000003000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 1, y: 5}
+    isHidden: 0
+    itemIds: 09000000090000000000000000000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 2, y: 5}
+    isHidden: 1
+    itemIds: 01000000040000000100000008000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 5}
+    isHidden: 0
+    itemIds: 08000000080000000800000003000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 4, y: 5}
+    isHidden: 1
+    itemIds: 04000000040000000c0000000c000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 4, y: 6}
+    isHidden: 0
+    itemIds: 08000000020000000c00000003000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 1
+    direction: 3
+    spawnStack:
+    - itemIds: 00000000000000000800000008000000
+      isHidden: 0
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
+    - itemIds: 00000000000000000000000000000000
+      isHidden: 0
+      hasLock: 0
+      lockType: 0
+      hasKeyLock: 0
+      keyLockType: 0
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 6}
+    isHidden: 0
+    itemIds: 01000000080000000000000001000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 2, y: 6}
+    isHidden: 0
+    itemIds: 04000000040000000400000004000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 3, y: 7}
+    isHidden: 1
+    itemIds: 00000000000000000000000008000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 4, y: 7}
+    isHidden: 0
+    itemIds: 03000000090000000900000009000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
+  - targetStackCount: 0
+    gridPos: {x: 5, y: 7}
+    isHidden: 0
+    itemIds: 01000000010000000100000008000000
+    hasLock: 0
+    lockType: 0
+    hasKeyLock: 0
+    keyLockType: 0
+    isStackSpawner: 0
+    direction: 0
+    spawnStack: []
