@@ -28,10 +28,16 @@ public class Stash : MonoBehaviour
 
     [Header("Runtime Info")] public Vector2Int index;
 
+    // --- [NEW] Reference để tìm hàng xóm ---
+    public Level currentLevel;
+
     public bool isEat = false;
     public bool CanPick = true;
     public bool isLock = false;
     public bool isHidden = false;
+
+    // --- [NEW] Danh sách các hướng liên kết ---
+    public List<BoxDirection> connectedSides = new List<BoxDirection>();
     private KeyLockType keyLockType;
     private LockType lockType;
     [ShowInInspector] public Queue<BoxStackData> pendingStack = new Queue<BoxStackData>();
@@ -54,6 +60,7 @@ public class Stash : MonoBehaviour
 
     private void OnUnLockStashCallBack(UnLockStash obj)
     {
+        // ... (Giữ nguyên logic cũ) ...
         if (isLock && (int)lockType == (int)obj.KeyLockType)
         {
             obj.keyTranform.DOKill();
@@ -67,9 +74,6 @@ public class Stash : MonoBehaviour
             seq.Append(transform.DOShakeRotation(0.2f, new Vector3(0, 0, 20), 10));
             seq.OnComplete(() =>
             {
-                // Hiệu ứng nổ hạt (VFX) nếu có
-                // if(vfxUnlock != null) Instantiate(vfxUnlock, transform.position, Quaternion.identity);
-
                 Destroy(obj.keyTranform.gameObject);
                 SetLock(false, LockType.None);
                 transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 1);
@@ -83,6 +87,7 @@ public class Stash : MonoBehaviour
         isLock = false;
         isHidden = false;
         isEat = false;
+        connectedSides.Clear(); // Clear kết nối cũ
     }
 
     public void SetupSpawner(List<BoxStackData> stackData)
@@ -96,11 +101,23 @@ public class Stash : MonoBehaviour
         stackVisual.UpdateStack(pendingStack.Count);
     }
 
+    // --- [UPDATE] Thêm Level reference vào tham số (tùy chọn) hoặc gán sau ---
     public void ApplyConfig(BoxConfig config, ItemDatabase db)
     {
         if (config == null) return;
         sortLayer = 7 - config.gridPos.y;
         isHidden = config.isHidden;
+
+        // --- [NEW] Lưu data liên kết ---
+        if (config.connectedSides != null)
+        {
+            connectedSides = new List<BoxDirection>(config.connectedSides);
+        }
+        else
+        {
+            connectedSides = new List<BoxDirection>();
+        }
+        // ------------------------------
 
         box1.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
         box2.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
@@ -143,10 +160,12 @@ public class Stash : MonoBehaviour
 
     public void SetCanPick(bool canPick)
     {
+        // Cập nhật trạng thái của bản thân
         CanPick = canPick;
+
+        // --- XỬ LÝ VISUAL ---
         if (glass != null)
         {
-            //glass.gameObject.SetActive(!canPick);
             if (!canPick)
             {
                 glass.gameObject.SetActive(true);
@@ -160,6 +179,41 @@ public class Stash : MonoBehaviour
         if (canPick && isHidden)
         {
             SetHidden(false);
+        }
+
+        // --- XỬ LÝ LIÊN KẾT (RECURSIVE) ---
+        // Kiểm tra an toàn cho level
+        if (currentLevel == null || currentLevel.stashGrid == null) return;
+
+        foreach (var dir in connectedSides)
+        {
+            int r = index.x;
+            int c = index.y;
+
+            // Tính tọa độ hàng xóm
+            switch (dir)
+            {
+                case BoxDirection.Up: r += 1; break;
+                case BoxDirection.Down: r -= 1; break;
+                case BoxDirection.Left: c -= 1; break;
+                case BoxDirection.Right: c += 1; break;
+            }
+
+            // Kiểm tra biên (Bounds check)
+            if (r >= 0 && r < currentLevel.stashGrid.GetLength(0) &&
+                c >= 0 && c < currentLevel.stashGrid.GetLength(1))
+            {
+                Stash neighbor = currentLevel.stashGrid[r, c];
+
+                // FIX:
+                // 1. neighbor != null: Đảm bảo ô đó có box
+                // 2. neighbor.CanPick != canPick: QUAN TRỌNG! Chỉ gọi nếu trạng thái khác nhau.
+                //    (Nếu A set B thành true, B đã là true rồi thì B sẽ không gọi ngược lại A nữa)
+                if (neighbor != null && neighbor.CanPick != canPick)
+                {
+                    neighbor.SetCanPick(canPick);
+                }
+            }
         }
     }
 
@@ -178,15 +232,19 @@ public class Stash : MonoBehaviour
         }
     }
 
+    // --- [UPDATE] Logic Pick đệ quy ---
     public void OnPick()
     {
+        // 1. Chặn đệ quy vô hạn: Nếu đã ăn rồi hoặc không được pick thì dừng
+        if (!CanPick || isEat) return;
+
         CanPick = false;
         isEat = true;
 
+        // 2. Visual Effects (Code cũ)
         MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
         for (int i = 0; i < m_ListItem.Count; i++)
         {
-            //m_ListItem[i].transform.DOScale(1.1f, 0.2f);
             Utils_Custom.PlayAnimation(m_ListItem[i].skeletonAnimation, "Jump", loop: true);
         }
 
@@ -196,7 +254,48 @@ public class Stash : MonoBehaviour
             cb.KeyLockType = keyLockType;
             cb.keyTranform = l_KeyTranform;
             EventManager.Trigger(cb);
-            //SetKeyLock(false, KeyLockType.None);
+        }
+
+        // 3. [NEW] Kích hoạt Pick cho các Box liên kết (Hàng xóm)
+        PickConnectedNeighbors();
+    }
+
+    // Hàm đệ quy tìm và pick hàng xóm
+    private void PickConnectedNeighbors()
+    {
+        if (connectedSides == null || connectedSides.Count == 0 || currentLevel == null) return;
+
+        foreach (var dir in connectedSides)
+        {
+            int r = index.x;
+            int c = index.y;
+
+            // Tính tọa độ hàng xóm dựa trên Grid của Level (Row là Y, Col là X trong Grid Logic)
+            switch (dir)
+            {
+                case BoxDirection.Up: r += 1; break;
+                case BoxDirection.Down: r -= 1; break;
+                case BoxDirection.Left: c -= 1; break;
+                case BoxDirection.Right: c += 1; break;
+            }
+
+            // Kiểm tra biên
+            if (currentLevel.stashGrid != null &&
+                r >= 0 && r < currentLevel.stashGrid.GetLength(0) &&
+                c >= 0 && c < currentLevel.stashGrid.GetLength(1))
+            {
+                Stash neighbor = currentLevel.stashGrid[r, c];
+
+                // Chỉ pick nếu hàng xóm tồn tại, chưa bị ăn, và được phép pick
+                if (neighbor != null && !neighbor.isEat && neighbor.CanPick)
+                {
+                    neighbor.OnPick();
+                    OnStashPick cb = new OnStashPick();
+                    cb.Stash = neighbor;
+                    cb.listItem = neighbor.ListItem;
+                    EventManager.Trigger(cb);
+                }
+            }
         }
     }
 

@@ -112,6 +112,9 @@ public class LevelEditorWindow : EditorWindow
 
         if (box != null)
         {
+            // --- [NEW] VẼ LIÊN KẾT (CONNECTION) TRƯỚC ---
+            DrawConnections(rect, box);
+
             // --- VẼ BOX THỰC ---
             bool isSelected = _selectedBox == box;
 
@@ -154,16 +157,12 @@ public class LevelEditorWindow : EditorWindow
             {
                 GUI.Label(new Rect(rect.x + 2, rect.y + 17, 70, 20), "(Lock)",
                     new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.green }, fontSize = 14 });
-                EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6),
-                    new Color(0, 0, 0, 0.3f));
             }
 
             if (box.hasKeyLock)
             {
                 GUI.Label(new Rect(rect.x + 2, rect.y + 27, 70, 20), "(Key)",
                     new GUIStyle(EditorStyles.boldLabel) { normal = { textColor = Color.magenta }, fontSize = 14 });
-                EditorGUI.DrawRect(new Rect(rect.x + 3, rect.y + 3, rect.width - 6, rect.height - 6),
-                    new Color(0, 0, 0, 0.3f));
             }
 
             // 5. Báo lỗi Reserved
@@ -200,6 +199,36 @@ public class LevelEditorWindow : EditorWindow
         }
 
         HandleInput(rect, x, y, box, isReserved);
+    }
+
+    // --- [NEW] VẼ DÂY KẾT NỐI ---
+    private void DrawConnections(Rect rect, BoxConfig box)
+    {
+        if (box.connectedSides == null) return;
+
+        foreach (var dir in box.connectedSides)
+        {
+            Rect visualRect = Rect.zero;
+            // Vẽ 1 đoạn khớp nối nhỏ chìa ra khỏi box
+            switch (dir)
+            {
+                case BoxDirection.Right:
+                    visualRect = new Rect(rect.xMax - 6, rect.center.y - 6, 12, 12);
+                    break;
+                case BoxDirection.Left:
+                    visualRect = new Rect(rect.x - 6, rect.center.y - 6, 12, 12);
+                    break;
+                case BoxDirection.Up: // Trong Grid Loop y vẽ ngược, nhưng visual Up là trên
+                    visualRect = new Rect(rect.center.x - 6, rect.y - 6, 12, 12);
+                    break;
+                case BoxDirection.Down:
+                    visualRect = new Rect(rect.center.x - 6, rect.yMax - 6, 12, 12);
+                    break;
+            }
+
+            EditorGUI.DrawRect(visualRect, new Color(0.8f, 0.8f, 0.8f)); // Màu xám khớp nối
+            FrameRect(visualRect, Color.black, 1);
+        }
     }
 
     private void DrawItemPreview2x2(Rect rect, BoxConfig box)
@@ -292,12 +321,34 @@ public class LevelEditorWindow : EditorWindow
                 if (box != null)
                 {
                     Undo.RecordObject(_level, "Remove Box");
+
+                    // --- [NEW] Xóa mọi liên kết trỏ đến box này trước khi xóa ---
+                    RemoveAllConnectionsTo(box);
+
                     _level.boxes.Remove(box);
                     if (_selectedBox == box) _selectedBox = null;
                     EditorUtility.SetDirty(_level);
                 }
 
                 e.Use();
+            }
+        }
+    }
+
+    // --- [NEW] HÀM XÓA LIÊN KẾT AN TOÀN ---
+    private void RemoveAllConnectionsTo(BoxConfig targetBox)
+    {
+        int[] dx = { 1, -1, 0, 0 };
+        int[] dy = { 0, 0, 1, -1 };
+        BoxDirection[] oppDirs = { BoxDirection.Left, BoxDirection.Right, BoxDirection.Down, BoxDirection.Up };
+
+        for (int i = 0; i < 4; i++)
+        {
+            var neighbor = _level.GetBoxAt(targetBox.gridPos.x + dx[i], targetBox.gridPos.y + dy[i]);
+            if (neighbor != null && neighbor.connectedSides != null)
+            {
+                if (neighbor.connectedSides.Contains(oppDirs[i]))
+                    neighbor.connectedSides.Remove(oppDirs[i]);
             }
         }
     }
@@ -367,6 +418,22 @@ public class LevelEditorWindow : EditorWindow
         }
 
         EditorGUILayout.EndVertical();
+
+        // --- [NEW] LIÊN KẾT (JOINTS) ---
+        EditorGUILayout.Space(5);
+        EditorGUILayout.BeginVertical("box");
+        EditorGUILayout.LabelField("Connections (Joints)", EditorStyles.boldLabel);
+        if (_selectedBox != null)
+        {
+            // Kiểm tra và hiển thị nút Link cho 4 hướng
+            DrawNeighborConnection("Link Right (►)", 1, 0, BoxDirection.Right, BoxDirection.Left);
+            DrawNeighborConnection("Link Left (◄)", -1, 0, BoxDirection.Left, BoxDirection.Right);
+            DrawNeighborConnection("Link Up (▲)", 0, 1, BoxDirection.Up, BoxDirection.Down);
+            DrawNeighborConnection("Link Down (▼)", 0, -1, BoxDirection.Down, BoxDirection.Up);
+        }
+
+        EditorGUILayout.EndVertical();
+        // ------------------------------
 
         EditorGUILayout.Space(5);
 
@@ -500,6 +567,63 @@ public class LevelEditorWindow : EditorWindow
 
             EditorGUILayout.EndVertical();
         }
+    }
+
+    // --- [NEW] LOGIC XỬ LÝ LIÊN KẾT ---
+    private void DrawNeighborConnection(string label, int offX, int offY, BoxDirection myDir, BoxDirection neighborDir)
+    {
+        if (_selectedBox.connectedSides == null) _selectedBox.connectedSides = new List<BoxDirection>();
+
+        int nx = _selectedBox.gridPos.x + offX;
+        int ny = _selectedBox.gridPos.y + offY;
+
+        var neighborBox = _level.GetBoxAt(nx, ny);
+
+        // Chỉ enable nút nếu có hàng xóm
+        GUI.enabled = neighborBox != null;
+
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField(label, GUILayout.Width(100));
+
+        bool isConnected = _selectedBox.connectedSides.Contains(myDir);
+        string btnLabel = isConnected ? "Unlink" : "Link";
+
+        // Cảnh báo nếu dữ liệu không đồng bộ (A nối B mà B chưa nối A)
+        if (neighborBox != null && isConnected)
+        {
+            if (neighborBox.connectedSides == null || !neighborBox.connectedSides.Contains(neighborDir))
+            {
+                GUI.color = Color.yellow; // Cảnh báo
+            }
+        }
+
+        if (GUILayout.Button(btnLabel, isConnected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
+        {
+            Undo.RecordObject(_level, "Toggle Connection");
+            if (neighborBox.connectedSides == null) neighborBox.connectedSides = new List<BoxDirection>();
+
+            if (isConnected)
+            {
+                // Ngắt kết nối 2 chiều
+                _selectedBox.connectedSides.Remove(myDir);
+                neighborBox.connectedSides.Remove(neighborDir);
+            }
+            else
+            {
+                // Tạo kết nối 2 chiều
+                if (!_selectedBox.connectedSides.Contains(myDir)) _selectedBox.connectedSides.Add(myDir);
+                if (!neighborBox.connectedSides.Contains(neighborDir)) neighborBox.connectedSides.Add(neighborDir);
+            }
+
+            EditorUtility.SetDirty(_level);
+        }
+
+        GUI.color = Color.white;
+        GUI.enabled = true;
+
+        if (neighborBox == null) GUILayout.Label("(None)", EditorStyles.centeredGreyMiniLabel);
+
+        EditorGUILayout.EndHorizontal();
     }
 
     private void Draw4ItemSlots(List<int> items)

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using MoreMountains.Feedbacks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,6 +14,7 @@ public class BoxSoldOut : MonoBehaviour
     [SerializeField] private List<SpriteRenderer> sprite;
     public bool isRemove = false;
     public GameObject vfxLandingPrefab;
+    public MMF_Player MmfPlayer;
 
     private Tween tween1;
     private Tween tween2;
@@ -85,6 +87,8 @@ public class BoxSoldOut : MonoBehaviour
                         GameObject vfx = Instantiate(vfxLandingPrefab, pos[index].position, Quaternion.identity);
                         Destroy(vfx, 1.0f);
                     }
+
+                    MmfPlayer.PlayFeedbacks();
 
                     sprite[index].sprite = source.Sprite;
                     sprite[index].enabled = true;

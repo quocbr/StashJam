@@ -17,7 +17,12 @@ public class Level : MonoBehaviour
     public Vector3 gridOrigin = Vector3.zero;
 
     [Header("Prefabs")] public Stash boxPrefab;
+
     public Stash stackPrefab;
+
+    // --- [NEW] Prefab cho liên kết (Joint/Chain) ---
+    [Tooltip("Prefab hiển thị mối nối giữa 2 box (sợi xích, thanh sắt...)")]
+    public GameObject linkPrefab;
 
     [Header("Runtime")] [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
     public Transform levelRoot;
@@ -100,8 +105,11 @@ public class Level : MonoBehaviour
 
                     foreach (Item item in selectedItems)
                     {
-                        Utils_Custom.PlayAnimation(item.skeletonAnimation, "Shake",
-                            onComplete: () => { Utils_Custom.PlayAnimation(item.skeletonAnimation, "Idle"); });
+                        if (item != null && item.skeletonAnimation != null)
+                        {
+                            Utils_Custom.PlayAnimation(item.skeletonAnimation, "Shake",
+                                onComplete: () => { Utils_Custom.PlayAnimation(item.skeletonAnimation, "Idle"); });
+                        }
                     }
                 }
             }
@@ -145,6 +153,7 @@ public class Level : MonoBehaviour
 
     public void Init()
     {
+        // ... (Giữ nguyên logic Init cũ) ...
         int[,] originalMatrix = new int[levelData.height, levelData.width];
         InitializeMatrix(originalMatrix, levelData.height, levelData.width, -1);
 
@@ -173,14 +182,13 @@ public class Level : MonoBehaviour
                 int boxIndex = originalMatrix[y, x];
                 if (boxIndex != -1)
                 {
-                    int newY = y; // giữ nguyên (hàng lề ở dưới)
-                    int newX = x + 1; // dịch phải 1 (lề trái)
+                    int newY = y;
+                    int newX = x + 1;
                     paddedMatrix[newY, newX] = boxIndex;
                 }
             }
         }
 
-        // Lưu lại
         levelIndexMatrix = paddedMatrix;
         stashGrid = new Stash[newHeight, newWidth];
         for (int i = 0; i < Stash.Count; i++)
@@ -192,17 +200,20 @@ public class Level : MonoBehaviour
         {
             var boxCfg = levelData.boxes[i];
 
-            stashGrid[boxCfg.gridPos.y, boxCfg.gridPos.x + 1].SetHidden(boxCfg.isHidden);
-
-
-            if (boxCfg.hasLock)
+            // Lưu ý: Tọa độ truy cập stashGrid cần +1 ở X do padding
+            var currentStash = stashGrid[boxCfg.gridPos.y, boxCfg.gridPos.x + 1];
+            if (currentStash != null)
             {
-                stashGrid[boxCfg.gridPos.y, boxCfg.gridPos.x + 1].SetLock(boxCfg.hasLock, boxCfg.lockType);
-            }
+                currentStash.SetHidden(boxCfg.isHidden);
 
-            if (boxCfg.hasKeyLock)
-            {
-                stashGrid[boxCfg.gridPos.y, boxCfg.gridPos.x + 1].SetKeyLock(boxCfg.hasKeyLock, boxCfg.keyLockType);
+                if (boxCfg.hasLock)
+                    currentStash.SetLock(boxCfg.hasLock, boxCfg.lockType);
+
+                if (boxCfg.hasKeyLock)
+                    currentStash.SetKeyLock(boxCfg.hasKeyLock, boxCfg.keyLockType);
+
+                // --- Nếu trong Stash có biến lưu connection data thì gán ở đây ---
+                // currentStash.connectedSides = boxCfg.connectedSides; 
             }
 
             if (boxCfg.isStackSpawner)
@@ -224,10 +235,16 @@ public class Level : MonoBehaviour
                         case BoxDirection.Right: tCol += 1; break;
                     }
 
-                    spawnerStash.SetupSpawner(boxCfg.spawnStack);
-                    Stash x = stashGrid[tRow, tCol];
-                    x.Init();
-                    spawnerStash.SetVisualStack(x);
+                    if (tRow >= 0 && tRow < newHeight && tCol >= 0 && tCol < newWidth)
+                    {
+                        spawnerStash.SetupSpawner(boxCfg.spawnStack);
+                        Stash x = stashGrid[tRow, tCol];
+                        if (x != null)
+                        {
+                            x.Init();
+                            spawnerStash.SetVisualStack(x);
+                        }
+                    }
                 }
             }
         }
@@ -327,39 +344,31 @@ public class Level : MonoBehaviour
                     0f
                 );
 
+                // --- LOGIC EXTRA DECOR SANG 2 BÊN ---
                 if (row == 0)
                 {
                     if (col == 0)
                     {
                         for (int i = 1; i <= 3; i++)
                         {
-                            // Tính vị trí lùi sang trái: trừ đi (i * cellSize) vào trục X
                             Vector3 extraPos = localPos - new Vector3(cellSize * i, 0f, 0f);
-
                             if (prefabToSpawn != null)
                             {
                                 GameObject go = Instantiate(prefabToSpawn, levelRoot);
                                 go.transform.localPosition = extraPos;
-                                go.transform.localRotation = Quaternion.identity;
-                                go.transform.localScale = Vector3.one;
-                                go.name = $"ExtraLeft_{row}_{i}"; // Đặt tên để dễ debug
+                                go.name = $"ExtraLeft_{row}_{i}";
                             }
                         }
                     }
-
                     else if (col == maxCols - 1)
                     {
                         for (int i = 1; i <= 3; i++)
                         {
-                            // Tính vị trí tiến sang phải: cộng thêm (i * cellSize) vào trục X
                             Vector3 extraPos = localPos + new Vector3(cellSize * i, 0f, 0f);
-
                             if (prefabToSpawn != null)
                             {
                                 GameObject go = Instantiate(prefabToSpawn, levelRoot);
                                 go.transform.localPosition = extraPos;
-                                go.transform.localRotation = Quaternion.identity;
-                                go.transform.localScale = Vector3.one;
                                 go.name = $"ExtraRight_{row}_{i}";
                             }
                         }
@@ -387,6 +396,7 @@ public class Level : MonoBehaviour
                     }
                     else
                     {
+                        // --- SPAWN BOX THƯỜNG ---
                         var boxCfg = levelData.boxes[boxIndex];
 
                         Stash box = Instantiate(boxPrefab, levelRoot);
@@ -396,15 +406,22 @@ public class Level : MonoBehaviour
                         box.transform.localScale = Vector3.one;
                         box.SetIndex(row, col);
 
+                        box.currentLevel = this;
+
                         box.ApplyConfig(boxCfg, itemDatabase);
                         box.SetHidden(boxCfg.isHidden);
-                        Stash.Add(box);
 
+                        // --- [NEW] GỌI HÀM SPAWN LINK ---
+                        SpawnBoxConnections(box, boxCfg);
+                        // --------------------------------
+
+                        Stash.Add(box);
                         stashGrid[row, col] = box;
                     }
                 }
                 else
                 {
+                    // --- SPAWN BORDER/DECOR ---
                     stashGrid[row, col] = null;
                     int orthoMask = GetOrthogonalMask(row, col, maxRows, maxCols);
 
@@ -440,6 +457,50 @@ public class Level : MonoBehaviour
 
         SetBlock();
         UpdateMinMaxPositions(centerX, centerY);
+    }
+
+    // --- [NEW] LOGIC SPAWN KẾT NỐI ---
+    private void SpawnBoxConnections(Stash box, BoxConfig config)
+    {
+        if (linkPrefab == null || config.connectedSides == null || config.connectedSides.Count == 0) return;
+
+        foreach (var dir in config.connectedSides)
+        {
+            GameObject linkObj = Instantiate(linkPrefab, box.transform);
+
+            // Tính toán vị trí và góc xoay tương đối so với Box cha
+            // (Giả sử linkPrefab được thiết kế dạng thanh ngang hướng sang phải)
+            Vector3 offset = Vector3.zero;
+            float rotationZ = 0;
+
+            float halfSize = cellSize / 2f;
+            // Điều chỉnh offset này tùy vào pivot của prefab Link của bạn
+
+            switch (dir)
+            {
+                case BoxDirection.Right:
+                    offset = new Vector3(halfSize, 0, 0);
+                    rotationZ = 0;
+                    break;
+                case BoxDirection.Left:
+                    offset = new Vector3(-halfSize, 0, 0);
+                    rotationZ = 180;
+                    break;
+                case BoxDirection.Up:
+                    offset = new Vector3(0, halfSize, 0);
+                    rotationZ = 90;
+                    break;
+                case BoxDirection.Down:
+                    offset = new Vector3(0, -halfSize, 0);
+                    rotationZ = -90;
+                    break;
+            }
+
+            linkObj.transform.localPosition = offset;
+            linkObj.transform.localRotation = Quaternion.Euler(0, 0, rotationZ);
+            linkObj.transform.localScale = Vector3.one;
+            linkObj.name = $"Link_{dir}";
+        }
     }
 
     private void UpdateMinMaxPositions(float centerX, float centerY)

@@ -27,7 +27,6 @@ public enum KeyLockType
 
 // --- DATA CLASSES ---
 
-// Dữ liệu của một cái Box nằm trong hàng đợi (Stack)
 [Serializable]
 public class BoxStackData
 {
@@ -52,8 +51,11 @@ public class BoxConfig
     // Item của chính cái Box đang đặt trên sàn
     public List<int> itemIds = new List<int>();
 
+    // --- [NEW] LIÊN KẾT (JOINTS) ---
+    // Danh sách các hướng mà Box này đang kết nối
+    public List<BoxDirection> connectedSides = new List<BoxDirection>();
+
     // --- LOCK & KEYLOCK ---
-    // (Đã thay thế bool isLocked cũ bằng hệ thống mới chi tiết hơn)
     public bool hasLock;
     public LockType lockType;
 

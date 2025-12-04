@@ -4910,7 +4910,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   loopType: 0
-  loops: 1
+  loops: -1
   id: 
   isRelative: 0
   isFrom: 0

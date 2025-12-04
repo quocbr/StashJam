@@ -29,6 +29,8 @@ public class WinUI : UICanvas
     public TextMeshProUGUI title;
     public TextMeshProUGUI description;
 
+    private bool isBlock = false;
+
     private void Awake()
     {
         NextButton.onClick.AddListener(OnNextButtonClickHandle);
@@ -38,6 +40,7 @@ public class WinUI : UICanvas
     public override void Open()
     {
         base.Open();
+        isBlock = false;
         SoundManager.Ins.PlaySoundBG(SoundBg.win);
         content1.SetActive(true);
         content2.SetActive(false);
@@ -80,6 +83,8 @@ public class WinUI : UICanvas
 
     private void OnNextButtonClickHandle()
     {
+        if (isBlock) return;
+        isBlock = true;
         particleImage.transform.position = rewardIcon.position;
         particleImage.Play();
     }
@@ -95,31 +100,24 @@ public class WinUI : UICanvas
             temp = GameManager.Ins.UnlockFeatures[index - 1].levelUnlock;
         }
 
-        // Lấy các thông số cần thiết
         int currentLevel = DataManager.Ins.userData.level;
         int targetLevel = GameManager.Ins.UnlockFeatures[index].levelUnlock;
         float totalRange = (targetLevel - temp) * 1.0f;
 
-        // 1. Tính giá trị ĐÍCH (Level hiện tại)
         float endValue = (currentLevel - temp) / totalRange;
 
-        // 2. Tính giá trị BẮT ĐẦU (Level trước đó = Level hiện tại - 1)
-        // Dùng Mathf.Max(0, ...) để đảm bảo không bị âm nếu là level đầu tiên
         float startValue = (currentLevel - 1 - temp) / totalRange;
         if (startValue < 0) startValue = 0;
 
-        // 3. Đặt slider ngay lập tức về vị trí cũ
         slider.value = startValue;
 
-        // Cập nhật Text hiện tại (có thể để nó chạy theo slider nếu muốn, ở đây đang hiển thị số cuối cùng)
         processText.text = $"{currentLevel - temp} / {targetLevel - temp}";
 
-        // Xử lý Logic hoàn thành (Unlock)
         if (endValue >= 1)
         {
+            isBlock = true;
             DataManager.Ins.userData.indexCurrentFeature++;
 
-            // Chạy từ startValue lên 1
             slider.DOValue(1, 1f).SetEase(Ease.OutQuad).OnComplete(() =>
             {
                 content1.SetActive(false);
@@ -127,6 +125,7 @@ public class WinUI : UICanvas
                 iconFeatureUnlock.sprite = feature.spriteUnlock;
                 title.text = feature.Title;
                 description.text = feature.Description;
+                isBlock = false;
             }).SetDelay(0.2f);
         }
         else
