@@ -470,9 +470,13 @@ MonoBehaviour:
   l_LockSprite:
   - {fileID: 21300000, guid: 2ba8d23dea3b7e74fb900540c9d7e6e5, type: 3}
   - {fileID: 21300000, guid: 4972c5bcd40646b49a6a1a6eaad479d4, type: 3}
+  - {fileID: 21300000, guid: 1c3103f2909a12849abaa57e4c397253, type: 3}
+  - {fileID: 21300000, guid: 16b98ea0ba1713840957c7d44b8ae788, type: 3}
   l_KeyLockSprite:
   - {fileID: 21300000, guid: 605f6751a55100f45a995911f139e444, type: 3}
   - {fileID: 21300000, guid: af47afc951bde7d45b8ec9879064ad73, type: 3}
+  - {fileID: 21300000, guid: 615974a5eb82d9d4fa7ae81912d71ed8, type: 3}
+  - {fileID: 21300000, guid: 9f3b3e9c18b1eac4db932fba55fb4695, type: 3}
   l_KeyTranform: {fileID: 2167539883756671325}
   l_ParentKeyTranform: {fileID: 2729717220024620454}
   index: {x: 0, y: 0}
