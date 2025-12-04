@@ -475,15 +475,17 @@ MonoBehaviour:
   l_KeyLockSprite:
   - {fileID: 21300000, guid: 605f6751a55100f45a995911f139e444, type: 3}
   - {fileID: 21300000, guid: af47afc951bde7d45b8ec9879064ad73, type: 3}
-  - {fileID: 21300000, guid: 615974a5eb82d9d4fa7ae81912d71ed8, type: 3}
   - {fileID: 21300000, guid: 9f3b3e9c18b1eac4db932fba55fb4695, type: 3}
+  - {fileID: 21300000, guid: 615974a5eb82d9d4fa7ae81912d71ed8, type: 3}
   l_KeyTranform: {fileID: 2167539883756671325}
   l_ParentKeyTranform: {fileID: 2729717220024620454}
   index: {x: 0, y: 0}
+  currentLevel: {fileID: 0}
   isEat: 0
   CanPick: 1
   isLock: 0
   isHidden: 0
+  connectedSides: 
 --- !u!61 &4808754173002921554
 BoxCollider2D:
   m_ObjectHideFlags: 0
