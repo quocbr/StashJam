@@ -69,6 +69,7 @@ namespace MoreMountains.Feedbacks
 
 		protected Coroutine _coroutine;
 		protected Color _initialColor;
+		protected Color _initialInstantColor;
 
 		/// <summary>
 		/// On init we turn the Graphic off if needed
@@ -84,6 +85,15 @@ namespace MoreMountains.Feedbacks
 				{
 					Turn(false);
 				}
+
+				if (TargetGraphic == null)
+				{
+					Debug.LogWarning("[Graphic Feedback] The graphic feedback on "+Owner.name+" doesn't have a Target Graphic, it won't work. You need to specify a graphic in its inspector.");
+				}
+				else
+				{
+					_initialInstantColor = TargetGraphic.color;	
+				}
 			}
 		}
 
@@ -94,7 +104,7 @@ namespace MoreMountains.Feedbacks
 		/// <param name="feedbacksIntensity"></param>
 		protected override void CustomPlayFeedback(Vector3 position, float feedbacksIntensity = 1.0f)
 		{
-			if (!Active || !FeedbackTypeAuthorized)
+			if (!Active || !FeedbackTypeAuthorized || (TargetGraphic == null))
 			{
 				return;
 			}
@@ -106,7 +116,7 @@ namespace MoreMountains.Feedbacks
 				case Modes.Instant:
 					if (ModifyColor)
 					{
-						TargetGraphic.color = InstantColor;
+						TargetGraphic.color = NormalPlayDirection ? InstantColor : _initialInstantColor;
 					}
 					break;
 				case Modes.OverTime:

@@ -1,10 +1,10 @@
 using UnityEngine;
-#if (MM_TEXTMESHPRO || MM_UGUI2)
+#if MM_UGUI2
 using TMPro;
 
 namespace MoreMountains.Feedbacks
 {
-	[AddComponentMenu("More Mountains/Springs/MMSpringTMPSoftness")]
+	[AddComponentMenu("More Mountains/Springs/MM Spring TMP Softness")]
 	public class MMSpringTMPSoftness : MMSpringFloatComponent<TMP_Text>
 	{
 		protected override void ApplyValue(float newValue)

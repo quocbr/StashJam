@@ -91,6 +91,11 @@ namespace MoreMountains.Tools
 		/// the current level 
 		public float Level = 0f;
 
+		public float GetLevel()
+		{
+			return (_propertySetter != null) ? _propertySetter.GetLevel(this, _targetMMProperty) : 0f;
+		} 
+		
 		/// <summary>
 		/// Sets the level
 		/// </summary>

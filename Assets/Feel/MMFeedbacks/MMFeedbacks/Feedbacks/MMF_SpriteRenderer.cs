@@ -152,8 +152,14 @@ namespace MoreMountains.Feedbacks
 			{
 				return;
 			}
+			
+			if (BoundSpriteRenderer == null)
+			{
+				Debug.LogWarning("[Sprite Renderer Feedback] The sprite renderer feedback on "+Owner.name+" doesn't have a BoundSpriteRenderer, it won't work. You need to specify one in its inspector.");
+				return;
+			}
             
-			if ((BoundSpriteRenderer != null) && (InitialColorMode == InitialColorModes.InitialColorOnPlay))
+			if (InitialColorMode == InitialColorModes.InitialColorOnPlay)
 			{
 				_initialColor = BoundSpriteRenderer.color;
 				_initialFlipX = BoundSpriteRenderer.flipX;
@@ -167,7 +173,7 @@ namespace MoreMountains.Feedbacks
 				case Modes.Instant:
 					if (ModifyColor)
 					{
-						BoundSpriteRenderer.color = InstantColor;
+						BoundSpriteRenderer.color = NormalPlayDirection ? InstantColor : _initialColor;
 					}
 					Flip();
 					break;

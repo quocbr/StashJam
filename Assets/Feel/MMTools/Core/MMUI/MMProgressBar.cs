@@ -3,7 +3,7 @@
 using UnityEngine.UI;
 #endif
 using System.Collections;
-#if (MM_TEXTMESHPRO || MM_UGUI2)
+#if MM_UGUI2
 using TMPro;
 #endif
 using UnityEngine.Events;
@@ -16,7 +16,7 @@ namespace MoreMountains.Tools
 	/// See the HealthBar.cs script for a use case
 	/// </summary>
 	[MMRequiresConstantRepaint]
-	[AddComponentMenu("More Mountains/Tools/GUI/MMProgressBar")]
+	[AddComponentMenu("More Mountains/Tools/GUI/MM Progress Bar")]
 	public class MMProgressBar : MMMonoBehaviour
 	{
 		#if MM_UI
@@ -219,7 +219,7 @@ namespace MoreMountains.Tools
 		/// a Text object to update with the bar's value
 		[Tooltip("a Text object to update with the bar's value")]
 		public Text PercentageText;
-		#if (MM_TEXTMESHPRO || MM_UGUI2)
+		#if MM_UGUI2
 		/// a TMPro text object to update with the bar's value
 		[Tooltip("a TMPro text object to update with the bar's value")]
 		public TMP_Text PercentageTextMeshPro;
@@ -236,7 +236,7 @@ namespace MoreMountains.Tools
 		public float TextValueMultiplier = 1f;
 		/// the format in which the text should display
 		[Tooltip("the format in which the text should display")]
-		public string TextFormat = "{000}";
+		public string TextFormat = "000";
 		/// whether or not to display the total after the current value 
 		[Tooltip("whether or not to display the total after the current value")]
 		public bool DisplayTotal = false;
@@ -490,7 +490,7 @@ namespace MoreMountains.Tools
 			_isDelayedBarDecreasingNotNull = DelayedBarDecreasing != null;
 			_isDelayedBarIncreasingNotNull = DelayedBarIncreasing != null;
 			_isPercentageTextNotNull = PercentageText != null;
-			#if (MM_TEXTMESHPRO || MM_UGUI2)
+			#if MM_UGUI2
 			_isPercentageTextMeshProNotNull = PercentageTextMeshPro != null;
 			#endif
 			_initialScale = this.transform.localScale;
@@ -606,7 +606,7 @@ namespace MoreMountains.Tools
 			{
 				PercentageText.text = _updatedText;
 			}
-			#if (MM_TEXTMESHPRO || MM_UGUI2)
+			#if MM_UGUI2
 			if (_isPercentageTextMeshProNotNull)
 			{
 				PercentageTextMeshPro.text = _updatedText;
@@ -687,7 +687,7 @@ namespace MoreMountains.Tools
 			}
 			else // if the value is increasing
 			{
-				newFill = ComputeNewFill(LerpForegroundBar, LerpForegroundBarSpeedIncreasing, LerpForegroundBarDurationIncreasing, LerpForegroundBarCurveIncreasing, 0f, _delayedBarIncreasingProgress, out t1);
+				newFill = ComputeNewFill(LerpForegroundBar, LerpIncreasingDelayedBarSpeed, LerpIncreasingDelayedBarDuration, LerpIncreasingDelayedBarCurve, 0f, _delayedBarIncreasingProgress, out t1);
 				SetBarInternal(newFill, DelayedBarIncreasing, _delayedIncreasingImage, _initialBarSize);
 				
 				DelayedBarIncreasingProgress = newFill;

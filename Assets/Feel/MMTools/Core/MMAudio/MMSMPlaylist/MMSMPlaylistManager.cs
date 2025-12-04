@@ -199,7 +199,7 @@ namespace MoreMountains.Tools
 				{
 					if (_instance == null)
 					{
-						_instance = FindObjectOfType<MMSMPlaylistManager> ();
+						_instance = FindAnyObjectByType<MMSMPlaylistManager>();
 						if (_instance == null)
 						{
 							GameObject obj = new GameObject ();
@@ -328,6 +328,14 @@ namespace MoreMountains.Tools
 			/// </summary>
 			protected virtual void Update()
 			{
+				if (AudioListener.pause)
+				{
+					return;
+				}
+				if (MMSoundManager.Instance.IsPaused(Playlist.Track))
+				{
+					return;
+				}
 				if (PlaylistManagerState.CurrentState == PlaylistManagerStates.Idle)
 				{
 					this.enabled = false;
@@ -385,6 +393,10 @@ namespace MoreMountains.Tools
 				{
 					if (FadeIn && FadeOut && (CurrentTimeLeft < FadeDuration))
 					{
+						if (FadeOut)
+						{
+							Stop();	
+						}
 						HandleNextSong(1, false);
 					}
 					return;

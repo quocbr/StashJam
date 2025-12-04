@@ -28,7 +28,6 @@ public class WinUI : UICanvas
 
     public TextMeshProUGUI title;
     public TextMeshProUGUI description;
-    private bool canNext = false;
 
     private void Awake()
     {
@@ -44,12 +43,10 @@ public class WinUI : UICanvas
         content2.SetActive(false);
 
         textCoin.text = $"{DataManager.Ins.userData.coin}";
-
-        canNext = false;
         DataManager.Ins.userData.level++;
         DataManager.Ins.SaveData();
 
-        DOVirtual.DelayedCall(0.2f, () => { particleImage.Play(); });
+        DOVirtual.DelayedCall(0.2f, () => { });
         if (DataManager.Ins.userData.indexCurrentFeature < GameManager.Ins.UnlockFeatures.Count)
         {
             Content.anchoredPosition = new Vector2(0, -100);
@@ -66,22 +63,25 @@ public class WinUI : UICanvas
     [Button]
     public void FlyCoin()
     {
-        particleImage.transform.position = rewardIcon.position;
         DOVirtual.Int(DataManager.Ins.userData.coin, DataManager.Ins.userData.coin + 100, 0.5f,
-            value => { textCoin.text = $"{value}"; }).OnComplete(() => { canNext = true; });
+            value => { textCoin.text = $"{value}"; }).OnComplete(() => { });
         DataManager.Ins.AddCoin(100);
+    }
+
+    public void Up()
+    {
+        TransitionManager.Instance.PlayStartHalfTransition(0.6f, 0.5f, () =>
+        {
+            LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
+            TransitionManager.Instance.PlayEndHalfTransition(0.6f, 0.5f);
+            Close(0);
+        });
     }
 
     private void OnNextButtonClickHandle()
     {
-        if (!canNext) return;
-        canNext = false;
-        TransitionManager.Instance.PlayStartHalfTransition(0.4f, 0f, () =>
-        {
-            LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
-            TransitionManager.Instance.PlayEndHalfTransition(0.4f, 0.5f);
-            Close(0);
-        });
+        particleImage.transform.position = rewardIcon.position;
+        particleImage.Play();
     }
 
     private void SetProcessUnlockFeature(int index)

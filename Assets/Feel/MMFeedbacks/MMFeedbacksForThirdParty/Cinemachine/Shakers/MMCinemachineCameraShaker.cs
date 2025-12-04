@@ -6,13 +6,14 @@ using Cinemachine;
 using Unity.Cinemachine;
 #endif
 using MoreMountains.Feedbacks;
+using MoreMountains.Tools;
 
 namespace MoreMountains.FeedbacksForThirdParty
 {
 	/// <summary>
 	/// Add this component to your Cinemachine Virtual Camera to have it shake when calling its ShakeCamera methods.
 	/// </summary>
-	[AddComponentMenu("More Mountains/Feedbacks/Shakers/Cinemachine/MMCinemachineCameraShaker")]
+	[AddComponentMenu("More Mountains/Feedbacks/Shakers/Cinemachine/MM Cinemachine Camera Shaker")]
 	#if MM_CINEMACHINE
 	[RequireComponent(typeof(CinemachineVirtualCamera))]
 	#elif MM_CINEMACHINE3
@@ -176,7 +177,7 @@ namespace MoreMountains.FeedbacksForThirdParty
 			_timescaleMode = useUnscaledTime ? TimescaleModes.Unscaled : TimescaleModes.Scaled;
 			if (!infinite)
 			{
-				yield return new WaitForSeconds(duration);
+				yield return MMCoroutine.WaitFor(duration);
 				CameraReset();
 			}                        
 		}

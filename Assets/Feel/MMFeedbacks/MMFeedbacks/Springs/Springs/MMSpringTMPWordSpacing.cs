@@ -1,10 +1,10 @@
 using UnityEngine;
-#if (MM_TEXTMESHPRO || MM_UGUI2)
+#if MM_UGUI2
 using TMPro;
 
 namespace MoreMountains.Feedbacks
 {
-	[AddComponentMenu("More Mountains/Springs/MMSpringTMPWordSpacing")]
+	[AddComponentMenu("More Mountains/Springs/MM Spring TMP Word Spacing")]
 	public class MMSpringTMPWordSpacing : MMSpringFloatComponent<TMP_Text>
 	{
 		public override float TargetFloat

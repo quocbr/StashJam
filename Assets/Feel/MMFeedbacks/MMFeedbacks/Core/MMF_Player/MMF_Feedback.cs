@@ -29,6 +29,13 @@ namespace MoreMountains.Feedbacks
 		[Tooltip("the name of this feedback to display in the inspector")]
 		public string Label = "MMFeedback";
 
+		/// you can override this when creating a custom feedback to have it behave differently and display a different label 
+		public virtual string GetLabel() => Label;
+
+		/// the original label of this feedback, used to display next to the custom label in case we set one
+		[MMFHidden]
+		public string OriginalLabel = "";
+
 		/// whether to broadcast this feedback's message using an int or a scriptable object. Ints are simple to setup but can get messy and make it harder to remember what int corresponds to what.
 		/// MMChannel scriptable objects require you to create them in advance, but come with a readable name and are more scalable
 		[Tooltip(
@@ -57,7 +64,7 @@ namespace MoreMountains.Feedbacks
 
 		/// use this color to customize the background color of the feedback in the MMF_Player's list
 		[Tooltip("use this color to customize the background color of the feedback in the MMF_Player's list")]
-		public Color DisplayColor = Color.black;
+		public virtual Color DisplayColor => Color.black;
 
 		/// a number of timing-related values (delay, repeat, etc)
 		[Tooltip("a number of timing-related values (delay, repeat, etc)")]
@@ -137,7 +144,7 @@ namespace MoreMountains.Feedbacks
 		/// if this is true, this feedback will wait until all previous feedbacks have run, then run all previous feedbacks again
 		public virtual bool LooperPause => false;
 
-		/// if this is true, this feedback will pause and wait until Resume() is called on its parent MMFeedbacks to resume execution
+		/// if this is true, this feedback will pause and wait until ResumeFeedbacks() is called on its parent MMF_Player to resume execution
 		public virtual bool ScriptDrivenPause { get; set; }
 
 		/// if this is a positive value, the feedback will auto resume after that duration if it hasn't been resumed via script already
@@ -416,8 +423,10 @@ namespace MoreMountains.Feedbacks
 
 		/// a ChannelData object, ready to pass to an event
 		public virtual MMChannelData ChannelData => _channelData.Set(ChannelMode, Channel, MMChannelDefinition);
+		
+		public virtual bool InInitialDelay { get; set; }
 
-		protected float _lastPlayTimestamp = -1f;
+		protected float _lastPlayTimestamp = -float.MaxValue;
 		protected int _playsLeft;
 		protected bool _initialized = false;
 		protected Coroutine _playCoroutine;
@@ -466,7 +475,8 @@ namespace MoreMountains.Feedbacks
 			}
 
 			SetIndexInFeedbacksList(index);
-			_lastPlayTimestamp = -1f;
+			ResetCooldown();
+			InInitialDelay = false;
 			Timing.PlayCount = 0;
 			_initialized = true;
 			Owner = owner;
@@ -609,7 +619,9 @@ namespace MoreMountains.Feedbacks
 		/// <returns></returns>
 		protected virtual IEnumerator PlayCoroutine(Vector3 position, float feedbacksIntensity = 1.0f)
 		{
+			InInitialDelay = true;
 			yield return WaitFor(ApplyTimeMultiplier(Timing.InitialDelay));
+			InInitialDelay = false;
 			RegularPlay(position, feedbacksIntensity);
 		}
 
@@ -720,18 +732,20 @@ namespace MoreMountains.Feedbacks
 		{
 			if (Timing.Sequence == null)
 			{
+				float time = InScaledTimescaleMode ? Time.time : Time.unscaledTime;
 				TriggerCustomPlay(position, feedbacksIntensity);
-				float repeatStartTime = Time.time;
+				float repeatStartTime = time;
 					
 				float repeatDuration = Timing.DelayBetweenRepeats + FeedbackDuration;
 				if (_repeatOffset <= Timing.DelayBetweenRepeats)
 				{
 					repeatDuration = Timing.DelayBetweenRepeats + FeedbackDuration - _repeatOffset;	
 				}
-					
+				
 				yield return WaitFor(repeatDuration);
 				yield return null;
-				_repeatOffset = (Time.time - repeatStartTime - repeatDuration);
+				time = InScaledTimescaleMode ? Time.time : Time.unscaledTime;
+				_repeatOffset = (time - repeatStartTime - (Timing.DelayBetweenRepeats + FeedbackDuration));
 			}
 			else
 			{
@@ -857,8 +871,9 @@ namespace MoreMountains.Feedbacks
 				Owner.StopCoroutine(_sequenceCoroutine);
 			}
 
-			_lastPlayTimestamp = -1f;
 			_playsLeft = Timing.NumberOfRepeats + 1;
+			_lastPlayTimestamp = -1f;
+			
 			if (Timing.InterruptsOnStop)
 			{
 				CustomStopFeedback(position, feedbacksIntensity);
@@ -932,6 +947,14 @@ namespace MoreMountains.Feedbacks
 				ResetPlayCount();
 			}
 			CustomReset();
+		}
+
+		/// <summary>
+		/// Resets the cooldown for this feedback, allowing it to be played again instantly
+		/// </summary>
+		public virtual void ResetCooldown()
+		{
+			_lastPlayTimestamp = -float.MaxValue; 
 		}
 
 		/// <summary>
@@ -1055,7 +1078,7 @@ namespace MoreMountains.Feedbacks
 			{
 				float delayBetweenRepeats = ApplyTimeMultiplier(Timing.DelayBetweenRepeats);
 
-				totalTime += (Timing.NumberOfRepeats * delayBetweenRepeats);
+				totalTime += Timing.NumberOfRepeats * (FeedbackDuration + delayBetweenRepeats);
 			}
 				
 			_totalDuration = totalTime;
