@@ -30,6 +30,7 @@ public class Stash : MonoBehaviour
 
     // --- [NEW] Reference để tìm hàng xóm ---
     public Level currentLevel;
+    public GameObject x;
 
     public bool isEat = false;
     public bool CanPick = true;
@@ -102,7 +103,7 @@ public class Stash : MonoBehaviour
     }
 
     // --- [UPDATE] Thêm Level reference vào tham số (tùy chọn) hoặc gán sau ---
-    public void ApplyConfig(BoxConfig config, ItemDatabase db)
+    public virtual void ApplyConfig(BoxConfig config, ItemDatabase db)
     {
         if (config == null) return;
         sortLayer = 7 - config.gridPos.y;
@@ -121,7 +122,11 @@ public class Stash : MonoBehaviour
 
         box1.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
         box2.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
-        glass.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
+        if (glass != null)
+        {
+            glass.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
+        }
+
         lockSprite.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
         keyLockSprite.sortingLayerID = SortingLayer.NameToID($"{7 - config.gridPos.y}");
 
@@ -243,6 +248,11 @@ public class Stash : MonoBehaviour
 
         // 2. Visual Effects (Code cũ)
         MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
+        if (x != null)
+        {
+            x.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
+        }
+
         for (int i = 0; i < m_ListItem.Count; i++)
         {
             Utils_Custom.PlayAnimation(m_ListItem[i].skeletonAnimation, "Jump", loop: true);

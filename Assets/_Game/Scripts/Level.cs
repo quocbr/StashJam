@@ -19,10 +19,11 @@ public class Level : MonoBehaviour
     [Header("Prefabs")] public Stash boxPrefab;
 
     public Stash stackPrefab;
+    public Stash BoxLinkPrefab;
 
     // --- [NEW] Prefab cho liên kết (Joint/Chain) ---
     [Tooltip("Prefab hiển thị mối nối giữa 2 box (sợi xích, thanh sắt...)")]
-    public GameObject linkPrefab;
+    public StashLink[] linkPrefab;
 
     [Header("Runtime")] [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
     public Transform levelRoot;
@@ -38,6 +39,7 @@ public class Level : MonoBehaviour
     public Transform max;
     public Transform min;
     private Coroutine animShake;
+    private Stash boxTemp;
 
     private int[,] levelIndexMatrix;
     private List<Item> selectedItems = new List<Item>();
@@ -397,26 +399,35 @@ public class Level : MonoBehaviour
                     else
                     {
                         // --- SPAWN BOX THƯỜNG ---
+
                         var boxCfg = levelData.boxes[boxIndex];
+                        if (boxCfg.connectedSides.Count > 0)
+                        {
+                            boxTemp = Instantiate(BoxLinkPrefab, levelRoot);
+                        }
+                        else
+                        {
+                            boxTemp = Instantiate(boxPrefab, levelRoot);
+                        }
 
-                        Stash box = Instantiate(boxPrefab, levelRoot);
-                        box.name = $"Box_{boxCfg.gridPos.x}_{boxCfg.gridPos.y}";
-                        box.transform.localPosition = localPos;
-                        box.transform.localRotation = Quaternion.identity;
-                        box.transform.localScale = Vector3.one;
-                        box.SetIndex(row, col);
 
-                        box.currentLevel = this;
+                        boxTemp.name = $"Box_{boxCfg.gridPos.x}_{boxCfg.gridPos.y}";
+                        boxTemp.transform.localPosition = localPos;
+                        boxTemp.transform.localRotation = Quaternion.identity;
+                        boxTemp.transform.localScale = Vector3.one;
+                        boxTemp.SetIndex(row, col);
 
-                        box.ApplyConfig(boxCfg, itemDatabase);
-                        box.SetHidden(boxCfg.isHidden);
+                        boxTemp.currentLevel = this;
+
+                        boxTemp.ApplyConfig(boxCfg, itemDatabase);
+                        boxTemp.SetHidden(boxCfg.isHidden);
 
                         // --- [NEW] GỌI HÀM SPAWN LINK ---
-                        SpawnBoxConnections(box, boxCfg);
+                        SpawnBoxConnections(boxTemp, boxCfg);
                         // --------------------------------
 
-                        Stash.Add(box);
-                        stashGrid[row, col] = box;
+                        Stash.Add(boxTemp);
+                        stashGrid[row, col] = boxTemp;
                     }
                 }
                 else
@@ -464,42 +475,13 @@ public class Level : MonoBehaviour
     {
         if (linkPrefab == null || config.connectedSides == null || config.connectedSides.Count == 0) return;
 
-        foreach (var dir in config.connectedSides)
+        foreach (BoxDirection dir in config.connectedSides)
         {
-            GameObject linkObj = Instantiate(linkPrefab, box.transform);
-
-            // Tính toán vị trí và góc xoay tương đối so với Box cha
-            // (Giả sử linkPrefab được thiết kế dạng thanh ngang hướng sang phải)
+            StashLink linkObj = Instantiate(linkPrefab[(int)dir], box.transform);
             Vector3 offset = Vector3.zero;
-            float rotationZ = 0;
-
-            float halfSize = cellSize / 2f;
-            // Điều chỉnh offset này tùy vào pivot của prefab Link của bạn
-
-            switch (dir)
-            {
-                case BoxDirection.Right:
-                    offset = new Vector3(halfSize, 0, 0);
-                    rotationZ = 0;
-                    break;
-                case BoxDirection.Left:
-                    offset = new Vector3(-halfSize, 0, 0);
-                    rotationZ = 180;
-                    break;
-                case BoxDirection.Up:
-                    offset = new Vector3(0, halfSize, 0);
-                    rotationZ = 90;
-                    break;
-                case BoxDirection.Down:
-                    offset = new Vector3(0, -halfSize, 0);
-                    rotationZ = -90;
-                    break;
-            }
-
             linkObj.transform.localPosition = offset;
-            linkObj.transform.localRotation = Quaternion.Euler(0, 0, rotationZ);
-            linkObj.transform.localScale = Vector3.one;
-            linkObj.name = $"Link_{dir}";
+            linkObj.ApplyConfig(config);
+            box.x = linkObj.gameObject;
         }
     }
 

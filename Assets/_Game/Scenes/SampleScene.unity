@@ -1520,7 +1520,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allLevel:
-  - {fileID: 9152654379301594138, guid: 434a612afa6eafa49868e17c6eedc639, type: 3}
   - {fileID: 9152654379301594138, guid: a1e87f76824a9f148a3e00c651bb6026, type: 3}
   itemDatabase: {fileID: 11400000, guid: 7ecb08f41f7cd7a47b744712e9c39727, type: 2}
   currentLevel: {fileID: 0}
@@ -1712,6 +1711,16 @@ MonoBehaviour:
     spriteUnlock: {fileID: 21300000, guid: 160f80641a749284184e378842c73094, type: 3}
     Title: Hidden Box
     Description: Tap the box and unleash the key to open the lock
+  - levelUnlock: 24
+    spriteLock: {fileID: 21300000, guid: 4d38c323d09eba64a9f40439c8a44223, type: 3}
+    spriteUnlock: {fileID: 21300000, guid: 977d0227ff825a64998313b0ba1da4f0, type: 3}
+    Title: Key-Lock
+    Description: Tap The box and unleash the key to open the lock
+  - levelUnlock: 28
+    spriteLock: {fileID: 21300000, guid: a0b55d127f4f56148b05592d2a59c947, type: 3}
+    spriteUnlock: {fileID: 21300000, guid: 02ac6f79132284546875a8884a751595, type: 3}
+    Title: Couple
+    Description: Double Stash linker
   MainCanvasRect: {fileID: 726175530}
 --- !u!4 &1552108926
 Transform:
