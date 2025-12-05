@@ -76,7 +76,7 @@ public class WinUI : UICanvas
         TransitionManager.Instance.PlayStartHalfTransition(0.6f, 0.3f, () =>
         {
             LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
-            TransitionManager.Instance.PlayEndHalfTransition(0.6f, 0.2f);
+            TransitionManager.Instance.PlayEndHalfTransition(0.6f, 0.3f);
             Close(0);
         });
     }
