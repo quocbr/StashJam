@@ -15,7 +15,7 @@ public class LoseUI : UICanvas
     public override void Open()
     {
         base.Open();
-        SoundManager.Ins.PlaySoundBG(SoundBg.lose);
+        SoundManager.Ins.PlayMusic(Music.k_Music_Lose, false);
     }
 
     private void OnNextButtonClickHandle()

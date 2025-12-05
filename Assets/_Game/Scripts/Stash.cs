@@ -39,6 +39,7 @@ public class Stash : MonoBehaviour
 
     // --- [NEW] Danh sách các hướng liên kết ---
     public List<BoxDirection> connectedSides = new List<BoxDirection>();
+    public GameObject glassObject;
     private KeyLockType keyLockType;
     private LockType lockType;
     [ShowInInspector] public Queue<BoxStackData> pendingStack = new Queue<BoxStackData>();
@@ -165,10 +166,7 @@ public class Stash : MonoBehaviour
 
     public void SetCanPick(bool canPick)
     {
-        // Cập nhật trạng thái của bản thân
         CanPick = canPick;
-
-        // --- XỬ LÝ VISUAL ---
         if (glass != null)
         {
             if (!canPick)
@@ -181,13 +179,23 @@ public class Stash : MonoBehaviour
             }
         }
 
+        if (glassObject != null)
+        {
+            if (!canPick)
+            {
+                glassObject.gameObject.SetActive(true);
+            }
+            else
+            {
+                AnimOpen();
+            }
+        }
+
         if (canPick && isHidden)
         {
             SetHidden(false);
         }
 
-        // --- XỬ LÝ LIÊN KẾT (RECURSIVE) ---
-        // Kiểm tra an toàn cho level
         if (currentLevel == null || currentLevel.stashGrid == null) return;
 
         foreach (var dir in connectedSides)
@@ -224,8 +232,18 @@ public class Stash : MonoBehaviour
 
     public void AnimOpen()
     {
-        glass.transform.DOLocalMoveY(0.4f, 0.4f);
-        glass.DOFade(0.2f, 0.4f).OnComplete(() => { glass.gameObject.SetActive(false); });
+        if (glass != null)
+        {
+            glass.transform.DOLocalMoveY(0.4f, 0.4f);
+            glass.DOFade(0.2f, 0.4f).OnComplete(() => { glass.gameObject.SetActive(false); });
+        }
+
+        if (glassObject != null)
+        {
+            glassObject.transform.DOLocalMoveY(0.4f, 0.4f)
+                .OnComplete(() => { glassObject.gameObject.SetActive(false); });
+            //glassObject.>().DOFade(0.2f, 0.4f).OnComplete(() => { glass.gameObject.SetActive(false); });
+        }
     }
 
     public void SetHidden(bool isHidden)
@@ -240,13 +258,11 @@ public class Stash : MonoBehaviour
     // --- [UPDATE] Logic Pick đệ quy ---
     public void OnPick()
     {
-        // 1. Chặn đệ quy vô hạn: Nếu đã ăn rồi hoặc không được pick thì dừng
         if (!CanPick || isEat) return;
 
         CanPick = false;
         isEat = true;
 
-        // 2. Visual Effects (Code cũ)
         MainAsset.transform.DOScale(0, 0.4f).SetEase(Ease.InBack);
         if (x != null)
         {
@@ -266,7 +282,6 @@ public class Stash : MonoBehaviour
             EventManager.Trigger(cb);
         }
 
-        // 3. [NEW] Kích hoạt Pick cho các Box liên kết (Hàng xóm)
         PickConnectedNeighbors();
     }
 

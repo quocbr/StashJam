@@ -15,8 +15,8 @@ public class WinUI : UICanvas
     [SerializeField] private TextMeshProUGUI processText;
     [SerializeField] private TextMeshProUGUI textCoin;
     [SerializeField] private ParticleImage particleImage;
-    [SerializeField] private Button NextButton;
-    [SerializeField] private Button NextButton2;
+    [SerializeField] private BaseButton NextButton;
+    [SerializeField] private BaseButton NextButton2;
     [SerializeField] private GameObject content1;
     [SerializeField] private GameObject container1;
     [SerializeField] private GameObject content2;
@@ -33,15 +33,15 @@ public class WinUI : UICanvas
 
     private void Awake()
     {
-        NextButton.onClick.AddListener(OnNextButtonClickHandle);
-        NextButton2.onClick.AddListener(OnNextButtonClickHandle);
+        NextButton.AddListener(OnNextButtonClickHandle);
+        NextButton2.AddListener(OnNextButtonClickHandle);
     }
 
     public override void Open()
     {
         base.Open();
         isBlock = false;
-        SoundManager.Ins.PlaySoundBG(SoundBg.win);
+        SoundManager.Ins.PlayMusic(Music.k_Music_Win, false);
         content1.SetActive(true);
         content2.SetActive(false);
 
@@ -73,10 +73,10 @@ public class WinUI : UICanvas
 
     public void Up()
     {
-        TransitionManager.Instance.PlayStartHalfTransition(0.6f, 0.5f, () =>
+        TransitionManager.Instance.PlayStartHalfTransition(0.6f, 0.3f, () =>
         {
             LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
-            TransitionManager.Instance.PlayEndHalfTransition(0.6f, 0.5f);
+            TransitionManager.Instance.PlayEndHalfTransition(0.6f, 0.2f);
             Close(0);
         });
     }
@@ -122,6 +122,7 @@ public class WinUI : UICanvas
             {
                 content1.SetActive(false);
                 content2.SetActive(true);
+                content2.transform.DOScale(1f, 0.3f).From(0f).SetEase(Ease.OutBack);
                 iconFeatureUnlock.sprite = feature.spriteUnlock;
                 title.text = feature.Title;
                 description.text = feature.Description;

@@ -1,62 +1,139 @@
+using System;
+using System.Collections;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.Pool;
 
-public enum SoundBg
+public class SoundFX
 {
-    bg = 0,
-    win = 1,
-    lose = 2
+    public const string ClickStask = "Interface Click 10-1";
+    public const string UI_Click = "UI_3_Clicks_01_Appear_mono";
+    public const string Fish_Drop = "UI_Switch_Dirty_stereo";
+    public const string Fish_Finsher = "etfx_spawn";
 }
 
-public enum SoundFx
+public class Music
 {
-    ClickStask = 0
+    public const string k_Music_bg_music1 = "Casual Music Loop 07";
+    public const string k_Music_Lose = "Negative 09";
+    public const string k_Music_Win = "Positive 03-2";
 }
 
 public class SoundManager : Singleton<SoundManager>
 {
-    public List<AudioSource> list_SoundBG;
-    public List<AudioSource> list_SoundFx;
+    public List<AudioClip> audioData;
+    [Header("Audio Configuration")] public AudioMixer masterMixer;
 
-    private float dfVolume = 1f;
-    private float xmasVolume = 0.25f;
+    public AudioSource musicSource;
 
-    public void PlaySoundBG(SoundBg soundbg)
+    private ObjectPool<AudioSource> audioSourcePool;
+
+    [ShowInInspector] private Dictionary<string, AudioClip> dicAudioClips;
+
+    private void Awake()
     {
-        for (int i = 0; i < list_SoundBG.Count; i++)
-        {
-            if (!list_SoundBG[i].isPlaying) continue;
-            if ((int)soundbg == i) return;
+        LoadAudioClips();
+        InitializeAudioPool();
+    }
 
-            int temp = i;
-            list_SoundBG[temp].Stop();
+    public void PlaySFX(string clipName, float volume = 1f)
+    {
+        if (!dicAudioClips.TryGetValue(clipName, out AudioClip clip))
+        {
+            Debug.LogWarning($"[AudioModule] Audio clip not found: {clipName}");
+            return;
         }
 
-        list_SoundBG[(int)soundbg].Play();
+        var source = audioSourcePool.Get();
+        if (source == null) return;
+
+        source.clip = clip;
+        source.volume = volume;
+        source.Play();
+
+        float clipLength = clip.length;
+        if (clipLength <= 0) clipLength = 0.1f;
+
+        StartCoroutine(ReturnToPoolAfterPlay(source, clipLength));
     }
 
-    [Button]
-    public void PlaySoundFx(SoundFx fx, float timePlay = 0)
+    public void PlayMusic(string clipName, bool loop = true)
     {
-        if (timePlay != 0) list_SoundFx[(int)fx].time = timePlay;
-        list_SoundFx[(int)fx].Play();
-    }
-
-    public void SetActiveSoundBG(bool isMute)
-    {
-        for (int i = 0; i < list_SoundBG.Count; i++)
+        if (dicAudioClips.TryGetValue(clipName, out AudioClip clip))
         {
-            list_SoundBG[i].mute = isMute;
+            musicSource.clip = clip;
+            musicSource.loop = loop;
+            musicSource.Play();
         }
     }
 
-    public void SetActiveSoundFx(bool isMute)
+    public void SetMasterVolume(float volume)
     {
-        for (int i = 0; i < list_SoundFx.Count; i++)
+        float dbVolume = volume > 0 ? Mathf.Log10(volume) * 20 : -80f;
+        masterMixer.SetFloat("MasterVolume", dbVolume);
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        float dbVolume = volume > 0 ? Mathf.Log10(volume) * 20 : -80f;
+        masterMixer.SetFloat("SFXVolume", dbVolume);
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        float dbVolume = volume > 0 ? Mathf.Log10(volume) * 20 : -80f;
+        masterMixer.SetFloat("MusicVolume", dbVolume);
+    }
+
+    public void SetMusicSourceVolume(float volume)
+    {
+        musicSource.volume = volume;
+    }
+
+    private void InitializeAudioPool()
+    {
+        audioSourcePool = new ObjectPool<AudioSource>(
+            () =>
+            {
+                AudioSource source = new GameObject("Pooled Audio Source").AddComponent<AudioSource>();
+                source.outputAudioMixerGroup = masterMixer.FindMatchingGroups("SFX")[0];
+                source.playOnAwake = false;
+                source.transform.SetParent(transform);
+                return source;
+            },
+            (source) => { source.gameObject.SetActive(true); },
+            (source) =>
+            {
+                source.Stop();
+                source.gameObject.SetActive(false);
+            },
+            (source) => { Destroy(source.gameObject); },
+            defaultCapacity: 10,
+            maxSize: 50
+        );
+    }
+
+    private void LoadAudioClips()
+    {
+        dicAudioClips = new Dictionary<string, AudioClip>();
+        foreach (AudioClip clip in audioData)
         {
-            list_SoundFx[i].mute = isMute;
+            if (clip != null)
+            {
+                dicAudioClips[clip.name] = clip;
+            }
+        }
+    }
+
+    private IEnumerator ReturnToPoolAfterPlay(AudioSource source, float clipLength)
+    {
+        yield return new WaitForSeconds(clipLength);
+        if (source != null && audioSourcePool != null)
+        {
+            audioSourcePool.Release(source);
         }
     }
 }

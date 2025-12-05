@@ -15,20 +15,20 @@ public class SettingUI : UICanvas
     public GameObject hapticOn;
     public GameObject hapticOff;
 
-    [SerializeField] private Button replayButton;
-    [SerializeField] private Button closeButton;
+    [SerializeField] private BaseButton replayButton;
+    [SerializeField] private BaseButton closeButton;
 
-    [SerializeField] private Button music;
-    [SerializeField] private Button sound;
-    [SerializeField] private Button haptic;
+    [SerializeField] private BaseButton music;
+    [SerializeField] private BaseButton sound;
+    [SerializeField] private BaseButton haptic;
 
     private void Awake()
     {
-        replayButton.onClick.AddListener(OnReplayBtnClickHandler);
-        closeButton.onClick.AddListener(OnCloseBtnClickHandler);
-        music.onClick.AddListener(OnMusicClickHandler);
-        sound.onClick.AddListener(OnSoundClickHandler);
-        haptic.onClick.AddListener(OnHapticClickHandler);
+        replayButton.AddListener(OnReplayBtnClickHandler);
+        closeButton.AddListener(OnCloseBtnClickHandler);
+        music.AddListener(OnMusicClickHandler);
+        sound.AddListener(OnSoundClickHandler);
+        haptic.AddListener(OnHapticClickHandler);
     }
 
     private void OnHapticClickHandler()
@@ -49,7 +49,7 @@ public class SettingUI : UICanvas
     private void OnMusicClickHandler()
     {
         DataManager.Ins.userData.isMusic = !DataManager.Ins.userData.isMusic;
-        SoundManager.Ins.SetActiveSoundBG(!DataManager.Ins.userData.isMusic);
+        SoundManager.Ins.SetMusicVolume(DataManager.Ins.userData.isMusic ? 1f : 0f);
 
         if (DataManager.Ins.userData.isMusic)
         {
@@ -66,7 +66,7 @@ public class SettingUI : UICanvas
     private void OnSoundClickHandler()
     {
         DataManager.Ins.userData.isFX = !DataManager.Ins.userData.isFX;
-        SoundManager.Ins.SetActiveSoundFx(!DataManager.Ins.userData.isFX);
+        SoundManager.Ins.SetSFXVolume(DataManager.Ins.userData.isFX ? 1f : 0f);
         if (DataManager.Ins.userData.isFX)
         {
             soundOn.SetActive(true);

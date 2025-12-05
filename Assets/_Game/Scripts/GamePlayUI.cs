@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 public class GamePlayUI : Singleton<GamePlayUI>
 {
-    [SerializeField] private Button settingBtn;
+    [SerializeField] private BaseButton settingBtn;
     public ConveyorController conveyorPrefab;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI coinText;
@@ -27,7 +27,7 @@ public class GamePlayUI : Singleton<GamePlayUI>
 
     private void Awake()
     {
-        settingBtn.onClick.AddListener(OnSettingBtnClickHandler);
+        settingBtn.AddListener(OnSettingBtnClickHandler);
     }
 
     private void Start()
@@ -63,7 +63,7 @@ public class GamePlayUI : Singleton<GamePlayUI>
     [Button]
     public void SetupCamera()
     {
-        SoundManager.Ins.PlaySoundBG(SoundBg.bg);
+        SoundManager.Ins.PlayMusic(Music.k_Music_bg_music1);
         Level currentLevel = LevelManager.Ins.currentLevel;
         levelText.text = $"Lv.{DataManager.Ins.userData.level + 1}";
         if (currentLevel == null || currentLevel.min == null || currentLevel.max == null)

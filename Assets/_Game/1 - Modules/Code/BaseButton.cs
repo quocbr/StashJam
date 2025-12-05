@@ -6,13 +6,13 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Sirenix.OdinInspector;
 
 public class BaseButton : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
 {
     [SerializeField] private Button button;
-    [SerializeField] private Image image;
 
-    [SerializeField] private AudioClip clickSFX;
+    [SerializeField] private Image image;
     //[SerializeField] private MMF_Player MMFClick;
 
     [field: SerializeField] public RectTransform Rect { get; private set; }
@@ -43,6 +43,7 @@ public class BaseButton : MonoBehaviour, IPointerClickHandler, IPointerDownHandl
 
         //MMFClick?.PlayFeedbacks();
         //AudioManager.Ins.PlaySFX(clickSFX);
+        SoundManager.Ins.PlaySFX(SoundFX.UI_Click);
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -117,5 +118,13 @@ public class BaseButton : MonoBehaviour, IPointerClickHandler, IPointerDownHandl
             OnPress?.Invoke();
             yield return null;
         }
+    }
+
+    [Button]
+    private void Fetch()
+    {
+        button = GetComponent<Button>();
+        image = GetComponent<Image>();
+        Rect = GetComponent<RectTransform>();
     }
 }

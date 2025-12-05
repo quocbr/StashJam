@@ -25,6 +25,7 @@ namespace MaskTransitions
         private RectTransform parentMaskRect;
 
         [SerializeField] private RectTransform maskRect;
+        [SerializeField] private RectTransform maskRectIcon;
         [SerializeField] private RectTransform transitionCanvas;
         [SerializeField] private Image parentMaskImage;
         [SerializeField] private CutoutMaskUI cutoutMask;
@@ -71,13 +72,20 @@ namespace MaskTransitions
             float animationTime = totalTime ?? individualTransitionTime;
 
             maskRect.sizeDelta = Vector2.zero;
+            maskRectIcon.sizeDelta = Vector2.zero;
             parentMaskRect.sizeDelta = Vector2.zero;
 
             maskRect.DOSizeDelta(new Vector2(maxSize, maxSize), animationTime).SetEase(Ease.InOutQuad)
                 .OnComplete(() => onComplete?.Invoke());
+            maskRectIcon.DOSizeDelta(new Vector2(maxSize, maxSize), animationTime).SetEase(Ease.InOutQuad)
+                .OnComplete(() => onComplete?.Invoke());
             if (rotation)
+            {
                 maskRect.DORotate(new Vector3(0, 0, 180), animationTime, RotateMode.FastBeyond360)
                     .SetEase(Ease.InOutQuad);
+                maskRectIcon.DORotate(new Vector3(0, 0, 180), animationTime, RotateMode.FastBeyond360)
+                    .SetEase(Ease.InOutQuad);
+            }
         }
 
         private Tween StartAnimationForLoad(float? totalTime = null)
@@ -85,19 +93,29 @@ namespace MaskTransitions
             float animationTime = totalTime ?? individualTransitionTime;
 
             maskRect.sizeDelta = Vector2.zero;
+            maskRectIcon.sizeDelta = Vector2.zero;
             parentMaskRect.sizeDelta = Vector2.zero;
             maskRect.rotation = Quaternion.identity;
+            maskRectIcon.rotation = Quaternion.identity;
 
             Tween blueTweenSize = maskRect.DOSizeDelta(new Vector2(maxSize, maxSize), animationTime)
                 .SetEase(Ease.InOutQuad);
 
+            Tween blueTweenSize1 = maskRectIcon.DOSizeDelta(new Vector2(maxSize, maxSize), animationTime)
+                .SetEase(Ease.InOutQuad);
+
             Sequence animationSequence = DOTween.Sequence().Join(blueTweenSize);
+
+            animationSequence.Join(blueTweenSize1);
 
             if (rotation)
             {
                 Tween blueTweenRotate =
                     maskRect.DORotate(new Vector3(0, 0, 180), animationTime).SetEase(Ease.InOutQuad);
+                Tween blueTweenRotate1 =
+                    maskRectIcon.DORotate(new Vector3(0, 0, 180), animationTime).SetEase(Ease.InOutQuad);
                 animationSequence.Join(blueTweenRotate);
+                animationSequence.Join(blueTweenRotate1);
             }
 
             return animationSequence;
@@ -109,6 +127,7 @@ namespace MaskTransitions
             float animationTime = totalTime ?? individualTransitionTime;
 
             maskRect.sizeDelta = new Vector2(maxSize, maxSize);
+            maskRectIcon.sizeDelta = new Vector2(maxSize, maxSize);
             parentMaskRect.sizeDelta = Vector2.zero;
             parentMaskRect.rotation = Quaternion.identity;
 

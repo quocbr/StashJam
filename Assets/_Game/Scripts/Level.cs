@@ -25,6 +25,8 @@ public class Level : MonoBehaviour
     [Tooltip("Prefab hiển thị mối nối giữa 2 box (sợi xích, thanh sắt...)")]
     public StashLink[] linkPrefab;
 
+    public GameObject glassPrefab;
+
     [Header("Runtime")] [Tooltip("Root chứa toàn bộ box của level hiện tại. Nếu để trống sẽ tự tạo.")]
     public Transform levelRoot;
 
@@ -478,10 +480,72 @@ public class Level : MonoBehaviour
         foreach (BoxDirection dir in config.connectedSides)
         {
             StashLink linkObj = Instantiate(linkPrefab[(int)dir], box.transform);
+
+            float halfSize = cellSize / 2f;
             Vector3 offset = Vector3.zero;
-            linkObj.transform.localPosition = offset;
+            float rotationZ = 0;
+
+            switch (dir)
+            {
+                case BoxDirection.Right:
+                case BoxDirection.Left:
+                    offset = new Vector3(halfSize, 0.155f, 0);
+                    rotationZ = 0;
+                    break;
+                case BoxDirection.Up:
+                case BoxDirection.Down:
+                    offset = new Vector3(0, 0.7f, 0);
+                    rotationZ = 90;
+                    break;
+            }
+
+            // Cấu hình cho LinkObj
+            linkObj.transform.localPosition = Vector3.zero;
             linkObj.ApplyConfig(config);
             box.x = linkObj.gameObject;
+
+            // =================================================================================
+            // 2. XỬ LÝ GLASS OBJECT (Kiểm tra xem hàng xóm đã có chưa)
+            // =================================================================================
+
+            // Tìm tọa độ hàng xóm
+            int nr = box.index.x;
+            int nc = box.index.y;
+            switch (dir)
+            {
+                case BoxDirection.Up: nr += 1; break;
+                case BoxDirection.Down: nr -= 1; break;
+                case BoxDirection.Left: nc -= 1; break;
+                case BoxDirection.Right: nc += 1; break;
+            }
+
+            Stash neighbor = null;
+            if (stashGrid != null &&
+                nr >= 0 && nr < stashGrid.GetLength(0) &&
+                nc >= 0 && nc < stashGrid.GetLength(1))
+            {
+                neighbor = stashGrid[nr, nc];
+            }
+
+            if (neighbor != null && neighbor.glassObject != null)
+            {
+                box.glassObject = neighbor.glassObject;
+            }
+            else
+            {
+                GameObject glassObj = Instantiate(glassPrefab, box.transform);
+
+                glassObj.transform.localPosition = offset;
+                glassObj.transform.localRotation = Quaternion.Euler(0, 0, rotationZ);
+                glassObj.transform.localScale = Vector3.one;
+
+                box.glassObject = glassObj;
+
+                if (neighbor != null)
+                {
+                    neighbor.glassObject = glassObj;
+                }
+            }
         }
     }
 

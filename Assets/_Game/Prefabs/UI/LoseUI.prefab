@@ -528,7 +528,7 @@ MonoBehaviour:
   isMoveAnim: 0
   cvGroupBackGround: {fileID: 6278015017242384248}
   rectTfMain: {fileID: 7822675776134417006}
-  isCloseAnim: 0
+  isCloseAnim: 1
   ReTryButton: {fileID: 5258719440622937764}
 --- !u!1 &5996021003505315672
 GameObject:
@@ -566,8 +566,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 4.2787, y: -372}
-  m_SizeDelta: {x: 339.1505, y: 160}
+  m_AnchoredPosition: {x: 0, y: -372}
+  m_SizeDelta: {x: 433.6503, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8703632322834382549
 CanvasRenderer:

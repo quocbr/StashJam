@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using MoreMountains.Feedbacks;
 using TMPro;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public class StackStash : Stash
     [SerializeField] private Sprite[] l_PileSprite;
     [SerializeField] private SpriteRenderer pile;
     [SerializeField] private TextMeshPro text;
+
+    public MMF_Player mmf_Player;
 
     public override void Init()
     {
@@ -29,7 +32,8 @@ public class StackStash : Stash
         }
         else
         {
-            pile.transform.DOScale(1.1f, 0.3f).SetEase(Ease.InOutBack).SetLoops(2, LoopType.Yoyo);
+            //pile.transform.DOScale(1.1f, 0.3f).SetEase(Ease.InOutBack).SetLoops(2, LoopType.Yoyo);
+            mmf_Player?.PlayFeedbacks();
         }
     }
 

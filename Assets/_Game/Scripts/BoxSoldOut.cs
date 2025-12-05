@@ -89,6 +89,7 @@ public class BoxSoldOut : MonoBehaviour
                     }
 
                     MmfPlayer.PlayFeedbacks();
+                    SoundManager.Ins.PlaySFX(SoundFX.Fish_Finsher, 0.8f);
 
                     sprite[index].sprite = source.Sprite;
                     sprite[index].enabled = true;

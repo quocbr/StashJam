@@ -53,8 +53,8 @@ public class DataManager : Singleton<DataManager>
             SaveData();
         }
 
-        SoundManager.Ins.SetActiveSoundBG(!userData.isMusic);
-        SoundManager.Ins.SetActiveSoundFx(!userData.isFX);
+        SoundManager.Ins.SetSFXVolume(Ins.userData.isFX ? 1f : 0f);
+        SoundManager.Ins.SetMusicVolume(Ins.userData.isMusic ? 1f : 0f);
 
         LevelManager.Ins.SpawnLevel(userData.level);
     }
