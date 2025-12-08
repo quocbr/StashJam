@@ -607,6 +607,11 @@ public class Level : MonoBehaviour
                         stashGrid[row, col].Glass.gameObject.SetActive(false);
                     }
 
+                    if (stashGrid[row, col].glassObject != null)
+                    {
+                        stashGrid[row, col].glassObject.gameObject.SetActive(false);
+                    }
+
                     continue;
                 }
 
@@ -621,6 +626,12 @@ public class Level : MonoBehaviour
                 if (left) tileIndex += 4;
                 if (right) tileIndex += 8;
 
+                if (stashGrid[row, col].x != null && stashGrid[row, col].x.activeSelf)
+                {
+                    stashGrid[row, col].SetCanPick(true);
+                    continue;
+                }
+
                 if (tileIndex != 0)
                 {
                     stashGrid[row, col].SetCanPick(false);
@@ -628,6 +639,7 @@ public class Level : MonoBehaviour
             }
         }
     }
+
 
     private int GetOrthogonalMask(int row, int col, int maxRows, int maxCols)
     {

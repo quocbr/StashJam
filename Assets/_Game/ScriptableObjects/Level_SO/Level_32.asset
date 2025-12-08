@@ -19,6 +19,7 @@ MonoBehaviour:
     gridPos: {x: 1, y: 0}
     isHidden: 0
     itemIds: 0700000007000000070000000b000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -54,6 +55,7 @@ MonoBehaviour:
     gridPos: {x: 2, y: 0}
     isHidden: 0
     itemIds: 040000000a0000000b0000000b000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -65,6 +67,7 @@ MonoBehaviour:
     gridPos: {x: 3, y: 0}
     isHidden: 0
     itemIds: 04000000070000000200000002000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -76,6 +79,7 @@ MonoBehaviour:
     gridPos: {x: 4, y: 0}
     isHidden: 0
     itemIds: 0900000009000000090000000b000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -117,6 +121,7 @@ MonoBehaviour:
     gridPos: {x: 2, y: 1}
     isHidden: 0
     itemIds: 01000000070000000400000004000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -128,6 +133,7 @@ MonoBehaviour:
     gridPos: {x: 3, y: 1}
     isHidden: 0
     itemIds: 07000000070000000000000000000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -137,8 +143,9 @@ MonoBehaviour:
     spawnStack: []
   - targetStackCount: 0
     gridPos: {x: 2, y: 2}
-    isHidden: 0
+    isHidden: 1
     itemIds: 0b0000000b0000000b00000000000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -148,8 +155,9 @@ MonoBehaviour:
     spawnStack: []
   - targetStackCount: 0
     gridPos: {x: 3, y: 2}
-    isHidden: 0
+    isHidden: 1
     itemIds: 0a0000000a0000000900000009000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -161,6 +169,7 @@ MonoBehaviour:
     gridPos: {x: 2, y: 3}
     isHidden: 0
     itemIds: 07000000070000000100000004000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -172,6 +181,7 @@ MonoBehaviour:
     gridPos: {x: 3, y: 3}
     isHidden: 0
     itemIds: 02000000020000000200000004000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -183,6 +193,7 @@ MonoBehaviour:
     gridPos: {x: 1, y: 3}
     isHidden: 0
     itemIds: 02000000020000000100000001000000
+    connectedSides: 00000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -194,6 +205,7 @@ MonoBehaviour:
     gridPos: {x: 4, y: 3}
     isHidden: 0
     itemIds: 07000000070000000100000001000000
+    connectedSides: 00000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -205,6 +217,7 @@ MonoBehaviour:
     gridPos: {x: 1, y: 4}
     isHidden: 0
     itemIds: 0b0000000b0000000b0000000a000000
+    connectedSides: 01000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -216,6 +229,7 @@ MonoBehaviour:
     gridPos: {x: 0, y: 4}
     isHidden: 0
     itemIds: 01000000000000000000000000000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -227,6 +241,7 @@ MonoBehaviour:
     gridPos: {x: 0, y: 5}
     isHidden: 0
     itemIds: 07000000070000000900000009000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -238,6 +253,7 @@ MonoBehaviour:
     gridPos: {x: 4, y: 4}
     isHidden: 0
     itemIds: 0200000002000000040000000a000000
+    connectedSides: 01000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -249,6 +265,7 @@ MonoBehaviour:
     gridPos: {x: 5, y: 4}
     isHidden: 0
     itemIds: 02000000020000000000000000000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -260,6 +277,7 @@ MonoBehaviour:
     gridPos: {x: 5, y: 5}
     isHidden: 0
     itemIds: 0a0000000a0000000900000009000000
+    connectedSides: 
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
