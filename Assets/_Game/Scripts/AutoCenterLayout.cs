@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using Sirenix.OdinInspector; // Cần DOTween
+using Sirenix.OdinInspector;
 
 public class AutoCenterLayout : MonoBehaviour
 {
@@ -13,7 +13,7 @@ public class AutoCenterLayout : MonoBehaviour
     [Header("Spawn Animation")] [SerializeField]
     private float spawnYDistance = 5f; // Khoảng cách từ dưới bay lên
 
-    [SerializeField] private Ease spawnEase = Ease.OutBack;
+    //[SerializeField] private Ease spawnEase = Ease.OutBack;
     [SerializeField] private Ease despawnEase = Ease.InBack;
 
     [Header("Debug")] [SerializeField] private List<BoxSoldOut> boxes = new List<BoxSoldOut>();

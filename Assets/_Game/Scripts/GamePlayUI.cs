@@ -192,7 +192,7 @@ public class GamePlayUI : Singleton<GamePlayUI>
 
 
         showTutorial = false;
-        DOVirtual.DelayedCall(1.4f, () =>
+        DOVirtual.DelayedCall(1f, () =>
         {
             if (LevelManager.Ins.currentLevel.Stash.Count > 0)
             {

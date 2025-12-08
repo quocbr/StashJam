@@ -22,7 +22,7 @@ public class UICanvas : MonoBehaviour
     [Header("Close Anim")] [SerializeField]
     private bool isCloseAnim;
 
-    private float initScale = 1f;
+    //private float initScale = 1f;
     private Animator m_Animator;
 
     protected RectTransform m_RectTransform;

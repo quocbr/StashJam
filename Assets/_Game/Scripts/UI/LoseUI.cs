@@ -15,6 +15,7 @@ public class LoseUI : UICanvas
     public override void Open()
     {
         base.Open();
+        TinySauce.OnGameFinished(false, 0, DataManager.Ins.userData.level + 1);
         SoundManager.Ins.PlayMusic(Music.k_Music_Lose, false);
     }
 

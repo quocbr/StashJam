@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectedAppIndex: 0
   clientTokens:
-  - 
+  - c9af2059734f69f1031972c33728898a
   appIds:
-  - 0
+  - 735304319216343
   appLabels:
-  - App Name
+  - Seafood Stash & Sort
   cookie: 1
   logging: 1
   status: 1

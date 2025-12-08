@@ -192,7 +192,7 @@ public class ConveyorController : MonoBehaviour
     private float moveSpeed = 2.0f;
 
     [SerializeField] private float rotationSpeed = 15f;
-    [SerializeField] private bool rotateWithMovement = true;
+    //[SerializeField] private bool rotateWithMovement = true;
 
     [SerializeField] private bool isLinearPath = true;
 

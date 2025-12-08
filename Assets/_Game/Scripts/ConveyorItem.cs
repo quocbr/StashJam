@@ -23,7 +23,7 @@ public class ConveyorItem : MonoBehaviour
         }
 
         item.transform.SetParent(LevelManager.Ins.currentLevel.transform);
-        item.AnimBackToRoot(transform, () => { SoundManager.Ins.PlaySFX(SoundFX.Fish_Drop, 0.5f); });
+        item.AnimBackToRoot(transform, () => { SoundManager.Ins.PlaySFX(SoundFX.Fish_Drop, 0.4f); });
     }
 
     public void SetIndex(int index)

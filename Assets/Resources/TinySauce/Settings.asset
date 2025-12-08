@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faa11ec82e9746928e211e7f096812ca, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
-  gameAnalyticsIosGameKey: 
+  gameAnalyticsIosGameKey: 332568
   gameAnalyticsIosSecretKey: 
-  gameAnalyticsAndroidGameKey: 
-  gameAnalyticsAndroidSecretKey: 
-  facebookAppId: 
-  facebookClientToken: 
+  gameAnalyticsAndroidGameKey: 7175aa62d03e24cb03d86ffafc8b49f0
+  gameAnalyticsAndroidSecretKey: 7d6b233ec610ebb1a75bebd67409ac9e2cf84c64
+  facebookAppId: 735304319216343
+  facebookClientToken: c9af2059734f69f1031972c33728898a
   adjustIOSToken: 
-  adjustAndroidToken: 
+  adjustAndroidToken: k1gan4wkhrls
   EditorIdfa: deff0dc5-fed4-4064-9951-728996720911
   UseRemoteConfig: 0
   UseVoodooAnalytics: 1
-  companyName: 
-  privacyPolicyURL: 
-  developerContactEmail: 
+  companyName: PITISTUDIO
+  privacyPolicyURL: https://pitistudios.com/privacy/
+  developerContactEmail: contact@pitistudios.com

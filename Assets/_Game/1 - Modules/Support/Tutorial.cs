@@ -54,7 +54,7 @@ public class Tutorial : Singleton<Tutorial>
 
     [SerializeField] private BaseButton tutorialBtn;
 
-    private Action clickAction = null;
+    //private Action clickAction = null;
     private TutorialData currentData;
 
     private Vector3 handRenderRotation;
