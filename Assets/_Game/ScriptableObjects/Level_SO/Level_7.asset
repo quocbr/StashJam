@@ -79,7 +79,7 @@ MonoBehaviour:
     gridPos: {x: 2, y: 1}
     isHidden: 0
     itemIds: 04000000000000000200000002000000
-    connectedSides: 
+    connectedSides: 00000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -91,7 +91,7 @@ MonoBehaviour:
     gridPos: {x: 2, y: 2}
     isHidden: 0
     itemIds: 01000000010000000a00000002000000
-    connectedSides: 
+    connectedSides: 01000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -103,7 +103,7 @@ MonoBehaviour:
     gridPos: {x: 2, y: 3}
     isHidden: 0
     itemIds: 04000000040000000800000000000000
-    connectedSides: 
+    connectedSides: 00000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
@@ -187,7 +187,7 @@ MonoBehaviour:
     gridPos: {x: 2, y: 4}
     isHidden: 0
     itemIds: 0a0000000a0000000000000000000000
-    connectedSides: 
+    connectedSides: 01000000
     hasLock: 0
     lockType: 0
     hasKeyLock: 0
