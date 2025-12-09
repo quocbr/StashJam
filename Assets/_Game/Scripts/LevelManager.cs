@@ -33,7 +33,11 @@ public class LevelManager : Singleton<LevelManager>
         currentLevel = Instantiate(allLevel[index], transform);
         currentLevel.Init();
 
-        TinySauce.OnGameStarted(index + 1);
+        if (!GameManager.Ins.isCheatMode)
+        {
+            TinySauce.OnGameStarted(index + 1);
+        }
+
         GamePlayUI.Ins.SetupCamera();
     }
 

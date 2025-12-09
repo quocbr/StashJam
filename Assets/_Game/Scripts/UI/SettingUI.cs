@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Lofelt.NiceVibrations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,6 +35,7 @@ public class SettingUI : UICanvas
     private void OnHapticClickHandler()
     {
         DataManager.Ins.userData.isHaptic = !DataManager.Ins.userData.isHaptic;
+        HapticController.hapticsEnabled = DataManager.Ins.userData.isHaptic;
         if (DataManager.Ins.userData.isHaptic)
         {
             hapticOn.SetActive(true);

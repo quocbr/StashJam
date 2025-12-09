@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3351963737209092541
+--- !u!1 &5247258062156723347
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8982373270295381471}
-  - component: {fileID: 391544754677076384}
-  - component: {fileID: 194751805885078856}
-  - component: {fileID: 3235946894968101986}
-  - component: {fileID: 5384451658661098655}
+  - component: {fileID: 5494492732704978829}
+  - component: {fileID: 6474486999328922459}
+  - component: {fileID: 3390175897979596151}
+  - component: {fileID: 8906152257348986401}
+  - component: {fileID: 4831676910493785103}
   m_Layer: 0
   m_Name: Spine GameObject (anim_fish)
   m_TagString: Untagged
@@ -20,13 +20,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8982373270295381471
+--- !u!4 &5494492732704978829
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3351963737209092541}
+  m_GameObject: {fileID: 5247258062156723347}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.4, z: 0}
@@ -35,21 +35,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2693040362950270530}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &391544754677076384
+--- !u!33 &6474486999328922459
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3351963737209092541}
+  m_GameObject: {fileID: 5247258062156723347}
   m_Mesh: {fileID: 0}
---- !u!23 &194751805885078856
+--- !u!23 &3390175897979596151
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3351963737209092541}
+  m_GameObject: {fileID: 5247258062156723347}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 244ca5496dfaf514b93b8b995f31d8b5, type: 2}
+  - {fileID: 2100000, guid: 87fc5018f25844a4d930898ef1b97175, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -85,19 +85,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &3235946894968101986
+--- !u!114 &8906152257348986401
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3351963737209092541}
+  m_GameObject: {fileID: 5247258062156723347}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d247ba06193faa74d9335f5481b2b56c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skeletonDataAsset: {fileID: 11400000, guid: 1b09a1d836e2c624296e06d9b10c840f, type: 2}
+  skeletonDataAsset: {fileID: 11400000, guid: 1ec52d2eea3babd469728ff17ec19605, type: 2}
   initialSkinName: fish_1
   fixPrefabOverrideViaMeshFilter: 2
   initialFlipX: 0
@@ -125,16 +125,16 @@ MonoBehaviour:
   physicsMovementRelativeTo: {fileID: 0}
   updateTiming: 1
   unscaledTime: 0
-  _animationName: Idle
-  loop: 0
+  _animationName: 
+  loop: 1
   timeScale: 1
---- !u!114 &5384451658661098655
+--- !u!114 &4831676910493785103
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3351963737209092541}
+  m_GameObject: {fileID: 5247258062156723347}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 395f769061839bf488f157c37d23835d, type: 3}
@@ -387,7 +387,7 @@ GameObject:
   - component: {fileID: 6751208198618142277}
   - component: {fileID: 4202875884838578374}
   m_Layer: 0
-  m_Name: Item1
+  m_Name: Item
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -406,7 +406,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 8982373270295381471}
+  - {fileID: 5494492732704978829}
   - {fileID: 8158787887827833100}
   - {fileID: 3151052007913677818}
   m_Father: {fileID: 0}
@@ -476,7 +476,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ID: 1
-  skeletonAnimation: {fileID: 3235946894968101986}
+  skeletonAnimation: {fileID: 8906152257348986401}
   m_Hidden: {fileID: 4939060101259529078}
   isEat: 0
   Sprite: {fileID: 0}
@@ -485,7 +485,7 @@ MonoBehaviour:
   flash:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5384451658661098655}
+      - m_Target: {fileID: 4831676910493785103}
         m_TargetAssemblyTypeName: HurtFlashEffect, spine-unity-examples
         m_MethodName: Flash
         m_Mode: 1

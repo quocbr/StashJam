@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Lofelt.NiceVibrations;
 using MaskTransitions;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -68,6 +69,7 @@ public class Controller : Singleton<Controller>
         }
 
         SoundManager.Ins.PlaySFX(SoundFX.ClickStask);
+        HapticPatterns.PlayPreset(HapticPatterns.PresetType.Selection);
         m_StashChoose.OnPick();
 
         OnStashPick cb = new OnStashPick();

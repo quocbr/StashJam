@@ -18,7 +18,7 @@ MonoBehaviour:
   - targetStackCount: 0
     gridPos: {x: 2, y: 2}
     isHidden: 0
-    itemIds: 00000000000000000000000000000000
+    itemIds: 05000000050000000000000000000000
     connectedSides: 00000000
     hasLock: 0
     lockType: 0
@@ -102,7 +102,7 @@ MonoBehaviour:
   - targetStackCount: 0
     gridPos: {x: 1, y: 2}
     isHidden: 0
-    itemIds: 00000000000000000000000000000000
+    itemIds: 05000000000000000500000000000000
     connectedSides: 
     hasLock: 0
     lockType: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
   - targetStackCount: 0
     gridPos: {x: 3, y: 1}
     isHidden: 0
-    itemIds: 00000000000000000000000000000000
+    itemIds: 05000000050000000000000000000000
     connectedSides: 02000000
     hasLock: 0
     lockType: 0

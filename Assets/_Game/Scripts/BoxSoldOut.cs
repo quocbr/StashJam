@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Lofelt.NiceVibrations;
 using MoreMountains.Feedbacks;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -90,6 +91,7 @@ public class BoxSoldOut : MonoBehaviour
 
                     MmfPlayer.PlayFeedbacks();
                     SoundManager.Ins.PlaySFX(SoundFX.Fish_Finsher, 0.5f);
+                    HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
 
                     sprite[index].sprite = source.Sprite;
                     sprite[index].enabled = true;

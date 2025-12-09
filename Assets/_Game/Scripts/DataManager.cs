@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Lofelt.NiceVibrations;
 using UnityEngine;
 
 public class DataManager : Singleton<DataManager>
@@ -55,6 +56,7 @@ public class DataManager : Singleton<DataManager>
 
         SoundManager.Ins.SetSFXVolume(Ins.userData.isFX ? 1f : 0f);
         SoundManager.Ins.SetMusicVolume(Ins.userData.isMusic ? 1f : 0f);
+        HapticController.hapticsEnabled = userData.isHaptic;
 
         LevelManager.Ins.SpawnLevel(userData.level);
     }

@@ -40,7 +40,10 @@ public class WinUI : UICanvas
     public override void Open()
     {
         base.Open();
-        TinySauce.OnGameFinished(true, 0, DataManager.Ins.userData.level + 1);
+        if (!GameManager.Ins.isCheatMode)
+        {
+            TinySauce.OnGameFinished(true, 0, DataManager.Ins.userData.level + 1);
+        }
         isBlock = false;
         SoundManager.Ins.PlayMusic(Music.k_Music_Win, false);
         content1.SetActive(true);

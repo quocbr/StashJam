@@ -240,7 +240,7 @@ public class Stash : MonoBehaviour
 
         if (glassObject != null)
         {
-            glassObject.transform.DOLocalMoveY(0.4f, 0.4f)
+            glassObject.transform.DOLocalMoveY(glassObject.transform.localPosition.y + 0.4f, 0.4f)
                 .OnComplete(() => { glassObject.gameObject.SetActive(false); });
             //glassObject.>().DOFade(0.2f, 0.4f).OnComplete(() => { glass.gameObject.SetActive(false); });
         }
