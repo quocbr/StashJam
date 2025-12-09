@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MaskTransitions;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class OnStashPick : IGameEvent
 {

@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public class LevelManager : Singleton<LevelManager>
 {
-    [SerializeField] private List<Level> allLevel;
+    public List<Level> allLevel;
     public ItemDatabase itemDatabase;
 
     public Level currentLevel;

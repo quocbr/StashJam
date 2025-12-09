@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using GameAnalyticsSDK.Setup;
 using MaskTransitions;
 using UnityEngine;
 
@@ -17,11 +18,14 @@ public struct UnlockFeature
 
 public class GameManager : Singleton<GameManager>
 {
+    public bool isCheatMode;
     public List<UnlockFeature> UnlockFeatures;
     public RectTransform MainCanvasRect;
+    public GameObject Cheat;
 
     private void Start()
     {
+        Cheat.SetActive(isCheatMode);
         UnlockFeatures.Sort((a, b) => a.levelUnlock.CompareTo(b.levelUnlock));
         TransitionManager.Instance.PlayEndHalfTransition(0.8f, 0.4f);
     }
