@@ -13,13 +13,16 @@ public class SoundFX
     public const string UI_Click = "UI_3_Clicks_01_Appear_mono";
     public const string Fish_Drop = "UI_Switch_Dirty_stereo";
     public const string Fish_Finsher = "etfx_spawn";
+    public const string CoinSFX = "Coin 9-1";
+    public const string LockSFX = "UI_Error_Double_Note_Down_Dark_stereo";
+    public const string UnLockFeature = "UI_Notification_Soft_Chime_01_stereo";
 }
 
 public class Music
 {
     public const string k_Music_bg_music1 = "Casual Music Loop 07";
     public const string k_Music_Lose = "Negative 09";
-    public const string k_Music_Win = "Positive 03-2";
+    public const string k_Music_Win = "Positive 02";
 }
 
 public class SoundManager : Singleton<SoundManager>

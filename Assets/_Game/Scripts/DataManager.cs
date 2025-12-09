@@ -88,7 +88,7 @@ public class UserData
     public UserData()
     {
         level = 0;
-        coin = 0;
+        coin = 200;
         indexCurrentFeature = 0;
         isMusic = true;
         isFX = true;

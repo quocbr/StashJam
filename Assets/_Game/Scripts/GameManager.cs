@@ -22,6 +22,7 @@ public class GameManager : Singleton<GameManager>
 
     private void Start()
     {
+        UnlockFeatures.Sort((a, b) => a.levelUnlock.CompareTo(b.levelUnlock));
         TransitionManager.Instance.PlayEndHalfTransition(0.8f, 0.4f);
     }
 }

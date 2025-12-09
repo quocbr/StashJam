@@ -49,13 +49,20 @@ public class WinUI : UICanvas
         textCoin.text = $"{DataManager.Ins.userData.coin}";
         DataManager.Ins.userData.level++;
         DataManager.Ins.SaveData();
+        var features = GameManager.Ins.UnlockFeatures;
 
-        DOVirtual.DelayedCall(0.2f, () => { });
-        if (DataManager.Ins.userData.indexCurrentFeature < GameManager.Ins.UnlockFeatures.Count)
+        int maxUnlockLevel = 0;
+        if (features.Count > 0)
+        {
+            features.Sort((a, b) => a.levelUnlock.CompareTo(b.levelUnlock));
+            maxUnlockLevel = features[features.Count - 1].levelUnlock;
+        }
+
+        if (DataManager.Ins.userData.level <= maxUnlockLevel)
         {
             Content.anchoredPosition = new Vector2(0, -100);
             container1.SetActive(true);
-            SetProcessUnlockFeature(DataManager.Ins.userData.indexCurrentFeature);
+            SetProcessUnlockFeature1();
         }
         else
         {
@@ -76,9 +83,9 @@ public class WinUI : UICanvas
     {
         TransitionManager.Instance.PlayStartHalfTransition(0.6f, 0.3f, () =>
         {
-            LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
-            TransitionManager.Instance.PlayEndHalfTransition(0.6f, 0.3f);
             Close(0);
+            LevelManager.Ins.SpawnLevel(DataManager.Ins.userData.level);
+            TransitionManager.Instance.PlayEndHalfTransition(0.6f, 0.35f);
         });
     }
 
@@ -135,5 +142,76 @@ public class WinUI : UICanvas
             // Chạy từ startValue lên endValue
             slider.DOValue(endValue, 1f).SetEase(Ease.OutQuad).SetDelay(0.2f);
         }
+    }
+
+    private void SetProcessUnlockFeature1()
+    {
+        int currentLevel = DataManager.Ins.userData.level;
+        var features = GameManager.Ins.UnlockFeatures;
+        int targetIndex = -1;
+
+        for (int i = 0; i < features.Count; i++)
+        {
+            if (features[i].levelUnlock >= currentLevel)
+            {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        if (targetIndex == -1)
+        {
+            targetIndex = features.Count - 1;
+        }
+
+        UnlockFeature feature = features[targetIndex];
+        iconFeature.sprite = feature.spriteLock;
+
+        int temp = 0;
+        if (targetIndex > 0)
+        {
+            temp = features[targetIndex - 1].levelUnlock;
+        }
+
+        int targetLevel = feature.levelUnlock;
+        float totalRange = (targetLevel - temp) * 1.0f;
+
+        if (totalRange <= 0) totalRange = 1;
+
+        float endValue = (currentLevel - temp) / totalRange;
+
+        float startValue = (currentLevel - 1 - temp) / totalRange;
+        if (startValue < 0) startValue = 0;
+
+        slider.value = startValue;
+        processText.text = $"{currentLevel - temp} / {targetLevel - temp}";
+        if (endValue >= 1)
+        {
+            isBlock = true;
+            slider.DOValue(1, 1f).SetEase(Ease.OutQuad).OnComplete(() =>
+            {
+                content1.SetActive(false);
+                content2.SetActive(true);
+                content2.transform.DOScale(1f, 0.3f).From(0f).SetEase(Ease.OutBack).OnComplete(() =>
+                {
+                    SoundManager.Ins.PlaySFX(SoundFX.UnLockFeature);
+                });
+
+                iconFeatureUnlock.sprite = feature.spriteUnlock;
+                title.text = feature.Title;
+                description.text = feature.Description;
+
+                isBlock = false;
+            }).SetDelay(0.2f);
+        }
+        else
+        {
+            slider.DOValue(endValue, 1f).SetEase(Ease.OutQuad).SetDelay(0.2f);
+        }
+    }
+
+    public void PlaySoundReward()
+    {
+        SoundManager.Ins.PlaySFX(SoundFX.CoinSFX, 0.5f);
     }
 }

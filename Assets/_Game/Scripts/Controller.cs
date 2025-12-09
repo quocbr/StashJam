@@ -60,6 +60,7 @@ public class Controller : Singleton<Controller>
 
         if (!m_StashChoose.CanPick || m_StashChoose.isLock)
         {
+            SoundManager.Ins.PlaySFX(SoundFX.LockSFX, 0.5f);
             PoolManager.Ins.Spawn<ParticleSystem>(PoolName.LockFX, m_StashChoose.transform.position,
                 m_StashChoose.transform.rotation);
             return;

@@ -190,10 +190,12 @@ public class GamePlayUI : Singleton<GamePlayUI>
             return;
         }
 
+        DOVirtual.DelayedCall(0.2f, () => { Controller.Ins.isPlay = false; });
 
         showTutorial = false;
         DOVirtual.DelayedCall(1f, () =>
         {
+            Controller.Ins.isPlay = true;
             if (LevelManager.Ins.currentLevel.Stash.Count > 0)
             {
                 for (int i = 0; i < LevelManager.Ins.currentLevel.Stash.Count; i++)

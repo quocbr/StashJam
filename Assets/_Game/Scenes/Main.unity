@@ -1499,6 +1499,11 @@ MonoBehaviour:
   - {fileID: 9152654379301594138, guid: 5c0b9e8c1dc11374b9c7f952c9233ca8, type: 3}
   - {fileID: 9152654379301594138, guid: e201f4ccbdf2eb34992f2e6aec1981d6, type: 3}
   - {fileID: 9152654379301594138, guid: b2698dbe1e6a49f4a83d383aa07ae0b6, type: 3}
+  - {fileID: 9152654379301594138, guid: 4f4c641cb7d16f242b341ed592f5b5f5, type: 3}
+  - {fileID: 9152654379301594138, guid: 0647c47c89ed9a34e936f460554e6f72, type: 3}
+  - {fileID: 9152654379301594138, guid: 51ec492864025a24bb554ebdb61a7a98, type: 3}
+  - {fileID: 9152654379301594138, guid: 9bb45d3679d710b4bbdb627e1be11394, type: 3}
+  - {fileID: 9152654379301594138, guid: ce192bd5bac66d444ada41db8429380f, type: 3}
   itemDatabase: {fileID: 11400000, guid: 7ecb08f41f7cd7a47b744712e9c39727, type: 2}
   currentLevel: {fileID: 0}
 --- !u!224 &1498527959 stripped
@@ -1679,6 +1684,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnlockFeatures:
+  - levelUnlock: 3
+    spriteLock: {fileID: 21300000, guid: a0b55d127f4f56148b05592d2a59c947, type: 3}
+    spriteUnlock: {fileID: 21300000, guid: 02ac6f79132284546875a8884a751595, type: 3}
+    Title: Couple
+    Description: Pick one box and its pair will go to the conveyor together!
   - levelUnlock: 7
     spriteLock: {fileID: 21300000, guid: bdfaf106e71684b4facb86b0e167cffc, type: 3}
     spriteUnlock: {fileID: 21300000, guid: cca81c27b6391eb41a75b1a6e558c272, type: 3}
@@ -1694,11 +1704,6 @@ MonoBehaviour:
     spriteUnlock: {fileID: 21300000, guid: 977d0227ff825a64998313b0ba1da4f0, type: 3}
     Title: Key-Lock
     Description: Tap The box and unleash the key to open the lock
-  - levelUnlock: 27
-    spriteLock: {fileID: 21300000, guid: a0b55d127f4f56148b05592d2a59c947, type: 3}
-    spriteUnlock: {fileID: 21300000, guid: 02ac6f79132284546875a8884a751595, type: 3}
-    Title: Couple
-    Description: Double Stash linker
   MainCanvasRect: {fileID: 726175530}
 --- !u!4 &1552108926
 Transform:
@@ -2418,10 +2423,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 82d94c98c7ffe2f44a1f8c95b118cb86, type: 3}
   - {fileID: 8300000, guid: 0edb86f58212341b1bbdf1543005371d, type: 3}
   - {fileID: 8300000, guid: f217024f012fc48c38a1744bb779d993, type: 3}
-  - {fileID: 8300000, guid: b46412c00c13848f7adb154f32c0ddbd, type: 3}
+  - {fileID: 8300000, guid: 9ccd1ec4195364228b8d4c5dda0024b3, type: 3}
   - {fileID: 8300000, guid: f0a108faa6d5a56498c89174c7ca1c37, type: 3}
   - {fileID: 8300000, guid: 5c862d7f607e79c47bc1a691a28e155f, type: 3}
   - {fileID: 8300000, guid: ebbac6ba6eb0c4c449486d15a606c254, type: 3}
+  - {fileID: 8300000, guid: 66584e212db5545288c8126f27f23f9c, type: 3}
+  - {fileID: 8300000, guid: b910abcf047823e4690a47f50ac01bb1, type: 3}
+  - {fileID: 8300000, guid: aaa015d66e9ba0d4d9423c5a8d74255e, type: 3}
   masterMixer: {fileID: 24100000, guid: 4ddeb16f0f087a44190a85f53e3594e2, type: 2}
   musicSource: {fileID: 2041778043}
 --- !u!4 &2024229090
