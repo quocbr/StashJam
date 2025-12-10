@@ -353,7 +353,7 @@ public class Level : MonoBehaviour
                 {
                     if (col == 0)
                     {
-                        for (int i = 1; i <= 3; i++)
+                        for (int i = 1; i <= 5; i++)
                         {
                             Vector3 extraPos = localPos - new Vector3(cellSize * i, 0f, 0f);
                             if (prefabToSpawn != null)
@@ -366,7 +366,7 @@ public class Level : MonoBehaviour
                     }
                     else if (col == maxCols - 1)
                     {
-                        for (int i = 1; i <= 3; i++)
+                        for (int i = 1; i <= 5; i++)
                         {
                             Vector3 extraPos = localPos + new Vector3(cellSize * i, 0f, 0f);
                             if (prefabToSpawn != null)
@@ -626,7 +626,7 @@ public class Level : MonoBehaviour
                 if (left) tileIndex += 4;
                 if (right) tileIndex += 8;
 
-                if (stashGrid[row, col].x != null && stashGrid[row, col].x.activeSelf)
+                if (stashGrid[row, col].x != null && !stashGrid[row, col].glassObject.activeSelf)
                 {
                     stashGrid[row, col].SetCanPick(true);
                     continue;
